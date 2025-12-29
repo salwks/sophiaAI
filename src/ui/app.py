@@ -16,6 +16,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from src.search.engine import SearchEngine
+from src.search.query_translator import get_translator
 
 # =============================================================================
 # 페이지 설정
@@ -41,6 +42,14 @@ def get_search_engine():
         ollama_url="http://localhost:11434",
         llm_model="qwen2.5:14b",
         use_reranker=True,
+    )
+
+@st.cache_resource(ttl=3600)
+def get_query_translator():
+    """쿼리 번역기 싱글톤"""
+    return get_translator(
+        ollama_url="http://localhost:11434",
+        model="qwen2.5:14b"
     )
 
 def call_llm_with_context(question: str, context: str, model="qwen2.5:14b", temperature=0.7):
@@ -233,35 +242,31 @@ def main():
         with st.spinner("📚 관련 논문 검색 중..."):
             try:
                 engine = get_search_engine()
+                translator = get_query_translator()
 
                 # 검색 쿼리 최적화
                 search_query = prompt
                 prompt_lower = prompt.lower()
 
-                # 1. BI-RADS 카테고리 질문 처리
+                # 0. LLM 기반 쿼리 번역 (한글 → 영문 의학 키워드)
+                if translator.needs_translation(prompt):
+                    with st.spinner("🔄 쿼리 최적화 중..."):
+                        translated_query = translator.translate(prompt)
+                        if translated_query != prompt:
+                            search_query = translated_query
+                            # 디버깅용: 번역 결과 표시
+                            st.caption(f"🔍 검색 키워드: `{translated_query}`")
+
+                # 1. BI-RADS 카테고리 질문 처리 (번역 후에도 확인)
+                search_query_lower = search_query.lower()
                 is_birads_concept = (
-                    'bi-rads' in prompt_lower or 'birads' in prompt_lower or '카테고리' in prompt_lower
-                ) and any(keyword in prompt_lower for keyword in ['기본', '개념', '정의', '설명', 'basic', 'concept', 'definition', '무엇'])
+                    'bi-rads' in search_query_lower or 'birads' in search_query_lower or
+                    '카테고리' in prompt_lower or 'category' in search_query_lower
+                ) and any(keyword in prompt_lower or keyword in search_query_lower
+                         for keyword in ['기본', '개념', '정의', '설명', 'basic', 'concept', 'definition', '무엇', 'what'])
 
-                if is_birads_concept and 'bi-rads' not in prompt_lower:
-                    search_query = f"BI-RADS {prompt}"
-
-                # 2. 기술 용어 질문 처리 (한영 혼용 → 영문 키워드 강화)
-                technical_terms = {
-                    'exposure': ['kVp', 'mAs', 'radiation dose', 'technique'],
-                    'positioning': ['positioning', 'technique', 'procedure'],
-                    'protocol': ['protocol', 'procedure', 'technique'],
-                    '노출': ['exposure', 'kVp', 'mAs', 'radiation dose'],
-                    '촬영': ['acquisition', 'technique', 'imaging'],
-                    '포지셔닝': ['positioning', 'technique'],
-                    '프로토콜': ['protocol', 'procedure'],
-                }
-
-                for term, keywords in technical_terms.items():
-                    if term in prompt_lower:
-                        # 기술 용어가 있으면 영문 키워드 추가
-                        search_query = f"{prompt} {' '.join(keywords)}"
-                        break
+                if is_birads_concept and 'bi-rads' not in search_query_lower:
+                    search_query = f"BI-RADS {search_query}"
 
                 search_response = engine.search(search_query, top_k=options["top_k"], use_rerank=True)
 
