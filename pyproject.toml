@@ -1,5 +1,5 @@
 [project]
-name = "maria-mammo"
+name = "sophia-ai"
 version = "0.1.0"
 description = "Mammography Literature Search Engine - PubMed 기반 유방영상의학 논문 검색 시스템"
 readme = "README.md"

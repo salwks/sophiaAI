@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: RSNA Abstracts Scraper
+Sophia AI: RSNA Abstracts Scraper
 ====================================
 RSNA 연례 학회 초록 스크래핑
 """

@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Collection Orchestrator
+Sophia AI: Collection Orchestrator
 ====================================
 맘모그래피 관련 PubMed 논문 수집 관리
 """
@@ -219,7 +219,7 @@ def main():
     args = parser.parse_args()
 
     api_key = os.getenv("NCBI_API_KEY")
-    email = os.getenv("CROSSREF_EMAIL", "maria-mammo@example.com")
+    email = os.getenv("CROSSREF_EMAIL", "sophia-ai@example.com")
 
     with PubMedClient(api_key=api_key, email=email) as client:
         collector = MammographyCollector(

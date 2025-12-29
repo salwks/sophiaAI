@@ -1,1 +1,1 @@
-# MARIA-Mammo Streamlit UI
+# Sophia AI Streamlit UI

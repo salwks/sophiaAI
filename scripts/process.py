@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MARIA-Mammo: Data Processing Script
+Sophia AI: Data Processing Script
 ====================================
 수집된 논문 데이터 정제 및 분류
 

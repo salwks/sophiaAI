@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Multi-Source Collector
+Sophia AI: Multi-Source Collector
 ====================================
 PubMed, KoreaMed, Semantic Scholar, RSNA 통합 수집
 """
@@ -44,7 +44,7 @@ class MultiSourceCollector:
 
         self.ncbi_api_key = ncbi_api_key or os.getenv("NCBI_API_KEY")
         self.s2_api_key = s2_api_key or os.getenv("S2_API_KEY")
-        self.email = os.getenv("CROSSREF_EMAIL", "maria-mammo@example.com")
+        self.email = os.getenv("CROSSREF_EMAIL", "sophia-ai@example.com")
 
         logger.info(f"MultiSourceCollector initialized. Output: {self.output_dir}")
 

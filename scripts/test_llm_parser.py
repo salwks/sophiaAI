@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MARIA-Mammo: LLM Query Parser Test Script
+Sophia AI: LLM Query Parser Test Script
 ==========================================
 LLM 파서 종합 테스트
 """
@@ -162,7 +162,7 @@ def check_expected(result, expected: dict) -> tuple[bool, list[str]]:
 def test_parser(use_llm: bool = True):
     """파서 테스트 실행"""
     print("=" * 70)
-    print(f"MARIA-Mammo Query Parser Test ({'LLM' if use_llm else 'Rule-based'})")
+    print(f"Sophia AI Query Parser Test ({'LLM' if use_llm else 'Rule-based'})")
     print("=" * 70)
 
     # Ollama 상태 확인
@@ -371,7 +371,7 @@ def compare_parsers():
 if __name__ == "__main__":
     import argparse
 
-    argparser = argparse.ArgumentParser(description="MARIA-Mammo Query Parser Test")
+    argparser = argparse.ArgumentParser(description="Sophia AI Query Parser Test")
     argparser.add_argument("query", nargs="?", help="Single query to test")
     argparser.add_argument("--rule", action="store_true", help="Use rule-based parser only")
     argparser.add_argument("--compare", action="store_true", help="Compare LLM vs Rule-based")

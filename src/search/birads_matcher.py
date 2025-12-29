@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: BI-RADS Category Matcher
+Sophia AI: BI-RADS Category Matcher
 =====================================
 BI-RADS 카테고리 직접 매칭 (의미 검색 대신 구조화 검색)
 """

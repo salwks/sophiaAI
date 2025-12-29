@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MARIA-Mammo: Automated Question Testing
+Sophia AI: Automated Question Testing
 ========================================
 테스트 질문으로 시스템 검증
 
@@ -149,7 +149,7 @@ def test_questions(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Test MARIA-Mammo with predefined questions")
+    parser = argparse.ArgumentParser(description="Test Sophia AI with predefined questions")
     parser.add_argument(
         "--category",
         type=str,

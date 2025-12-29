@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MARIA-Mammo: Educational Content Collection Script
+Sophia AI: Educational Content Collection Script
 ===================================================
 맘모그래피 기초 및 교육 자료 수집
 

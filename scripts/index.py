@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MARIA-Mammo: Indexing Script
+Sophia AI: Indexing Script
 ============================
 처리된 논문 인덱싱
 

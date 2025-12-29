@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Search Engine
+Sophia AI: Search Engine
 ==========================
 통합 검색 엔진 (Rule-based + LLM 쿼리 파서 지원)
 """
@@ -383,7 +383,7 @@ def main():
 
     if args.interactive:
         print("\n" + "="*70)
-        print("MARIA-Mammo Interactive Search")
+        print("Sophia AI Interactive Search")
         print("Type 'quit' or 'exit' to quit")
         print("="*70)
 

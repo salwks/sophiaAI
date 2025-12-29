@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Indexing Pipeline
+Sophia AI: Indexing Pipeline
 ==============================
 전체 인덱싱 파이프라인 (임베딩 + DB 저장)
 """

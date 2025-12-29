@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Paper Classifier
+Sophia AI: Paper Classifier
 =============================
 논문 자동 분류 (Modality, Pathology, Study Type, Population)
 """

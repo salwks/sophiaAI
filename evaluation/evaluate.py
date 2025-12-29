@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Evaluation System
+Sophia AI: Evaluation System
 ==============================
 검색 품질 평가
 """
@@ -202,7 +202,7 @@ def save_report(report: EvalReport, path: Path):
 def generate_report_markdown(report: EvalReport) -> str:
     """마크다운 리포트 생성"""
     lines = [
-        "# MARIA-Mammo Evaluation Report",
+        "# Sophia AI Evaluation Report",
         "",
         f"Evaluated at: {report.evaluated_at.strftime('%Y-%m-%d %H:%M:%S')}",
         f"Total queries: {report.total_queries}",

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MARIA-Mammo: Streamlit UI 실행
+Sophia AI: Streamlit UI 실행
 """
 
 import subprocess

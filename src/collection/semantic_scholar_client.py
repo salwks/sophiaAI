@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Semantic Scholar Client
+Sophia AI: Semantic Scholar Client
 =====================================
 Semantic Scholar API를 통한 논문 수집 및 인용수 보강
 """

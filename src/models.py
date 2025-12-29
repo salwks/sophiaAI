@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Data Models
+Sophia AI: Data Models
 ========================
 Pydantic 모델 정의 - 논문 메타데이터, 검색 쿼리, 검색 결과
 """

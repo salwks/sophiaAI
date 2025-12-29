@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Query Parser
+Sophia AI: Query Parser
 =========================
 검색 쿼리 분석 및 구조화 (Rule-based + LLM-based)
 """

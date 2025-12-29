@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: KoreaMed Client
+Sophia AI: KoreaMed Client
 ============================
 KoreaMed API를 통한 국내 유방영상 논문 수집
 """

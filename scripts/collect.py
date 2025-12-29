@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MARIA-Mammo: Data Collection Script
+Sophia AI: Data Collection Script
 ===================================
 PubMed에서 맘모그래피 관련 논문 수집
 

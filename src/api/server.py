@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: FastAPI Server
+Sophia AI: FastAPI Server
 ===========================
 검색 API 서버 (LLM 쿼리 파서 지원)
 """
@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
     """앱 라이프사이클"""
     global search_engine
 
-    logger.info("Starting MARIA-Mammo API server...")
+    logger.info("Starting Sophia AI API server...")
     logger.info(f"Parser mode: {PARSER_MODE}, Ollama URL: {OLLAMA_URL}, LLM model: {LLM_MODEL}")
 
     # 검색 엔진 초기화
@@ -68,7 +68,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="MARIA-Mammo API",
+    title="Sophia AI API",
     description="Mammography Literature Search Engine API",
     version="1.0.0",
     lifespan=lifespan,

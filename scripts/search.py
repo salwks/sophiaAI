@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MARIA-Mammo: Search Script
+Sophia AI: Search Script
 ==========================
 논문 검색 CLI
 

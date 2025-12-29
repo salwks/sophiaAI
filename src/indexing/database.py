@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Database Manager
+Sophia AI: Database Manager
 =============================
 SQLite (메타데이터) + LanceDB (벡터) 통합 관리
 """

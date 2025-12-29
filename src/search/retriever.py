@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Hybrid Retriever
+Sophia AI: Hybrid Retriever
 =============================
 BM25 + Vector 하이브리드 검색
 """

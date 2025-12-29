@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Test Fixtures
+Sophia AI: Test Fixtures
 """
 
 import pytest

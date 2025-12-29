@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: API Schemas
+Sophia AI: API Schemas
 ========================
 API 요청/응답 스키마
 """

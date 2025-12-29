@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Educational Content Collector
+Sophia AI: Educational Content Collector
 ===========================================
 맘모그래피 기초 및 교육 자료 수집
 """
@@ -253,7 +253,7 @@ def main():
     load_dotenv()
 
     api_key = os.getenv("NCBI_API_KEY")
-    email = os.getenv("CROSSREF_EMAIL", "maria-mammo@example.com")
+    email = os.getenv("CROSSREF_EMAIL", "sophia-ai@example.com")
 
     with PubMedClient(api_key=api_key, email=email) as client:
         collector = MammographyEducationalCollector(

@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Search Tests
+Sophia AI: Search Tests
 """
 
 import pytest

@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Metadata Enricher
+Sophia AI: Metadata Enricher
 ==============================
 논문 메타데이터 보강 (인용수, Journal IF)
 """
@@ -116,7 +116,7 @@ class MetadataEnricher:
         url = f"https://api.crossref.org/works/{doi}"
         headers = {}
         if self.email:
-            headers["User-Agent"] = f"MARIA-Mammo/1.0 (mailto:{self.email})"
+            headers["User-Agent"] = f"Sophia AI/1.0 (mailto:{self.email})"
 
         try:
             response = self.client.get(url, headers=headers)

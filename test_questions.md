@@ -1,4 +1,4 @@
-# MARIA-Mammo 테스트 질문 리스트
+# Sophia AI 테스트 질문 리스트
 
 ## 1. BI-RADS 카테고리 질문 (구조화 검색 테스트)
 

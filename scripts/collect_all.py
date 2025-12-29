@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MARIA-Mammo: Multi-Source Collection Script
+Sophia AI: Multi-Source Collection Script
 ============================================
 PubMed, KoreaMed, Semantic Scholar, RSNA에서 논문 수집
 

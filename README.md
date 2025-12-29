@@ -1,4 +1,4 @@
-# 🧠 Sophia AI (MARIA-Mammo)
+# 🧠 Sophia AI
 
 **유방영상의학 전문 AI 어시스턴트**
 
@@ -110,7 +110,7 @@ ollama pull qwen2.5:14b
 
 ```bash
 # 프로젝트 디렉토리 이동
-cd maria-mammo
+cd sophia-ai
 
 # Python 패키지 설치
 uv sync
@@ -180,7 +180,7 @@ python /tmp/auto_evaluate_quality.py
 ## Project Structure
 
 ```
-maria-mammo/
+sophia-ai/
 ├── src/
 │   ├── collection/      # PubMed 데이터 수집
 │   ├── processing/      # 데이터 정제 및 분류

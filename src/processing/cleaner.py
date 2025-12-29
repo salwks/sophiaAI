@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Data Cleaner
+Sophia AI: Data Cleaner
 =========================
 수집된 논문 데이터 정제
 """

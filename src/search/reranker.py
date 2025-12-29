@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Reranker
+Sophia AI: Reranker
 =====================
 Cross-encoder 기반 리랭킹
 """

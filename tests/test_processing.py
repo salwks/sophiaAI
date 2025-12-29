@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Processing Tests
+Sophia AI: Processing Tests
 """
 
 import pytest

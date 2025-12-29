@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MARIA-Mammo: Search Quality Evaluation
+Sophia AI: Search Quality Evaluation
 =======================================
 검색 품질 평가 스크립트
 
@@ -294,7 +294,7 @@ def main():
 
     # 결과 출력
     print("\n" + "=" * 60)
-    print("MARIA-Mammo Search Quality Report")
+    print("Sophia AI Search Quality Report")
     print("=" * 60)
     print(f"\nEvaluated: {report['num_queries']} queries")
     print(f"Parser mode: {args.parser}")

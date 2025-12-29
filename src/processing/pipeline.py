@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Processing Pipeline
+Sophia AI: Processing Pipeline
 ================================
 전체 데이터 처리 파이프라인
 """

@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: Paper Embedder
+Sophia AI: Paper Embedder
 ===========================
 의료 도메인 특화 임베딩 생성
 """

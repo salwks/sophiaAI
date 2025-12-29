@@ -1,5 +1,5 @@
 """
-MARIA-Mammo: PubMed E-utilities Client
+Sophia AI: PubMed E-utilities Client
 ======================================
 PubMed API를 통한 논문 검색 및 상세 정보 수집
 """
