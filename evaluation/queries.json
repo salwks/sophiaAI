@@ -1,0 +1,62 @@
+[
+  {
+    "id": "Q001",
+    "query": "DBT vs FFDM diagnostic performance comparison",
+    "relevant_pmids": [],
+    "category": "comparison"
+  },
+  {
+    "id": "Q002",
+    "query": "microcalcification detection sensitivity specificity",
+    "relevant_pmids": [],
+    "category": "technical"
+  },
+  {
+    "id": "Q003",
+    "query": "breast density screening supplemental ultrasound",
+    "relevant_pmids": [],
+    "category": "screening"
+  },
+  {
+    "id": "Q004",
+    "query": "BI-RADS 4 lesion positive predictive value",
+    "relevant_pmids": [],
+    "category": "birads"
+  },
+  {
+    "id": "Q005",
+    "query": "contrast enhanced mammography CEM performance",
+    "relevant_pmids": [],
+    "category": "modality"
+  },
+  {
+    "id": "Q006",
+    "query": "tomosynthesis recall rate reduction",
+    "relevant_pmids": [],
+    "category": "performance"
+  },
+  {
+    "id": "Q007",
+    "query": "dense breast cancer detection rate",
+    "relevant_pmids": [],
+    "category": "density"
+  },
+  {
+    "id": "Q008",
+    "query": "architectural distortion mammography",
+    "relevant_pmids": [],
+    "category": "pathology"
+  },
+  {
+    "id": "Q009",
+    "query": "Korean women breast cancer screening",
+    "relevant_pmids": [],
+    "category": "population"
+  },
+  {
+    "id": "Q010",
+    "query": "AI CAD mammography deep learning",
+    "relevant_pmids": [],
+    "category": "ai"
+  }
+]

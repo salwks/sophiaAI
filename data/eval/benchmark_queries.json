@@ -1,0 +1,86 @@
+{
+  "description": "MARIA-Mammo Benchmark Queries for Search Quality Evaluation",
+  "version": "1.0",
+  "queries": [
+    {
+      "id": "Q001",
+      "query": "DBT vs FFDM diagnostic performance for breast cancer detection",
+      "category": "comparison",
+      "expected_keywords": ["DBT", "FFDM", "diagnostic", "performance", "breast cancer"],
+      "expected_modalities": ["DBT", "FFDM"],
+      "notes": "Should return papers comparing tomosynthesis and digital mammography"
+    },
+    {
+      "id": "Q002", 
+      "query": "microcalcification detection sensitivity in dense breasts",
+      "category": "pathology",
+      "expected_keywords": ["microcalcification", "sensitivity", "dense", "breast"],
+      "expected_pathologies": ["calcification", "density"],
+      "notes": "Should return papers about calcification detection in dense tissue"
+    },
+    {
+      "id": "Q003",
+      "query": "BI-RADS category 4 management recommendations",
+      "category": "guideline",
+      "expected_keywords": ["BI-RADS", "category 4", "management"],
+      "notes": "Should include BI-RADS guidelines and management papers"
+    },
+    {
+      "id": "Q004",
+      "query": "breast MRI sensitivity specificity meta-analysis",
+      "category": "study_type",
+      "expected_keywords": ["MRI", "sensitivity", "specificity", "meta-analysis"],
+      "expected_modalities": ["MRI"],
+      "expected_study_type": "meta-analysis",
+      "notes": "Should return meta-analyses about MRI performance"
+    },
+    {
+      "id": "Q005",
+      "query": "contrast enhanced mammography for dense breast screening",
+      "category": "modality",
+      "expected_keywords": ["contrast", "mammography", "dense", "screening"],
+      "expected_modalities": ["CEM"],
+      "notes": "Should return CEM papers for dense breast imaging"
+    },
+    {
+      "id": "Q006",
+      "query": "architectural distortion mammography detection AI",
+      "category": "pathology",
+      "expected_keywords": ["architectural distortion", "mammography", "AI"],
+      "expected_pathologies": ["distortion"],
+      "notes": "Should return papers about AI detection of architectural distortion"
+    },
+    {
+      "id": "Q007",
+      "query": "Korean women breast density screening guidelines",
+      "category": "population",
+      "expected_keywords": ["Korean", "breast density", "screening"],
+      "expected_population": "Asian",
+      "notes": "Should return papers about screening in Asian populations"
+    },
+    {
+      "id": "Q008",
+      "query": "breast ultrasound BIRADS 3 follow-up",
+      "category": "guideline",
+      "expected_keywords": ["ultrasound", "BI-RADS 3", "follow-up"],
+      "expected_modalities": ["US"],
+      "notes": "Should return papers about BI-RADS 3 lesion follow-up"
+    },
+    {
+      "id": "Q009",
+      "query": "synthetic mammography from tomosynthesis image quality",
+      "category": "modality",
+      "expected_keywords": ["synthetic", "mammography", "tomosynthesis", "quality"],
+      "expected_modalities": ["SM", "DBT"],
+      "notes": "Should return papers about SM image quality"
+    },
+    {
+      "id": "Q010",
+      "query": "retrospective study breast cancer screening recall rate",
+      "category": "study_type",
+      "expected_keywords": ["retrospective", "screening", "recall rate"],
+      "expected_study_type": "retrospective",
+      "notes": "Should return retrospective screening studies"
+    }
+  ]
+}

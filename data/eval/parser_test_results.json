@@ -1,0 +1,454 @@
+[
+  {
+    "query": "DBT vs FFDM sensitivity comparison",
+    "parsed": {
+      "keywords": [
+        "digital breast tomosynthesis",
+        "digital mammography"
+      ],
+      "mesh_terms": [
+        "Mammography",
+        "Breast Imaging"
+      ],
+      "filters": {
+        "year_min": null,
+        "year_max": null,
+        "modality": [
+          "DBT",
+          "FFDM"
+        ],
+        "pathology": null,
+        "study_type": null,
+        "population": null,
+        "min_citations": null
+      },
+      "intent": "Comparison of DBT and FFDM for breast imaging"
+    },
+    "expected": {
+      "modality": [
+        "DBT",
+        "FFDM"
+      ],
+      "keywords_contain": [
+        "dbt",
+        "ffdm",
+        "sensitivity"
+      ]
+    },
+    "time": 2.0371809005737305,
+    "passed": false,
+    "issues": [
+      "Keyword 'dbt' not found in ['digital breast tomosynthesis', 'digital mammography']",
+      "Keyword 'ffdm' not found in ['digital breast tomosynthesis', 'digital mammography']",
+      "Keyword 'sensitivity' not found in ['digital breast tomosynthesis', 'digital mammography']"
+    ]
+  },
+  {
+    "query": "microcalcification detection in dense breast",
+    "parsed": {
+      "keywords": [
+        "microcalcification",
+        "dense breast"
+      ],
+      "mesh_terms": [
+        "Mammography",
+        "Calcinosis",
+        "Breast Density",
+        "Breast Neoplasms"
+      ],
+      "filters": {
+        "year_min": null,
+        "year_max": null,
+        "modality": null,
+        "pathology": [
+          "calcification",
+          "density"
+        ],
+        "study_type": null,
+        "population": null,
+        "min_citations": null
+      },
+      "intent": "Detection of microcalcifications in dense breast tissue"
+    },
+    "expected": {
+      "pathology": [
+        "calcification",
+        "density"
+      ]
+    },
+    "time": 2.1342742443084717,
+    "passed": true,
+    "issues": []
+  },
+  {
+    "query": "유방 밀도 분류 기준",
+    "parsed": {
+      "keywords": [
+        "breast density",
+        "K-BIRADS",
+        "breast imaging",
+        "density classification"
+      ],
+      "mesh_terms": [
+        "Breast Density",
+        "Mammography",
+        "Imaging Reports"
+      ],
+      "filters": {
+        "year_min": null,
+        "year_max": null,
+        "modality": null,
+        "pathology": null,
+        "study_type": null,
+        "population": null,
+        "min_citations": null
+      },
+      "intent": "Classification of breast density based on Korean Breast Imaging Reporting and Data System (K-BIRADS)"
+    },
+    "expected": {
+      "keywords_contain": [
+        "breast",
+        "density"
+      ]
+    },
+    "time": 1.8459820747375488,
+    "passed": true,
+    "issues": []
+  },
+  {
+    "query": "치밀유방에서 미세석회화 검출",
+    "parsed": {
+      "keywords": [
+        "microcalcification",
+        "dense breast",
+        "breast imaging"
+      ],
+      "mesh_terms": [
+        "Mammography",
+        "Calcinosis",
+        "Breast Density",
+        "Breast Neoplasms"
+      ],
+      "filters": {
+        "year_min": null,
+        "year_max": null,
+        "modality": [
+          "SM"
+        ],
+        "pathology": [
+          "calcification",
+          "density"
+        ],
+        "study_type": null,
+        "population": null,
+        "min_citations": null
+      },
+      "intent": "Detection of microcalcifications in dense breast tissue"
+    },
+    "expected": {
+      "pathology": [
+        "calcification"
+      ]
+    },
+    "time": 1.776643991470337,
+    "passed": true,
+    "issues": []
+  },
+  {
+    "query": "Korean women DBT prospective study since 2020",
+    "parsed": {
+      "keywords": [
+        "digital breast tomosynthesis",
+        "Korean women"
+      ],
+      "mesh_terms": [
+        "Mammography",
+        "Breast Density",
+        "Asiatic Population"
+      ],
+      "filters": {
+        "year_min": 2020,
+        "year_max": null,
+        "modality": [
+          "DBT"
+        ],
+        "pathology": null,
+        "study_type": "prospective",
+        "population": "Asian",
+        "min_citations": null
+      },
+      "intent": "Prospective study on the use of digital breast tomosynthesis (DBT) in Korean women"
+    },
+    "expected": {
+      "modality": [
+        "DBT"
+      ],
+      "population": "Asian",
+      "study_type": "prospective",
+      "year_min": 2020
+    },
+    "time": 2.3122377395629883,
+    "passed": true,
+    "issues": []
+  },
+  {
+    "query": "BI-RADS 4 lesion positive predictive value",
+    "parsed": {
+      "keywords": [
+        "BI-RADS",
+        "lesion",
+        "positive predictive value"
+      ],
+      "mesh_terms": [
+        "Mammography",
+        "Breast Neoplasms",
+        "Imaging Studies"
+      ],
+      "filters": {
+        "year_min": null,
+        "year_max": null,
+        "modality": null,
+        "pathology": [
+          "lesion",
+          "BI-RADS 4"
+        ],
+        "study_type": null,
+        "population": null,
+        "min_citations": null
+      },
+      "intent": "Positive predictive value of BI-RADS 4 lesions"
+    },
+    "expected": {
+      "keywords_contain": [
+        "bi-rads",
+        "predictive"
+      ]
+    },
+    "time": 2.2479770183563232,
+    "passed": true,
+    "issues": []
+  },
+  {
+    "query": "contrast enhanced mammography vs MRI comparison",
+    "parsed": {
+      "keywords": [
+        "contrast-enhanced mammography",
+        "MRI"
+      ],
+      "mesh_terms": [
+        "Mammography",
+        "Contrast Media",
+        "Imaging Techniques"
+      ],
+      "filters": {
+        "year_min": null,
+        "year_max": null,
+        "modality": [
+          "CEM",
+          "MRI"
+        ],
+        "pathology": null,
+        "study_type": null,
+        "population": null,
+        "min_citations": null
+      },
+      "intent": "Comparison of contrast-enhanced mammography and MRI"
+    },
+    "expected": {
+      "modality": [
+        "CEM",
+        "MRI"
+      ]
+    },
+    "time": 2.0130410194396973,
+    "passed": true,
+    "issues": []
+  },
+  {
+    "query": "3D tomosynthesis vs 2D mammography sensitivity specificity",
+    "parsed": {
+      "keywords": [
+        "digital breast tomosynthesis",
+        "mammography"
+      ],
+      "mesh_terms": [
+        "Mammography",
+        "Breast Imaging"
+      ],
+      "filters": {
+        "year_min": null,
+        "year_max": null,
+        "modality": [
+          "DBT",
+          "MMG"
+        ],
+        "pathology": null,
+        "study_type": null,
+        "population": null,
+        "min_citations": null
+      },
+      "intent": "Comparison of 3D tomosynthesis and 2D mammography in terms of sensitivity and specificity"
+    },
+    "expected": {
+      "modality": [
+        "DBT",
+        "FFDM"
+      ],
+      "keywords_contain": [
+        "sensitivity",
+        "specificity"
+      ]
+    },
+    "time": 2.1898958683013916,
+    "passed": false,
+    "issues": [
+      "Modality: expected {'DBT', 'FFDM'}, got {'DBT', 'MMG'}",
+      "Keyword 'sensitivity' not found in ['digital breast tomosynthesis', 'mammography']",
+      "Keyword 'specificity' not found in ['digital breast tomosynthesis', 'mammography']"
+    ]
+  },
+  {
+    "query": "AI CAD breast cancer detection performance",
+    "parsed": {
+      "keywords": [
+        "Artificial intelligence",
+        "Computer-aided detection",
+        "Breast cancer"
+      ],
+      "mesh_terms": [
+        "Artificial Intelligence",
+        "Computer-Aided Detection",
+        "Breast Neoplasms"
+      ],
+      "filters": {
+        "year_min": null,
+        "year_max": null,
+        "modality": null,
+        "pathology": [
+          "Cancer"
+        ],
+        "study_type": null,
+        "population": null,
+        "min_citations": null
+      },
+      "intent": "Evaluation of AI-assisted computer-aided detection (CAD) for breast cancer detection"
+    },
+    "expected": {
+      "keywords_contain": [
+        "ai",
+        "cad",
+        "detection"
+      ]
+    },
+    "time": 2.328115940093994,
+    "passed": false,
+    "issues": [
+      "Keyword 'cad' not found in ['Artificial intelligence', 'Computer-aided detection', 'Breast cancer']"
+    ]
+  },
+  {
+    "query": "deep learning breast density classification",
+    "parsed": {
+      "keywords": [
+        "breast density",
+        "deep learning"
+      ],
+      "mesh_terms": [
+        "Mammography",
+        "Breast Density",
+        "Computer-Assisted Detection"
+      ],
+      "filters": {
+        "year_min": null,
+        "year_max": null,
+        "modality": null,
+        "pathology": [
+          "density"
+        ],
+        "study_type": null,
+        "population": null,
+        "min_citations": null
+      },
+      "intent": "Deep learning for breast density classification"
+    },
+    "expected": {
+      "keywords_contain": [
+        "deep",
+        "learning",
+        "density"
+      ]
+    },
+    "time": 1.882047176361084,
+    "passed": true,
+    "issues": []
+  },
+  {
+    "query": "mammography screening",
+    "parsed": {
+      "keywords": [
+        "mammography",
+        "screening"
+      ],
+      "mesh_terms": [
+        "Mammography",
+        "Breast Neoplasms"
+      ],
+      "filters": {
+        "year_min": null,
+        "year_max": null,
+        "modality": [
+          "SM"
+        ],
+        "pathology": null,
+        "study_type": null,
+        "population": null,
+        "min_citations": null
+      },
+      "intent": "General mammography screening"
+    },
+    "expected": {
+      "keywords_contain": [
+        "mammography",
+        "screening"
+      ]
+    },
+    "time": 1.7907047271728516,
+    "passed": true,
+    "issues": []
+  },
+  {
+    "query": "breast cancer",
+    "parsed": {
+      "keywords": [
+        "breast cancer"
+      ],
+      "mesh_terms": [
+        "Mammography",
+        "Breast Neoplasms",
+        "Carcinoma, Breast"
+      ],
+      "filters": {
+        "year_min": null,
+        "year_max": null,
+        "modality": null,
+        "pathology": [
+          "cancer",
+          "neoplasms"
+        ],
+        "study_type": null,
+        "population": null,
+        "min_citations": null
+      },
+      "intent": "Breast Cancer"
+    },
+    "expected": {
+      "keywords_contain": [
+        "breast",
+        "cancer"
+      ]
+    },
+    "time": 1.9801008701324463,
+    "passed": true,
+    "issues": []
+  }
+]

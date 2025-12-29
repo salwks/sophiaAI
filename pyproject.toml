@@ -1,0 +1,68 @@
+[project]
+name = "maria-mammo"
+version = "0.1.0"
+description = "Mammography Literature Search Engine - PubMed 기반 유방영상의학 논문 검색 시스템"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    # API & HTTP
+    "httpx>=0.27.0",
+
+    # XML/HTML Parsing
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.0.0",
+
+    # ML & Embeddings
+    "sentence-transformers>=3.0.0",
+    "torch>=2.0.0",
+
+    # Database
+    "lancedb>=0.5.0",
+
+    # Search
+    "rank-bm25>=0.2.2",
+
+    # Web Framework
+    "fastapi>=0.110.0",
+    "uvicorn>=0.27.0",
+
+    # UI
+    "streamlit>=1.30.0",
+
+    # Data & Validation
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "pandas>=2.0.0",
+
+    # Utils
+    "python-dotenv>=1.0.0",
+    "tqdm>=4.66.0",
+    "tenacity>=8.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.3.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]
