@@ -212,16 +212,20 @@ def main():
                         icon = "📘" if source.get("is_birads", False) else "📄"
 
                         if source.get("is_birads", False):
-                            # BI-RADS 문서는 내용을 직접 표시
+                            # BI-RADS 문서는 원문 링크 제공
                             st.markdown(f"**{icon} [{i}] {source['title']}**")
                             st.markdown(f"{source['authors']} - {source['journal']} ({source['year']})")
 
-                            # 전체 내용을 expander로 표시
+                            # 원문 보기 링크 (Streamlit 페이지로 이동)
+                            st.markdown(
+                                f"💡 전문 보기: 좌측 사이드바 '📘 BI-RADS 가이드라인' 페이지에서 확인 "
+                                f"| 길이: {len(source.get('full_content', '')):,}자"
+                            )
+
+                            # 간단히 요약만 표시
                             if source.get("full_content"):
-                                with st.expander("📖 전체 내용 보기", expanded=False):
-                                    st.markdown(source["full_content"])
-                            else:
-                                st.caption("_내용을 불러올 수 없습니다_")
+                                preview = source["full_content"][:300] + "..." if len(source["full_content"]) > 300 else source["full_content"]
+                                st.caption(f"💡 미리보기: {preview}")
                         else:
                             # 일반 논문은 PubMed 링크
                             st.markdown(f"""
@@ -346,16 +350,20 @@ def main():
                     icon = "📘" if source["is_birads"] else "📄"
 
                     if source["is_birads"]:
-                        # BI-RADS 문서는 내용을 직접 표시
+                        # BI-RADS 문서는 원문 링크 제공
                         st.markdown(f"**{icon} [{i}] {source['title']}**")
                         st.markdown(f"{source['authors']} - {source['journal']} ({source['year']})")
 
-                        # 전체 내용을 expander로 표시
+                        # 원문 보기 링크 (Streamlit 페이지로 이동)
+                        st.markdown(
+                            f"💡 전문 보기: 좌측 사이드바 '📘 BI-RADS 가이드라인' 페이지에서 확인 "
+                            f"| 길이: {len(source.get('full_content', '')):,}자"
+                        )
+
+                        # 간단히 요약만 표시
                         if source.get("full_content"):
-                            with st.expander("📖 전체 내용 보기", expanded=False):
-                                st.markdown(source["full_content"])
-                        else:
-                            st.caption("_내용을 불러올 수 없습니다_")
+                            preview = source["full_content"][:300] + "..." if len(source["full_content"]) > 300 else source["full_content"]
+                            st.caption(f"💡 미리보기: {preview}")
                     else:
                         # 일반 논문은 PubMed 링크
                         st.markdown(f"""
