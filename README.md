@@ -13,9 +13,11 @@ RAG(Retrieval-Augmented Generation) 기반 논문 검색 & 질의응답 시스�
 - 💬 **채팅 인터페이스**: Streamlit 기반 직관적인 UI
 - 📊 **자동 품질 평가**: 5-metric 답변 품질 측정
 
-## 🚀 빠른 시작 (macOS)
+## 🚀 빠른 시작
 
-### 방법 1: 원클릭 설치 (권장)
+### macOS
+
+#### 방법 1: 원클릭 설치 (권장)
 
 1. **`install.command`** 파일을 더블클릭
    - 모든 의존성 자동 설치
@@ -26,22 +28,72 @@ RAG(Retrieval-Augmented Generation) 기반 논문 검색 & 질의응답 시스�
    - 자동으로 서버 시작 및 브라우저 오픈
    - http://localhost:8501 접속
 
-### 방법 2: 수동 설치
+#### 방법 2: 수동 설치
+
+터미널에서:
+```bash
+./install.command
+./start-sophiaai.command
+```
+
+---
+
+### Windows
+
+#### 방법 1: 원클릭 설치 (권장)
+
+1. **`install.bat`** 파일을 **우클릭** → **"관리자 권한으로 실행"**
+   - Chocolatey, Python, uv 자동 설치
+   - Ollama 설치 안내 (수동 다운로드 필요)
+   - LLM 모델(qwen2.5:14b) 다운로드
+
+2. **`start-sophiaai.bat`** 파일을 더블클릭
+   - 자동으로 서버 시작 및 브라우저 오픈
+   - http://localhost:8501 접속
+
+#### 방법 2: 수동 설치
+
+명령 프롬프트 (관리자 권한)에서:
+```batch
+install.bat
+start-sophiaai.bat
+```
+
+---
+
+### 공통: 수동 설치
 
 #### 1. 필수 프로그램 설치
 
+**macOS:**
 ```bash
-# Homebrew 설치 (macOS 패키지 매니저)
+# Homebrew 설치
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # Python 설치
 brew install python@3.12
 
-# uv 설치 (빠른 Python 패키지 매니저)
+# uv 설치
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Ollama 설치 (https://ollama.com)
-# 웹사이트에서 macOS용 다운로드
+# Ollama 설치
+# https://ollama.com 에서 macOS용 다운로드
+```
+
+**Windows (PowerShell 관리자 권한):**
+```powershell
+# Chocolatey 설치
+Set-ExecutionPolicy Bypass -Scope Process -Force
+iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+# Python 설치
+choco install python312 -y
+
+# uv 설치
+irm https://astral.sh/uv/install.ps1 | iex
+
+# Ollama 설치
+# https://ollama.com 에서 Windows용 다운로드
 ```
 
 #### 2. LLM 모델 다운로드
