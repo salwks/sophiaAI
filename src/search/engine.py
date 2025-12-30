@@ -197,6 +197,37 @@ class SearchEngine:
                     time_ms=elapsed_ms,
                 )
 
+        # 0-1. BI-RADS 일반 가이드라인 검색 (positioning, views 등)
+        if self.birads_matcher.is_birads_general_query(query):
+            birads_docs = self.birads_matcher.search_birads_general(query, top_k=min(top_k, 3))
+            if birads_docs:
+                logger.info(f"BI-RADS general query detected, found {len(birads_docs)} documents")
+
+                elapsed_ms = int((time.time() - start_time) * 1000)
+
+                parsed_query = SearchQuery(
+                    original_query=query,
+                    intent="guideline_lookup",
+                    keywords=[],
+                )
+
+                results = [
+                    SearchResult(
+                        paper=doc,
+                        score=1.0 - (i * 0.1),  # 순서대로 점수 부여
+                        rank=i + 1,
+                        matched_terms=["BI-RADS", "Guideline"],
+                    )
+                    for i, doc in enumerate(birads_docs)
+                ]
+
+                return SearchResponse(
+                    query=parsed_query,
+                    results=results,
+                    total_count=len(results),
+                    time_ms=elapsed_ms,
+                )
+
         # 1. 쿼리 파싱
         parsed_query = self.parser.parse(query)
         logger.info(f"Query parsed: {parsed_query.intent}")

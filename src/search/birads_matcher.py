@@ -164,6 +164,112 @@ class BiradsCategoryMatcher:
 
         return has_keyword and has_category
 
+    def is_birads_general_query(self, query: str) -> bool:
+        """
+        BI-RADS 일반 가이드라인 쿼리인지 확인
+        (positioning, views, screening 등)
+        """
+        query_lower = query.lower()
+
+        # 1. BI-RADS 직접 언급
+        if 'bi-rads' in query_lower or 'birads' in query_lower:
+            return True
+
+        # 2. 맘모그래피 키워드 확인
+        mammo_keywords = ['mammo', 'mammography', '맘모', '유방촬영']
+        has_mammo = any(kw in query_lower for kw in mammo_keywords)
+
+        if not has_mammo:
+            return False
+
+        # 3. 촬영 자세/view 관련 키워드
+        view_keywords = [
+            'cc', 'mlo', 'lcc', 'rcc', 'lmlo', 'rmlo',
+            'craniocaudal', 'mediolateral', 'oblique',
+            'projection', 'view', 'position',
+            '자세', '촬영', '방향', '포지션'
+        ]
+
+        # 키워드 매칭
+        for keyword in view_keywords:
+            if keyword in query_lower:
+                return True
+
+        return False
+
+    def search_birads_general(self, query: str, top_k: int = 3) -> List[Paper]:
+        """
+        BI-RADS 일반 가이드라인 검색
+        (키워드 기반 전문 검색)
+        """
+        query_lower = query.lower()
+
+        # 검색 키워드 추출
+        search_keywords = []
+
+        # View/Projection 키워드
+        if any(kw in query_lower for kw in ['cc', 'lcc', 'rcc', 'craniocaudal']):
+            search_keywords.append('%craniocaudal%')
+            search_keywords.append('%CC%')
+
+        if any(kw in query_lower for kw in ['mlo', 'lmlo', 'rmlo', 'mediolateral', 'oblique']):
+            search_keywords.append('%mediolateral%')
+            search_keywords.append('%MLO%')
+
+        if any(kw in query_lower for kw in ['projection', 'view', '촬영', '자세']):
+            search_keywords.append('%projection%')
+            search_keywords.append('%view%')
+            search_keywords.append('%positioning%')
+
+        if any(kw in query_lower for kw in ['screening', '스크리닝']):
+            search_keywords.append('%screening%')
+
+        # 키워드가 없으면 일반 검색
+        if not search_keywords:
+            search_keywords = ['%positioning%', '%view%', '%projection%']
+
+        cursor = self.conn.cursor()
+        papers = []
+
+        # 각 키워드로 검색
+        for keyword in search_keywords:
+            cursor.execute("""
+                SELECT pmid, doi, title, authors, journal, year, month,
+                       abstract, full_content, citation_count, journal_if
+                FROM papers
+                WHERE pmid LIKE 'BIRADS_%'
+                  AND (LOWER(title) LIKE LOWER(?) OR LOWER(full_content) LIKE LOWER(?))
+                LIMIT ?
+            """, (keyword, keyword, top_k))
+
+            for row in cursor.fetchall():
+                # 중복 제거
+                if any(p.pmid == row['pmid'] for p in papers):
+                    continue
+
+                paper = Paper(
+                    pmid=row['pmid'],
+                    doi=row['doi'],
+                    title=row['title'],
+                    authors=eval(row['authors']) if row['authors'] else [],
+                    journal=row['journal'] or "",
+                    year=row['year'] or 0,
+                    month=row['month'],
+                    abstract=row['abstract'] or "",
+                    full_content=row['full_content'],
+                    citation_count=row['citation_count'] or 0,
+                    journal_if=row['journal_if'],
+                )
+                papers.append(paper)
+
+                if len(papers) >= top_k:
+                    break
+
+            if len(papers) >= top_k:
+                break
+
+        return papers[:top_k]
+
 
 def test():
     """테스트"""
