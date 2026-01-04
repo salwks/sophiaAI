@@ -289,7 +289,11 @@ class BiRadsChunker:
         if density_match:
             chunks.append({
                 "pmid": f"{paper.pmid}_CHUNK_DENSITY",
-                "content": f"# BI-RADS Mammography - Mass Density Descriptors\n\nThe BI-RADS lexicon defines the following mass density descriptors for mammography:\n\n{density_match.group(0)}",
+                "content": f"# BI-RADS Mammography - Mass Density Descriptors\n\n"
+                          f"The BI-RADS lexicon defines the following mass density descriptors for mammography. "
+                          f"Density describes the x-ray attenuation of a mass relative to surrounding fibroglandular tissue. "
+                          f"This includes high-density masses, equal-density masses, low-density masses, and fat-containing masses (such as lipomas, oil cysts, galactoceles, and hamartomas).\n\n"
+                          f"{density_match.group(0)}",
                 "title": "BI-RADS Mass Density Descriptors",
             })
 
@@ -473,8 +477,20 @@ class BiRadsChunker:
         if cat0_match:
             chunks.append({
                 "pmid": f"{paper.pmid}_CAT0",
-                "content": f"# BI-RADS Assessment Category 0\n\nBI-RADS Category 0: Incomplete - Need Additional Imaging Evaluation and/or Prior Mammograms for Comparison.\n\n{cat0_match.group(0)}",
-                "title": "BI-RADS Category 0: Incomplete",
+                "content": f"# BI-RADS Assessment Category 0: Incomplete\n\n"
+                          f"BI-RADS Category 0 is an INCOMPLETE assessment used when additional imaging evaluation is needed or when prior mammograms are required for comparison before a final assessment can be rendered.\n\n"
+                          f"**When to use Category 0:**\n"
+                          f"- Screening examination shows an abnormality that is not definitively benign\n"
+                          f"- Need additional imaging evaluation (supplemental views, ultrasound)\n"
+                          f"- Need prior mammograms for comparison to make final assessment\n"
+                          f"- Cannot render final assessment without additional information\n\n"
+                          f"**Key points:**\n"
+                          f"- Incomplete assessment - not a final category\n"
+                          f"- Requires recall for additional imaging\n"
+                          f"- Should rarely be used in diagnostic imaging\n"
+                          f"- Must be followed by a final assessment (Category 1-6)\n\n"
+                          f"{cat0_match.group(0)}",
+                "title": "BI-RADS Category 0: Incomplete Assessment",
             })
 
         # Category 1: Negative
@@ -534,7 +550,22 @@ class BiRadsChunker:
         if cat6_match:
             chunks.append({
                 "pmid": f"{paper.pmid}_CAT6",
-                "content": f"# BI-RADS Assessment Category 6\n\nBI-RADS Category 6: Known Biopsy-Proven Malignancy - For imaging of known cancer before definitive treatment. Appropriate clinical follow-up required.\n\n{cat6_match.group(0)}",
+                "content": f"# BI-RADS Assessment Category 6: Known Biopsy-Proven Malignancy\n\n"
+                          f"BI-RADS Category 6 is assigned to imaging performed on a patient with KNOWN BIOPSY-PROVEN MALIGNANCY, performed AFTER cancer diagnosis but BEFORE definitive treatment is completed.\n\n"
+                          f"**When to use Category 6:**\n"
+                          f"- Patient has already had a biopsy confirming breast cancer\n"
+                          f"- Imaging is performed after diagnosis but before surgery/treatment\n"
+                          f"- Post-biopsy imaging to assess extent of known cancer\n"
+                          f"- Monitoring known malignancy before definitive local therapy\n\n"
+                          f"**Key differences from Category 5:**\n"
+                          f"- Category 5: SUSPECTED malignancy (not yet proven by biopsy)\n"
+                          f"- Category 6: KNOWN malignancy (already proven by biopsy)\n"
+                          f"- Category 6 is AFTER diagnosis, Category 5 is BEFORE diagnosis\n\n"
+                          f"**Important:**\n"
+                          f"- Not included in audit calculations (cancer already known)\n"
+                          f"- Requires appropriate clinical follow-up with surgeon/oncologist\n"
+                          f"- Used until definitive local therapy (usually surgery) is completed\n\n"
+                          f"{cat6_match.group(0)}",
                 "title": "BI-RADS Category 6: Known Biopsy-Proven Malignancy",
             })
 
