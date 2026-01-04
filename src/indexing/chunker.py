@@ -208,8 +208,9 @@ class BiRadsChunker:
         Returns:
             청킹 필요 여부
         """
-        # SECTION_IV (Findings) 섹션들을 청킹
-        return paper.pmid.startswith("BIRADS_2025_SECTION_IV")
+        # SECTION_IV (Findings)와 SECTION_V (Assessment) 섹션들을 청킹
+        return (paper.pmid.startswith("BIRADS_2025_SECTION_IV") or
+                paper.pmid == "BIRADS_2025_SECTION_V")
 
     def chunk_paper(self, paper: Paper) -> List[Dict[str, str]]:
         """
@@ -240,6 +241,10 @@ class BiRadsChunker:
         elif paper.pmid == "BIRADS_2025_SECTION_IV_D":
             return self.chunk_asymmetries(paper)
 
+        # SECTION_V: Assessment Categories
+        elif paper.pmid == "BIRADS_2025_SECTION_V":
+            return self.chunk_assessment_categories(paper)
+
         return []
 
     def chunk_masses(self, paper: Paper) -> List[Dict[str, str]]:
@@ -264,8 +269,8 @@ class BiRadsChunker:
         if shape_match:
             chunks.append({
                 "pmid": f"{paper.pmid}_CHUNK_SHAPE",
-                "content": f"# BI-RADS Mammography - Mass Shape\n\n{shape_match.group(0)}",
-                "title": "BI-RADS Mass Shape Classification",
+                "content": f"# BI-RADS Mammography - Mass Shape Descriptors\n\nThe BI-RADS lexicon defines the following mass shape descriptors for mammography:\n\n{shape_match.group(0)}",
+                "title": "BI-RADS Mass Shape Descriptors",
             })
 
         # Margin 청크
@@ -274,8 +279,8 @@ class BiRadsChunker:
         if margin_match:
             chunks.append({
                 "pmid": f"{paper.pmid}_CHUNK_MARGIN",
-                "content": f"# BI-RADS Mammography - Mass Margin\n\n{margin_match.group(0)}",
-                "title": "BI-RADS Mass Margin Classification",
+                "content": f"# BI-RADS Mammography - Mass Margin Descriptors\n\nThe BI-RADS lexicon defines the following mass margin descriptors for mammography:\n\n{margin_match.group(0)}",
+                "title": "BI-RADS Mass Margin Descriptors",
             })
 
         # Density 청크
@@ -284,8 +289,8 @@ class BiRadsChunker:
         if density_match:
             chunks.append({
                 "pmid": f"{paper.pmid}_CHUNK_DENSITY",
-                "content": f"# BI-RADS Mammography - Mass Density\n\n{density_match.group(0)}",
-                "title": "BI-RADS Mass Density Classification",
+                "content": f"# BI-RADS Mammography - Mass Density Descriptors\n\nThe BI-RADS lexicon defines the following mass density descriptors for mammography:\n\n{density_match.group(0)}",
+                "title": "BI-RADS Mass Density Descriptors",
             })
 
         # 원본 전체 문서도 유지
@@ -425,17 +430,112 @@ class BiRadsChunker:
 
     def chunk_simple(self, paper: Paper, section_name: str) -> List[Dict[str, str]]:
         """
-        간단한 섹션은 원본만 유지 (청킹하지 않음)
+        간단한 섹션은 원본에 도입부를 추가
 
         Args:
             paper: 논문 객체
             section_name: 섹션 이름
 
         Returns:
-            원본 문서를 포함한 리스트
+            강화된 문서를 포함한 리스트
         """
+        intro_map = {
+            "Architectural Distortion": "# BI-RADS Mammography - Architectural Distortion\n\nArchitectural distortion is a key finding in mammography. This section describes the characteristics, detection, and clinical significance of architectural distortion in breast imaging.\n\n",
+        }
+
+        intro = intro_map.get(section_name, "")
+        enhanced_content = intro + (paper.full_content or "")
+
         return [{
             "pmid": paper.pmid,
-            "content": paper.full_content or "",
-            "title": paper.title or f"BI-RADS {section_name}",
+            "content": enhanced_content,
+            "title": f"BI-RADS {section_name} in Mammography",
         }]
+    def chunk_assessment_categories(self, paper: Paper) -> List[Dict[str, str]]:
+        """
+        Assessment Categories 섹션을 카테고리별로 청크 분할
+
+        Args:
+            paper: SECTION_V 논문 객체
+
+        Returns:
+            청크 리스트
+        """
+        if not paper.full_content:
+            return []
+
+        chunks = []
+        content = paper.full_content
+
+        # Category 0: Incomplete (### a. Mammographic Assessment is Incomplete)
+        cat0_pattern = r'###\s*a\.\s*Mammographic Assessment is Incomplete.*?(?=###\s*B\.\s*Mammographic Assessment is Complete|\Z)'
+        cat0_match = re.search(cat0_pattern, content, re.DOTALL | re.IGNORECASE)
+        if cat0_match:
+            chunks.append({
+                "pmid": f"{paper.pmid}_CAT0",
+                "content": f"# BI-RADS Assessment Category 0\n\nBI-RADS Category 0: Incomplete - Need Additional Imaging Evaluation and/or Prior Mammograms for Comparison.\n\n{cat0_match.group(0)}",
+                "title": "BI-RADS Category 0: Incomplete",
+            })
+
+        # Category 1: Negative
+        cat1_pattern = r'####\s*Category 1:\s*Negative.*?(?=####\s*Category [2-9]:|\n##\s|\Z)'
+        cat1_match = re.search(cat1_pattern, content, re.DOTALL | re.IGNORECASE)
+        if cat1_match:
+            chunks.append({
+                "pmid": f"{paper.pmid}_CAT1",
+                "content": f"# BI-RADS Assessment Category 1\n\nBI-RADS Category 1: Negative - Normal examination. Essentially 0% likelihood of malignancy.\n\n{cat1_match.group(0)}",
+                "title": "BI-RADS Category 1: Negative",
+            })
+
+        # Category 2: Benign
+        cat2_pattern = r'####\s*Category 2:\s*Benign.*?(?=####\s*Category [3-9]:|\n##\s|\Z)'
+        cat2_match = re.search(cat2_pattern, content, re.DOTALL | re.IGNORECASE)
+        if cat2_match:
+            chunks.append({
+                "pmid": f"{paper.pmid}_CAT2",
+                "content": f"# BI-RADS Assessment Category 2\n\nBI-RADS Category 2: Benign Finding - Essentially 0% likelihood of malignancy.\n\n{cat2_match.group(0)}",
+                "title": "BI-RADS Category 2: Benign",
+            })
+
+        # Category 3: Probably Benign
+        cat3_pattern = r'####\s*Category 3:\s*Probably Benign.*?(?=####\s*Category [4-9]:|\n##\s|\Z)'
+        cat3_match = re.search(cat3_pattern, content, re.DOTALL | re.IGNORECASE)
+        if cat3_match:
+            chunks.append({
+                "pmid": f"{paper.pmid}_CAT3",
+                "content": f"# BI-RADS Assessment Category 3\n\nBI-RADS Category 3: Probably Benign - Greater than 0% but ≤ 2% likelihood of malignancy. Requires short-interval follow-up.\n\n{cat3_match.group(0)}",
+                "title": "BI-RADS Category 3: Probably Benign",
+            })
+
+        # Category 4: Suspicious
+        cat4_pattern = r'####\s*Category 4:\s*Suspicious.*?(?=####\s*Category [5-9]:|\n##\s|\Z)'
+        cat4_match = re.search(cat4_pattern, content, re.DOTALL | re.IGNORECASE)
+        if cat4_match:
+            chunks.append({
+                "pmid": f"{paper.pmid}_CAT4",
+                "content": f"# BI-RADS Assessment Category 4\n\nBI-RADS Category 4: Suspicious - Greater than 2% but less than 95% likelihood of malignancy. Subdivided into 4A (low suspicion: > 2% to ≤ 10%), 4B (intermediate suspicion: > 10% to ≤ 50%), and 4C (high suspicion: > 50% to < 95%).\n\n{cat4_match.group(0)}",
+                "title": "BI-RADS Category 4: Suspicious",
+            })
+
+        # Category 5: Highly Suggestive of Malignancy
+        cat5_pattern = r'####\s*Category 5:\s*Highly Suggestive of Malignancy.*?(?=####\s*Category 6:|\n##\s|\Z)'
+        cat5_match = re.search(cat5_pattern, content, re.DOTALL | re.IGNORECASE)
+        if cat5_match:
+            chunks.append({
+                "pmid": f"{paper.pmid}_CAT5",
+                "content": f"# BI-RADS Assessment Category 5\n\nBI-RADS Category 5: Highly Suggestive of Malignancy - Greater than or equal to 95% likelihood of malignancy. Appropriate action should be taken.\n\n{cat5_match.group(0)}",
+                "title": "BI-RADS Category 5: Highly Suggestive of Malignancy",
+            })
+
+        # Category 6: Known Biopsy-Proven Malignancy
+        # Note: Category 6 내용이 Category 5 안에 포함되어 있을 수 있으므로 더 넓은 범위로 검색
+        cat6_pattern = r'(?:####\s*Category 6:.*?Known.*?Malignancy|Category 6.*?biopsy.*?proven.*?malignancy).*?(?=####\s*Post-Procedure|\n##\s*B\.|\Z)'
+        cat6_match = re.search(cat6_pattern, content, re.DOTALL | re.IGNORECASE)
+        if cat6_match:
+            chunks.append({
+                "pmid": f"{paper.pmid}_CAT6",
+                "content": f"# BI-RADS Assessment Category 6\n\nBI-RADS Category 6: Known Biopsy-Proven Malignancy - For imaging of known cancer before definitive treatment. Appropriate clinical follow-up required.\n\n{cat6_match.group(0)}",
+                "title": "BI-RADS Category 6: Known Biopsy-Proven Malignancy",
+            })
+
+        return chunks
