@@ -28,7 +28,7 @@ class SearchEngine:
         db: Optional[DatabaseManager] = None,
         embedder: Optional[PaperEmbedder] = None,
         db_path: Path = Path("data/index"),
-        use_reranker: bool = True,
+        use_reranker: bool = True,  # Skip reranking for BI-RADS guideline queries
         parser_mode: Literal["rule", "llm", "smart"] = "smart",
         ollama_url: str = "http://localhost:11434",
         llm_model: str = "llama3.2",
@@ -72,7 +72,13 @@ class SearchEngine:
             self.parser = QueryParser()
             logger.info("Using rule-based query parser")
 
-        self.retriever = HybridRetriever(self.db, self.embedder)
+        # 가중치 조정: BM25 우선 (문서 길이 정규화 강화)
+        self.retriever = HybridRetriever(
+            self.db,
+            self.embedder,
+            bm25_weight=0.6,  # 0.4 → 0.6
+            vector_weight=0.4,  # 0.6 → 0.4
+        )
         self.reranker = Reranker() if use_reranker else None
         self.birads_matcher = BiradsCategoryMatcher(db_path)
 
@@ -251,8 +257,23 @@ class SearchEngine:
         # PMID -> Paper 매핑
         paper_dict = {p.pmid: p for p in papers}
 
-        # 3. 리랭킹
-        if use_rerank and self.reranker and papers:
+        # 가이드라인 쿼리 감지
+        intent_lower = parsed_query.intent.lower() if parsed_query.intent else ""
+        keywords_lower = [k.lower() for k in parsed_query.keywords]
+        original_lower = parsed_query.original_query.lower()
+
+        is_guideline_query = (
+            "guideline" in intent_lower or
+            "bi-rads" in keywords_lower or
+            "bi-rads" in original_lower or
+            "기준" in original_lower or
+            "가이드라인" in original_lower or
+            "분류" in original_lower or  # classification
+            "정의" in original_lower
+        )
+
+        # 3. 리랭킹 (가이드라인 쿼리는 건너뛰기)
+        if use_rerank and self.reranker and papers and not is_guideline_query:
             # BI-RADS 보호를 위해 전체 결과 리랭킹
             reranked = self.reranker.rerank(query, papers, top_k=len(papers))
             reranked = self.reranker.normalize_scores(reranked)
@@ -315,6 +336,98 @@ class SearchEngine:
         """
         response = self.search(query, top_k)
         return [r.paper for r in response.results]
+
+    def search_dual(
+        self,
+        query: str,
+        birads_k: int = 3,
+        papers_k: int = 5,
+    ) -> tuple[SearchResponse, SearchResponse]:
+        """
+        이중 검색: BI-RADS 가이드라인 + 연구 논문 분리
+
+        Args:
+            query: 검색 쿼리
+            birads_k: BI-RADS 결과 수
+            papers_k: 논문 결과 수
+
+        Returns:
+            (BI-RADS 응답, 논문 응답) 튜플
+        """
+        start_time = time.time()
+
+        # 쿼리 파싱
+        parsed_query = self.parser.parse(query)
+
+        # 1. BI-RADS 가이드라인 검색 (reranker 없이)
+        birads_retrieved = self.retriever.retrieve(parsed_query, top_k=birads_k * 3)
+        birads_pmids = [pmid for pmid, _ in birads_retrieved if pmid.startswith("BIRADS_")][:birads_k]
+
+        if birads_pmids:
+            birads_papers = self.db.get_papers(birads_pmids)
+            birads_results = [
+                SearchResult(
+                    paper=paper,
+                    score=1.0 - (i * 0.1),
+                    rank=i + 1,
+                    matched_terms=parsed_query.keywords[:5],
+                )
+                for i, paper in enumerate(birads_papers)
+            ]
+        else:
+            birads_results = []
+
+        # 2. 연구 논문 검색 (BI-RADS 제외, reranker 사용)
+        papers_retrieved = self.retriever.retrieve(parsed_query, top_k=papers_k * 5)
+        papers_pmids = [pmid for pmid, _ in papers_retrieved if not pmid.startswith("BIRADS_")][:papers_k * 2]
+
+        if papers_pmids:
+            papers_list = self.db.get_papers(papers_pmids)
+
+            # Reranker 사용
+            if self.reranker and papers_list:
+                reranked = self.reranker.rerank(query, papers_list, top_k=papers_k)
+                reranked = self.reranker.normalize_scores(reranked)
+
+                papers_results = [
+                    SearchResult(
+                        paper=paper,
+                        score=score,
+                        rank=i + 1,
+                        matched_terms=parsed_query.keywords[:5],
+                    )
+                    for i, (paper, score) in enumerate(reranked)
+                ]
+            else:
+                papers_results = [
+                    SearchResult(
+                        paper=paper,
+                        score=1.0 - (i * 0.1),
+                        rank=i + 1,
+                        matched_terms=parsed_query.keywords[:5],
+                    )
+                    for i, paper in enumerate(papers_list[:papers_k])
+                ]
+        else:
+            papers_results = []
+
+        elapsed_ms = int((time.time() - start_time) * 1000)
+
+        birads_response = SearchResponse(
+            query=parsed_query,
+            results=birads_results,
+            total_count=len(birads_results),
+            time_ms=elapsed_ms,
+        )
+
+        papers_response = SearchResponse(
+            query=parsed_query,
+            results=papers_results,
+            total_count=len(papers_results),
+            time_ms=elapsed_ms,
+        )
+
+        return birads_response, papers_response
 
     def format_results(self, results: List[SearchResult]) -> str:
         """

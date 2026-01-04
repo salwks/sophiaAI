@@ -190,6 +190,20 @@ class HybridRetriever:
         for rank, (pmid, _) in enumerate(vector_results, 1):
             fusion_scores[pmid] += vector_w * (1.0 / (k + rank))
 
+        # BI-RADS Lexicon 섹션 Boost (canonical definitions)
+        lexicon_boost = 1.2  # 20% 가중치 추가
+        lexicon_sections = [
+            "BIRADS_2025_SECTION_II",    # Breast Imaging Lexicon
+            "BIRADS_2025_SECTION_III",   # Breast Density
+            "BIRADS_2025_SECTION_IV_A",  # Masses
+            "BIRADS_2025_SECTION_IV_B",  # Calcifications
+            "BIRADS_2025_SECTION_IV_C",  # Architectural Distortion
+        ]
+
+        for pmid in fusion_scores:
+            if pmid in lexicon_sections:
+                fusion_scores[pmid] *= lexicon_boost
+
         # 정렬
         sorted_results = sorted(
             fusion_scores.items(),
@@ -451,7 +465,7 @@ class HybridRetriever:
 
         bm25_results = self.search_bm25(
             bm25_keywords,
-            k=top_k * 2,
+            k=top_k * 3,  # 2 → 3: 더 많은 후보 확보
             candidate_pmids=candidate_pmids,
         )
         logger.debug(f"BM25 results: {len(bm25_results)} (keywords: {bm25_keywords[:5]})")
@@ -459,7 +473,7 @@ class HybridRetriever:
         # 3. Vector 검색 - 원본 쿼리 사용 (다국어 임베딩 지원)
         vector_results = self.search_vector(
             query.original_query,
-            k=top_k * 2,
+            k=top_k * 3,  # 2 → 3: 더 많은 후보 확보
             candidate_pmids=candidate_pmids,
         )
         logger.debug(f"Vector results: {len(vector_results)}")
@@ -498,10 +512,10 @@ class HybridRetriever:
         keywords = re.findall(r'\b[a-zA-Z0-9-]+\b', query_text.lower())
 
         # BM25 검색
-        bm25_results = self.search_bm25(keywords, k=top_k * 2)
+        bm25_results = self.search_bm25(keywords, k=top_k * 3)  # 2 → 3
 
         # Vector 검색
-        vector_results = self.search_vector(query_text, k=top_k * 2)
+        vector_results = self.search_vector(query_text, k=top_k * 3)  # 2 → 3
 
         # 가중치 적용 RRF 융합
         fused_results = self.weighted_rrf(

@@ -31,10 +31,17 @@ class Reranker:
 
     def _prepare_text(self, paper: Paper) -> str:
         """리랭킹용 텍스트 준비"""
-        text = f"{paper.title}\n\n{paper.abstract}"
-        # 최대 512 토큰 정도로 제한
-        if len(text) > 1000:
-            text = text[:1000]
+        # BI-RADS 문서는 full_content 사용 (테이블 등 중요 내용 포함)
+        if paper.pmid and paper.pmid.startswith("BIRADS_"):
+            text = f"{paper.title}\n\n{paper.full_content if paper.full_content else paper.abstract}"
+            # BI-RADS는 최대 2000자까지 사용
+            if len(text) > 2000:
+                text = text[:2000]
+        else:
+            text = f"{paper.title}\n\n{paper.abstract}"
+            # 일반 논문은 최대 1000자
+            if len(text) > 1000:
+                text = text[:1000]
         return text
 
     def rerank(

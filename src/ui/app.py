@@ -272,53 +272,81 @@ def main():
                 if is_birads_concept and 'bi-rads' not in search_query_lower:
                     search_query = f"BI-RADS {search_query}"
 
-                search_response = engine.search(search_query, top_k=options["top_k"], use_rerank=True)
+                # 이중 검색: BI-RADS + 연구논문
+                birads_response, papers_response = engine.search_dual(
+                    search_query,
+                    birads_k=3,
+                    papers_k=5
+                )
 
-                if not search_response.results:
+                if not birads_response.results and not papers_response.results:
                     with st.chat_message("assistant"):
                         error_msg = "죄송합니다. 관련 논문을 찾을 수 없습니다. 다른 질문을 시도해보세요."
                         st.markdown(error_msg)
                         st.session_state.messages.append({"role": "assistant", "content": error_msg})
                     st.stop()
 
-                # 컨텍스트 구성 (검색된 논문)
-                context_parts = []
-                sources = []
+                # BI-RADS 컨텍스트 구성
+                birads_context_parts = []
+                birads_sources = []
 
-                for i, result in enumerate(search_response.results, 1):
+                for i, result in enumerate(birads_response.results, 1):
                     paper = result.paper
+                    content_text = getattr(paper, 'full_content', paper.abstract or '내용 없음')
 
-                    # BI-RADS 문서 여부
-                    is_birads = paper.pmid.startswith("BIRADS_")
-                    doc_type = "📘 BI-RADS 가이드라인" if is_birads else "📄 논문"
-
-                    # 컨텍스트에 추가
-                    # BI-RADS는 full_content 사용, 일반 논문은 abstract 사용
-                    if is_birads:
-                        content_text = getattr(paper, 'full_content', paper.abstract or '내용 없음')
-                    else:
-                        content_text = (paper.abstract[:500] + '...' if paper.abstract and len(paper.abstract) > 500 else paper.abstract or '초록 없음')
-
-                    context_parts.append(f"""
-[{i}] {doc_type}
+                    birads_context_parts.append(f"""
+[{i}] 📘 BI-RADS 가이드라인
 제목: {paper.title}
-{'저자: ' + paper.author_string if paper.author_string else ''}
-{'저널: ' + paper.journal + ' (' + str(paper.year) + ')' if paper.journal else ''}
 내용: {content_text}
 """)
 
-                    # 출처 정보 저장
-                    sources.append({
+                    birads_sources.append({
+                        "title": paper.title,
+                        "authors": paper.author_string or "American College of Radiology",
+                        "journal": paper.journal or "ACR BI-RADS Atlas v2025",
+                        "year": paper.year or "2025",
+                        "is_birads": True,
+                        "full_content": getattr(paper, 'full_content', None)
+                    })
+
+                birads_context = "\n".join(birads_context_parts) if birads_context_parts else ""
+
+                # 연구논문 컨텍스트 구성
+                papers_context_parts = []
+                papers_sources = []
+
+                for i, result in enumerate(papers_response.results, 1):
+                    paper = result.paper
+                    content_text = (paper.abstract[:500] + '...' if paper.abstract and len(paper.abstract) > 500 else paper.abstract or '초록 없음')
+
+                    papers_context_parts.append(f"""
+[{i}] 📄 연구논문
+제목: {paper.title}
+저자: {paper.author_string}
+저널: {paper.journal} ({paper.year})
+내용: {content_text}
+""")
+
+                    papers_sources.append({
                         "title": paper.title,
                         "authors": paper.author_string or "저자 정보 없음",
                         "journal": paper.journal or "저널 정보 없음",
                         "year": paper.year or "연도 정보 없음",
-                        "url": paper.pubmed_url if not is_birads else None,
-                        "is_birads": is_birads,
-                        "full_content": getattr(paper, 'full_content', None) if is_birads else None
+                        "url": paper.pubmed_url,
+                        "is_birads": False
                     })
 
-                context = "\n".join(context_parts)
+                papers_context = "\n".join(papers_context_parts) if papers_context_parts else ""
+
+                # 전체 컨텍스트 결합 (BI-RADS 우선, 연구논문 후순위)
+                context_parts = []
+                if birads_context:
+                    context_parts.append("### 📘 BI-RADS 가이드라인\n" + birads_context)
+                if papers_context:
+                    context_parts.append("\n### 📄 관련 연구 논문\n" + papers_context)
+
+                context = "\n\n".join(context_parts)
+                sources = birads_sources + papers_sources
 
             except Exception as e:
                 with st.chat_message("assistant"):
@@ -344,30 +372,30 @@ def main():
 
             message_placeholder.markdown(full_response)
 
-            # 출처 표시
-            with st.expander("📚 참고 자료", expanded=False):
-                for i, source in enumerate(sources, 1):
-                    icon = "📘" if source["is_birads"] else "📄"
-
-                    if source["is_birads"]:
-                        # BI-RADS 문서는 원문 링크 제공
-                        st.markdown(f"**{icon} [{i}] {source['title']}**")
+            # 출처 표시 (BI-RADS와 연구논문 분리)
+            if birads_sources:
+                with st.expander("📘 BI-RADS 가이드라인", expanded=False):
+                    for i, source in enumerate(birads_sources, 1):
+                        st.markdown(f"**📘 [{i}] {source['title']}**")
                         st.markdown(f"{source['authors']} - {source['journal']} ({source['year']})")
 
-                        # 원문 보기 링크 (Streamlit 페이지로 이동)
+                        # 원문 보기 링크
                         st.markdown(
                             f"💡 전문 보기: 좌측 사이드바 '📘 BI-RADS 가이드라인' 페이지에서 확인 "
                             f"| 길이: {len(source.get('full_content', '')):,}자"
                         )
 
-                        # 간단히 요약만 표시
+                        # 미리보기
                         if source.get("full_content"):
                             preview = source["full_content"][:300] + "..." if len(source["full_content"]) > 300 else source["full_content"]
                             st.caption(f"💡 미리보기: {preview}")
-                    else:
-                        # 일반 논문은 PubMed 링크
+                        st.markdown("---")
+
+            if papers_sources:
+                with st.expander("📄 관련 연구 논문", expanded=False):
+                    for i, source in enumerate(papers_sources, 1):
                         st.markdown(f"""
-                        **{icon} [{i}] {source['title']}**
+                        **📄 [{i}] {source['title']}**
                         {source['authors']} - {source['journal']} ({source['year']})
                         [PubMed 보기]({source['url']})
                         """)
