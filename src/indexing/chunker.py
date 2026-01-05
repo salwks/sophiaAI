@@ -279,8 +279,15 @@ class BiRadsChunker:
         if margin_match:
             chunks.append({
                 "pmid": f"{paper.pmid}_CHUNK_MARGIN",
-                "content": f"# BI-RADS Mammography - Mass Margin Descriptors\n\nThe BI-RADS lexicon defines the following mass margin descriptors for mammography:\n\n{margin_match.group(0)}",
-                "title": "BI-RADS Mass Margin Descriptors",
+                "content": f"# BI-RADS Mammography - Mass Margin Descriptors\n\n"
+                          f"The BI-RADS lexicon defines 4 mass margin classifications for mammography:\n"
+                          f"1. Circumscribed - sharply demarcated margin\n"
+                          f"2. Obscured - margin hidden by overlapping tissue\n"
+                          f"3. Indistinct - poorly defined margin\n"
+                          f"4. Spiculated - margin with radiating lines\n\n"
+                          f"These 4 margin descriptors are critical predictors of malignancy.\n\n"
+                          f"{margin_match.group(0)}",
+                "title": "BI-RADS Mass Margin Descriptors - 4 Classifications",
             })
 
         # Density 청크
@@ -477,20 +484,27 @@ class BiRadsChunker:
         if cat0_match:
             chunks.append({
                 "pmid": f"{paper.pmid}_CAT0",
-                "content": f"# BI-RADS Assessment Category 0: Incomplete\n\n"
-                          f"BI-RADS Category 0 is an INCOMPLETE assessment used when additional imaging evaluation is needed or when prior mammograms are required for comparison before a final assessment can be rendered.\n\n"
-                          f"**When to use Category 0:**\n"
-                          f"- Screening examination shows an abnormality that is not definitively benign\n"
-                          f"- Need additional imaging evaluation (supplemental views, ultrasound)\n"
-                          f"- Need prior mammograms for comparison to make final assessment\n"
-                          f"- Cannot render final assessment without additional information\n\n"
-                          f"**Key points:**\n"
-                          f"- Incomplete assessment - not a final category\n"
-                          f"- Requires recall for additional imaging\n"
-                          f"- Should rarely be used in diagnostic imaging\n"
-                          f"- Must be followed by a final assessment (Category 1-6)\n\n"
+                "content": f"# BI-RADS CATEGORY 0: INCOMPLETE ASSESSMENT - SCREENING RECALL REQUIRED\n\n"
+                          f"**THIS IS NOT A FINAL CATEGORY** - Category 0 is a TEMPORARY INCOMPLETE assessment used ONLY in SCREENING when you CANNOT make a final determination and MUST RECALL the patient for ADDITIONAL IMAGING.\n\n"
+                          f"**CRITICAL: What Category 0 is NOT:**\n"
+                          f"- NOT Category 1 (Negative) - you saw something that needs evaluation\n"
+                          f"- NOT Category 2 (Benign) - cannot confirm it's benign without more imaging\n"
+                          f"- NOT Category 3 (Probably Benign) - cannot even determine if it's probably benign\n"
+                          f"- This is INCOMPLETE, meaning you literally cannot render ANY final assessment\n\n"
+                          f"**When to use Category 0 (SCREENING ONLY):**\n"
+                          f"- SCREENING mammogram shows finding that is not clearly benign\n"
+                          f"- NEED ADDITIONAL IMAGING (spot compression, magnification, ultrasound)\n"
+                          f"- NEED PRIOR FILMS for comparison before making any assessment\n"
+                          f"- CANNOT determine if benign, probably benign, or suspicious WITHOUT more information\n"
+                          f"- MUST RECALL PATIENT from screening for diagnostic workup\n\n"
+                          f"**Workflow: SCREENING → CATEGORY 0 → RECALL → DIAGNOSTIC → FINAL CATEGORY (1-6)**\n\n"
+                          f"**DO NOT use Category 0 if:**\n"
+                          f"- Already in diagnostic setting (use final category instead)\n"
+                          f"- Can make final assessment now (use category 1-6)\n"
+                          f"- Just recommending screening MRI for dense breasts (not category 0)\n\n"
+                          f"**Remember: Category 0 = INCOMPLETE = NEED MORE IMAGES = CALLBACK REQUIRED**\n\n"
                           f"{cat0_match.group(0)}",
-                "title": "BI-RADS Category 0: Incomplete Assessment",
+                "title": "BI-RADS Category 0: Incomplete Assessment - Screening Recall",
             })
 
         # Category 1: Negative

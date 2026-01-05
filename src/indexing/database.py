@@ -32,7 +32,7 @@ class DatabaseManager:
         self.db_path.mkdir(parents=True, exist_ok=True)
 
         self.sqlite_path = self.db_path / "metadata.db"
-        self.lance_path = self.db_path / "vectors"
+        self.lance_path = self.db_path / "lancedb"  # Changed from "vectors" to "lancedb"
 
         self._init_sqlite()
         self._init_lancedb()
@@ -100,8 +100,11 @@ class DatabaseManager:
         try:
             self.lance_table = self.lance_db.open_table("papers")
             logger.info(f"LanceDB table opened: {len(self.lance_table)} vectors")
-        except Exception:
+        except FileNotFoundError:
             logger.info("LanceDB table not found, will create on first insert")
+        except Exception as e:
+            logger.error(f"Error opening LanceDB table: {e}", exc_info=True)
+            logger.info("Will attempt to open table on first search")
 
     def insert_paper(self, paper: Paper, embedding: Optional[np.ndarray] = None):
         """단일 논문 삽입"""
@@ -301,9 +304,14 @@ class DatabaseManager:
         Returns:
             (pmid, score) 튜플 리스트
         """
+        # Lazy initialization - try to open table if not already opened
         if self.lance_table is None:
-            logger.warning("LanceDB table not initialized")
-            return []
+            try:
+                self.lance_table = self.lance_db.open_table("papers")
+                logger.info(f"LanceDB table lazy-loaded: {len(self.lance_table)} vectors")
+            except Exception as e:
+                logger.warning(f"LanceDB table not initialized: {e}")
+                return []
 
         try:
             results = self.lance_table.search(query_embedding.tolist()).limit(k * 2).to_list()
@@ -347,6 +355,27 @@ class DatabaseManager:
         papers_dict = {self._row_to_paper(row).pmid: self._row_to_paper(row) for row in rows}
         return [papers_dict[pmid] for pmid in pmids if pmid in papers_dict]
 
+    def _safe_json_loads(self, value: str, default: list = None) -> list:
+        """안전한 JSON 파싱 (에러 처리 포함)"""
+        if default is None:
+            default = []
+
+        if not value:
+            return default
+
+        # 공백 제거
+        value = value.strip()
+
+        if not value:
+            return default
+
+        try:
+            result = json.loads(value)
+            return result if isinstance(result, list) else default
+        except (json.JSONDecodeError, ValueError, TypeError) as e:
+            logger.warning(f"JSON parse error for value '{value[:50]}...': {e}, using default {default}")
+            return default
+
     def _row_to_paper(self, row: sqlite3.Row) -> Paper:
         """SQLite Row를 Paper 객체로 변환"""
         # full_content 필드가 있는지 확인
@@ -359,17 +388,17 @@ class DatabaseManager:
             pmid=row["pmid"],
             doi=row["doi"],
             title=row["title"],
-            authors=json.loads(row["authors"] or "[]"),
+            authors=self._safe_json_loads(row["authors"]),
             journal=row["journal"] or "",
             journal_abbrev=row["journal_abbrev"] or "",
             year=row["year"] or 0,
             month=row["month"],
             abstract=row["abstract"] or "",
-            mesh_terms=json.loads(row["mesh_terms"] or "[]"),
-            keywords=json.loads(row["keywords"] or "[]"),
-            publication_types=json.loads(row["publication_types"] or "[]"),
-            modality=json.loads(row["modality"] or "[]"),
-            pathology=json.loads(row["pathology"] or "[]"),
+            mesh_terms=self._safe_json_loads(row["mesh_terms"]),
+            keywords=self._safe_json_loads(row["keywords"]),
+            publication_types=self._safe_json_loads(row["publication_types"]),
+            modality=self._safe_json_loads(row["modality"]),
+            pathology=self._safe_json_loads(row["pathology"]),
             study_type=row["study_type"],
             population=row["population"],
             citation_count=row["citation_count"] or 0,

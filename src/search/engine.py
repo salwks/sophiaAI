@@ -359,20 +359,34 @@ class SearchEngine:
         # 쿼리 파싱
         parsed_query = self.parser.parse(query)
 
-        # 1. BI-RADS 가이드라인 검색 (reranker 없이)
+        # 1. BI-RADS 가이드라인 검색 (reranker 없이, score boost 적용)
         birads_retrieved = self.retriever.retrieve(parsed_query, top_k=birads_k * 3)
-        birads_pmids = [pmid for pmid, _ in birads_retrieved if pmid.startswith("BIRADS_")][:birads_k]
 
-        if birads_pmids:
+        # BI-RADS 문서만 필터링 (점수 포함)
+        birads_with_scores = [(pmid, score) for pmid, score in birads_retrieved if pmid.startswith("BIRADS_")][:birads_k]
+
+        if birads_with_scores:
+            birads_pmids = [pmid for pmid, _ in birads_with_scores]
             birads_papers = self.db.get_papers(birads_pmids)
+
+            # PMID -> Paper 매핑
+            birads_paper_dict = {p.pmid: p for p in birads_papers}
+
+            # Score boosting: BI-RADS 문서 점수를 2배로 증폭
+            BIRADS_BOOST_FACTOR = 2.0
+
+            # 최대 점수로 정규화 후 boost 적용
+            max_score = max(score for _, score in birads_with_scores) if birads_with_scores else 1
+
             birads_results = [
                 SearchResult(
-                    paper=paper,
-                    score=1.0 - (i * 0.1),
+                    paper=birads_paper_dict[pmid],
+                    score=min((score / max_score) * BIRADS_BOOST_FACTOR, 1.0),  # 1.0 cap
                     rank=i + 1,
                     matched_terms=parsed_query.keywords[:5],
                 )
-                for i, paper in enumerate(birads_papers)
+                for i, (pmid, score) in enumerate(birads_with_scores)
+                if pmid in birads_paper_dict
             ]
         else:
             birads_results = []
