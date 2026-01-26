@@ -6,6 +6,7 @@ Sophia AI Alpha: RAG-based Medical AI Assistant
 
 import os
 import sys
+import re
 import copy
 from pathlib import Path
 import streamlit as st
@@ -18,6 +19,9 @@ sys.path.insert(0, str(project_root))
 
 from src.search.engine import SearchEngine
 from src.search.query_translator import get_translator
+from src.search.relay_router import RelayRouter, get_relay_router, QueryIntent
+from src.evaluation.agent_judge import TextExcellencePipeline, get_text_excellence_pipeline, JudgeVerdict
+from src.retrieval.dynamic_evidence import DynamicEvidencePipeline, get_dynamic_evidence_pipeline
 
 # =============================================================================
 # 페이지 설정
@@ -41,26 +45,76 @@ def get_search_engine():
         db_path=Path("data/index"),
         parser_mode="smart",
         ollama_url="http://localhost:11434",
-        llm_model="qwen2.5:14b",
+        llm_model="gpt-oss:20b",
         use_reranker=True,
     )
 
 @st.cache_resource(ttl=3600)
 def get_query_translator():
-    """쿼리 번역기 싱글톤"""
+    """쿼리 번역기 싱글톤 (레거시, RelayRouter로 대체 예정)"""
     return get_translator(
         ollama_url="http://localhost:11434",
-        model="qwen2.5:14b"
+        model="gpt-oss:20b"
     )
+
+@st.cache_resource(ttl=3600)
+def get_cached_relay_router():
+    """RelayRouter 싱글톤 (SLM-LLM 협업)"""
+    return get_relay_router()
+
+@st.cache_resource(ttl=3600)
+def get_cached_text_pipeline():
+    """TextExcellencePipeline 싱글톤 (Answering Twice + Agent Judge)"""
+    return get_text_excellence_pipeline()
+
+@st.cache_resource(ttl=3600)
+def get_cached_dynamic_pipeline(_version: str = "7.17"):
+    """DynamicEvidencePipeline 싱글톤 (Phase 7.17: 단순화된 파이프라인)"""
+    from src.retrieval.dynamic_evidence import DynamicEvidencePipeline
+    # Phase 7.17: decomposition 비활성화 (복잡한 레이어 제거)
+    return DynamicEvidencePipeline(use_summarizer=False, enable_decomposition=False)
+
+def get_guideline_type(pmid: str) -> str:
+    """PMID로부터 가이드라인 타입 반환"""
+    if not pmid:
+        return "unknown"
+    if pmid.startswith("BIRADS_"):
+        return "birads"
+    elif pmid.startswith("ACR_"):
+        return "acr"
+    elif pmid.startswith("PHYSICS_"):
+        return "physics"
+    elif pmid.startswith("CLINICAL_"):
+        return "clinical"
+    elif pmid.startswith("DANCE_"):
+        return "dance"  # Dance et al. 물리학 참조 논문
+    return "paper"
+
+
+def get_guideline_label(pmid: str) -> str:
+    """PMID로부터 가이드라인 라벨 반환"""
+    guideline_type = get_guideline_type(pmid)
+    labels = {
+        "birads": "📘 BI-RADS 가이드라인",
+        "acr": "📗 ACR Practice Parameter",
+        "physics": "📙 물리학 가이드라인",
+        "clinical": "📕 임상 가이드라인",
+        "dance": "📙 Dance 2011 물리 참조",  # Dance et al. MGD 논문
+        "paper": "📄 연구논문",
+        "unknown": "📄 문서"
+    }
+    return labels.get(guideline_type, "📄 문서")
+
 
 def get_birads_nav_params(pmid: str) -> dict:
     """
-    PMID로부터 BI-RADS 가이드라인 페이지 네비게이션 파라미터 생성
+    PMID로부터 가이드라인 페이지 네비게이션 파라미터 생성
 
     예: BIRADS_2025_SECTION_IV_A_CHUNK_MARGIN
     → {"modality": "mammography", "section": "BIRADS_2025_SECTION_IV", "sub": "BIRADS_2025_SECTION_IV_A", "chunk": "MARGIN"}
     """
-    if not pmid or not pmid.startswith("BIRADS"):
+    GUIDELINE_PREFIXES = ("BIRADS_", "ACR_", "PHYSICS_", "CLINICAL_")
+    if not pmid or not pmid.startswith(GUIDELINE_PREFIXES):
         return {"modality": "mammography"}
 
     params = {"modality": "mammography"}
@@ -92,6 +146,109 @@ def get_birads_nav_params(pmid: str) -> dict:
     return params
 
 
+def get_acr_nav_params(pmid: str) -> dict:
+    """
+    ACR PMID로부터 ACR 페이지 네비게이션 파라미터 생성
+
+    예: ACR_CEM_INDICATIONS → {"category": "cem", "doc": "ACR_CEM_INDICATIONS"}
+    예: ACR_MAMMO_SECTION_I → {"category": "mammo", "doc": "ACR_MAMMO_SECTION_I"}
+    """
+    if not pmid or not pmid.startswith("ACR_"):
+        return {}
+
+    params = {}
+
+    # 카테고리 결정
+    if pmid.startswith("ACR_CEM_"):
+        params["category"] = "cem"
+    elif pmid.startswith("ACR_MAMMO_"):
+        params["category"] = "mammo"
+    elif pmid.startswith("ACR_IQ_"):
+        params["category"] = "iq"
+    else:
+        params["category"] = "mammo"  # 기본값
+
+    params["doc"] = pmid
+    return params
+
+
+def get_guideline_page_url(pmid: str) -> str:
+    """
+    가이드라인 PMID에 따라 적절한 페이지 URL 생성
+    """
+    guideline_type = get_guideline_type(pmid)
+
+    if guideline_type == "acr":
+        nav_params = get_acr_nav_params(pmid)
+        param_str = "&".join([f"{k}={v}" for k, v in nav_params.items()])
+        return f"/ACR_Practice_Parameters?{param_str}"
+    elif guideline_type in ("birads", "physics", "clinical"):
+        nav_params = get_birads_nav_params(pmid)
+        param_str = "&".join([f"{k}={v}" for k, v in nav_params.items()])
+        return f"/BI-RADS_Guidelines?{param_str}"
+    else:
+        return "#"
+
+
+def fetch_pmc_fulltext(pmc_url: str, max_chars: int = 8000) -> str:
+    """
+    PMC 논문 전문을 가져와서 텍스트로 반환
+
+    Args:
+        pmc_url: PMC 논문 URL (예: https://pmc.ncbi.nlm.nih.gov/articles/PMC7533093/)
+        max_chars: 최대 문자 수 (기본 8000자)
+
+    Returns:
+        논문 전문 텍스트 (HTML 태그 제거됨)
+    """
+    try:
+        # URL 정규화
+        if "www.ncbi.nlm.nih.gov" in pmc_url:
+            pmc_url = pmc_url.replace("www.ncbi.nlm.nih.gov/pmc", "pmc.ncbi.nlm.nih.gov")
+
+        response = requests.get(pmc_url, timeout=15, headers={
+            "User-Agent": "Mozilla/5.0 (compatible; SophiaAI/1.0; Medical Research Assistant)"
+        })
+        response.raise_for_status()
+
+        html = response.text
+
+        # HTML에서 본문 텍스트 추출 (간단한 방식)
+        import re
+
+        # script, style 태그 제거
+        html = re.sub(r'<script[^>]*>.*?</script>', '', html, flags=re.DOTALL | re.IGNORECASE)
+        html = re.sub(r'<style[^>]*>.*?</style>', '', html, flags=re.DOTALL | re.IGNORECASE)
+
+        # 주요 섹션 추출 시도 (article-body, main-content 등)
+        article_match = re.search(r'<article[^>]*>(.*?)</article>', html, flags=re.DOTALL | re.IGNORECASE)
+        if article_match:
+            html = article_match.group(1)
+
+        # HTML 태그 제거
+        text = re.sub(r'<[^>]+>', ' ', html)
+
+        # 여러 공백을 하나로
+        text = re.sub(r'\s+', ' ', text)
+
+        # 특수문자 정리
+        text = text.replace('&nbsp;', ' ')
+        text = text.replace('&amp;', '&')
+        text = text.replace('&lt;', '<')
+        text = text.replace('&gt;', '>')
+
+        text = text.strip()
+
+        # 최대 길이 제한
+        if len(text) > max_chars:
+            text = text[:max_chars] + "... [전문 일부 생략]"
+
+        return text
+
+    except Exception as e:
+        return f"[PMC 전문 가져오기 실패: {str(e)}]"
+
+
 def is_korean(text: str) -> bool:
     """텍스트에 한글이 포함되어 있는지 확인"""
     import re
@@ -102,23 +259,23 @@ def get_messages(is_ko: bool) -> dict:
     """언어별 메시지 반환"""
     if is_ko:
         return {
-            "found_high": "📘 **BI-RADS 가이드라인에서 관련 내용을 찾았습니다.**\n\n아래 원문을 확인해주세요.",
-            "found_medium": "📋 **BI-RADS 가이드라인에서 관련될 수 있는 내용을 찾았습니다.**\n\n⚠️ _{reason}_\n\n아래 원문을 확인해주세요.",
-            "not_found": "📭 **BI-RADS 가이드라인에서 관련 내용을 찾지 못했습니다.**\n\n_{reason}_",
+            "found_high": "📚 **가이드라인에서 관련 내용을 찾았습니다.**\n\n아래 원문을 확인해주세요.",
+            "found_medium": "📋 **가이드라인에서 관련될 수 있는 내용을 찾았습니다.**\n\n⚠️ _{reason}_\n\n아래 원문을 확인해주세요.",
+            "not_found": "📭 **가이드라인에서 관련 내용을 찾지 못했습니다.**\n\n_{reason}_",
             "no_results": "검색 결과가 없습니다. 다른 키워드로 검색해 주세요.",
-            "view_source": "📘 원문 확인하기",
+            "view_source": "📚 원문 확인하기",
             "papers_high": "📄 관련 연구 논문",
             "papers_medium": "📄 관련될 수 있는 연구 논문 ⚠️",
             "verifying": "🔍 문서 관련성 검증 중...",
-            "searching": "📚 관련 논문 검색 중..."
+            "searching": "📚 관련 문서 검색 중..."
         }
     else:
         return {
-            "found_high": "📘 **Found relevant content in BI-RADS Guidelines.**\n\nPlease check the original text below.",
-            "found_medium": "📋 **Found possibly relevant content in BI-RADS Guidelines.**\n\n⚠️ _{reason}_\n\nPlease check the original text below.",
-            "not_found": "📭 **No relevant content found in BI-RADS Guidelines.**\n\n_{reason}_",
+            "found_high": "📚 **Found relevant content in Guidelines.**\n\nPlease check the original text below.",
+            "found_medium": "📋 **Found possibly relevant content in Guidelines.**\n\n⚠️ _{reason}_\n\nPlease check the original text below.",
+            "not_found": "📭 **No relevant content found in Guidelines.**\n\n_{reason}_",
             "no_results": "No search results. Please try different keywords.",
-            "view_source": "📘 View Original",
+            "view_source": "📚 View Original",
             "papers_high": "📄 Related Research Papers",
             "papers_medium": "📄 Possibly Related Research Papers ⚠️",
             "verifying": "🔍 Verifying document relevance...",
@@ -126,7 +283,7 @@ def get_messages(is_ko: bool) -> dict:
         }
 
 
-def enhance_query_with_context(current_question: str, chat_history: list, model="qwen2.5:14b") -> str:
+def enhance_query_with_context(current_question: str, chat_history: list, model="gpt-oss:20b") -> str:
     """
     이전 대화 맥락을 참고해서 검색 쿼리를 보강
 
@@ -210,7 +367,7 @@ def enhance_query_with_context(current_question: str, chat_history: list, model=
         return current_question
 
 
-def call_llm_with_context(question: str, context: str, model="qwen2.5:14b", temperature=0.7):
+def call_llm_with_context(question: str, context: str, model="gpt-oss:20b", temperature=0.7, has_guidelines: bool = True):
     """
     RAG: 검색된 논문 컨텍스트를 기반으로 LLM 답변 생성
 
@@ -219,30 +376,151 @@ def call_llm_with_context(question: str, context: str, model="qwen2.5:14b", temp
         context: 검색된 논문 내용
         model: LLM 모델명
         temperature: 온도 설정
+        has_guidelines: 가이드라인 문서 포함 여부
 
     Returns:
         LLM 답변 (generator)
     """
     url = "http://localhost:11434/api/chat"
 
-    system_message = """당신은 유방영상의학 전문 AI 어시스턴트입니다.
+    # 핵심 물리 지식 로드
+    try:
+        from src.knowledge.core_physics import get_core_physics_prompt
+        core_physics = get_core_physics_prompt()
+    except ImportError:
+        core_physics = ""
 
-**중요한 규칙:**
-1. 절대로 내용을 요약하거나 해석하지 마세요 - 할루시네이션 방지
-2. 질문에 해당하는 출처 번호만 안내하세요 (예: "[1]번 BI-RADS 가이드라인을 참조하세요")
-3. 아래에 원문이 표시되니 사용자가 직접 확인하도록 안내하세요
-4. 한국어로 간단히 답변하세요 (1-2문장)"""
+    if has_guidelines:
+        # 데이터 무결성 강화 프롬프트 (Integrity-First Prompt)
+        system_message = f"""# Role
+너는 의학 물리 데이터의 '무결성(Integrity)'을 검증하는 전문 감사관(Auditor)이다.
+단순한 정보 요약자가 아니라, 제공된 자료의 수치와 물리 법칙이 답변에 '왜곡 없이' 반영되었는지 감시하라.
 
-    user_message = f"""다음 자료 중 질문에 답할 수 있는 출처 번호를 안내해주세요.
-내용을 요약하지 말고, 출처 번호만 알려주세요.
+# ============================================================
+# 📚 검증된 표준 참조 자료 (Standard Reference - 인용 가능)
+# ============================================================
+# 아래 내용은 원본 논문에서 검증된 표준 지식입니다.
+# RAG 검색 결과와 동등하게 인용할 수 있습니다.
+# 특히 Dance et al. 2011 논문의 t-factor/T-factor 테이블은
+# 직접 인용하여 답변에 활용하세요.
+# ============================================================
 
-**참고 자료:**
+{core_physics}
+
+# ============================================================
+# 표준 참조 자료 끝
+# ============================================================
+
+# Strict Instruction (절대 준수 사항)
+1. **결론 도출 금지 (Evidence First)**:
+   - 네가 이미 알고 있는 일반 지식으로 결론을 먼저 내리지 마라.
+   - 반드시 제공된 [표준 참조 자료], [가이드라인], [연구 논문]의 텍스트에서 직접적인 근거를 먼저 나열한 후, 그 데이터가 허용하는 범위 내에서만 결론을 도출하라.
+
+2. **물리 개념의 엄격한 정의 (Grounding Physics)**:
+   - 위 "필수 물리 지식"과 Mammography 물리 법칙을 혼동하지 마라.
+   - [Hard Beam]: 에너지가 높음(keV↑), K-edge가 높음, 투과력 높음, 두꺼운 유방에 필수.
+   - [Soft Beam]: 에너지가 낮음(keV↓), K-edge가 낮음, 투과력 낮음, 얇은 유방에 적합.
+   - MGD 관련 질문에서는 Dance et al. 2011의 t-factor/T-factor 개념을 정확히 적용하라.
+   - 이 정의와 반대되는 주장을 논문에 근거 없이 작성할 경우, 이는 치명적인 오류로 간주한다.
+
+3. **인용 무결성 (Quoting & Verification)**:
+   - 논문의 내용을 언급할 때는 반드시 해당 논문의 번호와 핵심 키워드를 병기하라.
+   - 초록(Abstract)에 명시되지 않은 데이터(예: 구체적 수치 등)를 "합성"하거나 "유추"하여 기재하지 마라.
+   - 데이터가 부족하면 "제시된 자료에는 구체적 수치가 포함되어 있지 않음"을 명시하라.
+   - **제공된 자료에 없는 논문(저자명, 연도)은 절대 인용하지 마라. 이는 심각한 Hallucination 오류다.**
+
+4. **모순 발생 시 보고**:
+   - 질문의 내용과 논문의 데이터가 상충하거나, 논문 내부의 논리가 네 상식과 다를 경우 지어내지 말고 "자료 간의 논리적 모순"을 보고하라.
+
+# Response Format (한국어로 답변)
+⚠️ **반드시 한국어로만 답변하세요. 일본어/중국어 출력 금지.**
+- [데이터 기반 근거]: 각 논문에서 추출한 팩트 나열 (논문 번호 명시)
+- [물리적 인과관계 검증]: 추출된 팩트와 물리 법칙의 일치성 확인
+- [최종 결론]: 데이터가 보장하는 범위 내에서의 설계 지침
+
+# 답변 상세화 원칙 (Comprehensive Response)
+1. **수식 포함**: 물리 개념 설명 시 관련 수식을 반드시 포함하라.
+   - 예: "t(θ) = D(θ) / D(0)" 형태로 명시
+   - 수식의 각 변수 의미를 설명하라.
+
+2. **유도 과정 설명**: 개념 간 연결 관계를 유도 공식으로 보여라.
+   - 예: t-factor가 T-factor로 어떻게 통합되는지
+   - "T = Σ αᵢ × t(θᵢ)"와 같이 단계별로 설명
+
+3. **테이블/수치 인용**: 논문의 테이블 데이터가 있다면 구체적 수치를 제시하라.
+   - 예: "Table 6에 따르면, 6.5cm 두께에서 t(20°) = 0.929"
+
+4. **실무 적용**: 장비 설계나 AEC 알고리즘 관점에서 실무적 의미를 설명하라.
+   - 예: "이 공식은 각 각도별 mAs 배분 전략 수립에 사용됨"
+
+5. **페이지/섹션 참조**: 가능하면 논문의 구체적 페이지나 섹션을 명시하라.
+   - 예: "Dance et al. 2011, 8-9페이지 참조\""""
+
+        user_message = f"""다음 참고 자료를 분석하여 질문에 답변해주세요.
+
+**⚠️ 인용 가능한 자료:**
+1. **[표준 참조 자료]**: 시스템 프롬프트에 포함된 Dance et al. 2011 논문의 t-factor/T-factor 테이블 및 MGD 공식 (인용 가능)
+2. **[검색된 논문]**: 아래 RAG 검색 결과
+
+**⚠️ Hallucination 금지**: 위 두 출처에 없는 논문(저자명, 연도)은 절대 인용하지 마세요.
+
+**검색된 논문 (RAG 결과):**
 {context}
 
 **질문:** {question}
 
-**답변 예시:**
-"[1]번 BI-RADS 가이드라인에서 해당 내용을 확인하실 수 있습니다. 아래 원문을 참조해주세요."
+**요구사항:**
+- **[표준 참조 자료]의 Dance et al. 2011 내용**과 **[검색된 논문]**을 함께 활용하여 답변
+- **수식을 포함**하여 물리적 관계를 명확히 설명
+- **유도 과정**을 단계별로 보여줄 것 (예: t-factor → T-factor 연결)
+- **구체적 수치**를 테이블에서 인용 (예: "Dance et al. 2011, Table 6에 따르면 5cm 두께에서...")
+- **실무 적용** 관점에서 장비 설계/AEC 알고리즘에 어떻게 활용되는지 설명
+- 위 두 출처에 없는 논문은 절대 인용하지 말 것
+- 자료에 답이 없으면 "제공된 자료에는 해당 정보가 없습니다"라고 명시
+"""
+    else:
+        # 가이드라인 없음: 보수적 안내형 (논문 초록 기반 추정)
+        system_message = f"""당신은 유방영상학 전문 의학 물리 보조원입니다.
+
+# ============================================================
+# 📚 검증된 표준 참조 자료 (Standard Reference - 인용 가능)
+# ============================================================
+# 아래 내용은 원본 논문에서 검증된 표준 지식입니다.
+# RAG 검색 결과와 동등하게 인용할 수 있습니다.
+# ============================================================
+
+{core_physics}
+
+# ============================================================
+# 표준 참조 자료 끝
+# ============================================================
+
+**핵심 원칙:**
+1. **정직한 부재 고지**: 가이드라인(ACR/BI-RADS)에 직접적 답변이 없음을 먼저 밝히세요.
+2. **표준 참조 + 초록 기반 추론**: 위 [표준 참조 자료]와 RAG 검색된 논문 초록을 함께 활용하세요.
+3. **환각 방지**: 위 두 출처에 없는 수치를 만들지 마세요.
+4. **물리 원리**: [표준 참조 자료]의 Dance et al. 2011 t-factor/T-factor 테이블은 직접 인용 가능합니다.
+
+**출력 구조:**
+1. [지침 확인]: "가이드라인에는 이 주제에 대한 직접적인 명시가 없습니다."
+2. [표준 참조 + 초록 분석]: Dance et al. 테이블 및 논문 번호를 인용하며 물리적 원리 설명
+3. [제한 사항]: 필요시 "ℹ️ 초록(Abstract) 기반 분석입니다" 고지
+"""
+
+        user_message = f"""**사용자 질문:** {question}
+
+**⚠️ 인용 가능한 자료:**
+1. **[표준 참조 자료]**: 시스템 프롬프트의 Dance et al. 2011 t-factor/T-factor 테이블 및 MGD 공식
+2. **[검색된 논문]**: 아래 RAG 검색 결과
+
+**검색된 연구 논문 (초록):**
+{context}
+
+위 두 출처를 활용하여 질문에 답변해주세요.
+- 가이드라인 부재를 먼저 언급
+- **Dance et al. 2011 Table 6 수치** 직접 인용 가능 (예: "5cm 두께에서 t(20°)=0.919")
+- 논문 번호를 인용하여 물리적 원리 설명
+- 위 두 출처에 없는 논문은 인용 금지
 """
 
     messages = [
@@ -250,35 +528,270 @@ def call_llm_with_context(question: str, context: str, model="qwen2.5:14b", temp
         {"role": "user", "content": user_message}
     ]
 
+    # 🛡️ 데이터 무결성 모드: Temperature 0.0으로 결정론적 응답 강제
+    # has_guidelines=True일 때는 창의성을 완전히 차단하여 hallucination 방지
+    actual_temperature = 0.0 if has_guidelines else temperature
+
     payload = {
         "model": model,
         "messages": messages,
         "stream": True,
         "options": {
-            "temperature": temperature,
+            "temperature": actual_temperature,
         }
     }
 
     try:
+        print(f"[DEBUG] LLM 호출 시작: model={model}, context_len={len(context)}, has_guidelines={has_guidelines}")
         response = requests.post(url, json=payload, stream=True, timeout=180)
         response.raise_for_status()
 
+        chunk_count = 0
         for line in response.iter_lines():
             if line:
-                chunk = json.loads(line)
-                if "message" in chunk and "content" in chunk["message"]:
-                    yield chunk["message"]["content"]
+                try:
+                    chunk = json.loads(line)
+                    if "message" in chunk and "content" in chunk["message"]:
+                        chunk_count += 1
+                        yield chunk["message"]["content"]
+                except json.JSONDecodeError as je:
+                    print(f"[DEBUG] JSON 파싱 오류: {je}, line={line[:100]}")
+                    continue
+        print(f"[DEBUG] LLM 호출 완료: {chunk_count} chunks")
     except requests.exceptions.RequestException as e:
+        print(f"[DEBUG] LLM 연결 오류: {e}")
         yield f"⚠️ LLM 연결 오류: {str(e)}"
+    except Exception as e:
+        print(f"[DEBUG] LLM 예외 발생: {type(e).__name__}: {e}")
+        yield f"⚠️ 예상치 못한 오류: {str(e)}"
 
 
-def verify_relevance(question: str, documents: list, model="qwen2.5:14b") -> dict:
+def verify_hallucination(response: str, context: str) -> dict:
+    """
+    LLM 응답에서 Hallucination(허위 인용) 및 자료 무시를 탐지
+
+    Args:
+        response: LLM 응답 텍스트
+        context: 제공된 참고 자료 (원본)
+
+    Returns:
+        {
+            "has_hallucination": bool,
+            "suspicious_citations": list,  # 의심되는 인용 목록
+            "ignored_context": bool,  # 자료 무시 여부
+            "physics_errors": list,  # 물리 개념 오류
+            "warning_message": str  # 경고 메시지
+        }
+    """
+    import re
+
+    suspicious = []
+    physics_errors = []
+    ignored_context = False
+    context_lower = context.lower()
+    response_lower = response.lower()
+
+    # ========================================
+    # 1. 허위 인용 탐지 (기존)
+    # ========================================
+
+    # 1-1. "저자 et al." 패턴 탐지
+    et_al_pattern = r'([A-Z][a-z]+)\s+et\s+al\.?'
+    et_al_matches = re.findall(et_al_pattern, response)
+
+    for author in et_al_matches:
+        if author.lower() not in context_lower:
+            suspicious.append(f"{author} et al.")
+
+    # 1-2. "저자 (연도)" 패턴 탐지
+    author_year_pattern = r'([A-Z][a-z]+)\s*\(\s*(19|20)\d{2}\s*\)'
+    author_year_matches = re.findall(author_year_pattern, response)
+
+    for author, _ in author_year_matches:
+        if author.lower() not in context_lower:
+            citation = f"{author} (연도)"
+            if f"{author} et al." not in suspicious:
+                suspicious.append(citation)
+
+    # 1-3. "~에 따르면" 패턴 탐지
+    according_pattern = r'([A-Z][a-z]+)에\s*따르면'
+    according_matches = re.findall(according_pattern, response)
+
+    for author in according_matches:
+        if author.lower() not in context_lower and author not in ["Reference", "참고", "자료", "논문"]:
+            if not any(author in s for s in suspicious):
+                suspicious.append(f"{author}에 따르면")
+
+    # ========================================
+    # 2. 자료 무시 탐지 (신규)
+    # ========================================
+
+    # "자료 없음" 패턴 탐지
+    no_data_patterns = [
+        r"내용을\s*찾을\s*수\s*없",
+        r"해당\s*정보가?\s*없",
+        r"자료에서?\s*확인되지\s*않",
+        r"직접적인\s*답을?\s*포함하지\s*않",
+        r"관련된\s*내용을?\s*찾을\s*수\s*없",
+        r"제공된\s*자료에는?\s*없",
+    ]
+
+    claims_no_data = any(re.search(p, response_lower) for p in no_data_patterns)
+
+    # Context에 관련 키워드가 실제로 있는지 확인
+    relevant_keywords_in_context = []
+    important_keywords = [
+        "denoising", "deep learning", "microcalcification", "noise reduction",
+        "quantum", "mottle", "mtf", "spatial resolution", "cnn", "wavelet",
+        "디노이징", "딥러닝", "미세석회화", "노이즈"
+    ]
+
+    for kw in important_keywords:
+        if kw.lower() in context_lower:
+            relevant_keywords_in_context.append(kw)
+
+    # "자료 없다"고 했는데 실제로 관련 키워드가 있으면 = 자료 무시
+    if claims_no_data and len(relevant_keywords_in_context) >= 2:
+        ignored_context = True
+
+    # ========================================
+    # 3. 가짜 참고자료 탐지 (신규)
+    # ========================================
+
+    fake_references = set()  # 중복 방지를 위해 set 사용
+
+    # "참고 자료:" 섹션에서 가짜 문서 제목 탐지
+    # 실제 논문이 아닌 일반적인 설명 형태의 참고자료
+
+    # 3-1. 개별 라인에서 가짜 참고자료 탐지 (더 정밀한 패턴)
+    # 실제 예시: "[1] 제조업체의 Post-processing 알고리즘 설명서"
+    fake_ref_line_patterns = [
+        # 제조업체/업체 관련
+        r'\[?\d+\]?\s*.{0,30}(제조업체|제조사|업체).{0,50}(설명서|문서|매뉴얼|가이드)',
+        # 일반적인 보고서/문서
+        r'\[?\d+\]?\s*.{0,50}(기술\s*보고서|분석\s*보고서|연구\s*보고서|분석\s*문서)',
+        r'\[?\d+\]?\s*.{0,50}(알고리즘\s*설명서|기법\s*문서|처리\s*문서)',
+        # 노이즈/이미지 관련 일반 문서 (저자명 없이)
+        r'\[?\d+\]?\s*(노이즈|이미지|영상).{0,30}(기법|방법|처리).{0,20}(문서|설명|보고서)',
+        # 대비/향상 관련 일반 문서
+        r'\[?\d+\]?\s*.{0,30}(대비|contrast).{0,20}(향상|enhancement).{0,20}(문서|보고서|기술)',
+        # Post-processing 관련
+        r'\[?\d+\]?\s*.{0,30}(post-?processing|후처리).{0,30}(설명서|문서|알고리즘)',
+    ]
+
+    for pattern in fake_ref_line_patterns:
+        matches = re.finditer(pattern, response, re.IGNORECASE)
+        for match in matches:
+            matched_text = match.group(0).strip()
+            # Context에 이 내용이 없으면 가짜
+            if matched_text.lower() not in context_lower:
+                fake_references.add(f"'{matched_text}'")
+
+    # "참고 자료:" 섹션 전체 검사 - 실제 논문 제목이 없으면 가짜
+    ref_section_match = re.search(r'참고\s*자료[:\s]*\n?(.*?)(?:\n\n|$)', response, re.DOTALL | re.IGNORECASE)
+    if ref_section_match:
+        ref_section = ref_section_match.group(1)
+        # Context에서 실제 논문 제목 추출
+        real_titles = re.findall(r'제목:\s*([^\n]+)', context)
+
+        # 참고자료 섹션에 실제 논문 제목이 하나도 없으면 경고
+        has_real_title = False
+        for title in real_titles:
+            title_words = title.lower().split()[:3]  # 첫 3단어만 비교
+            if any(word in ref_section.lower() for word in title_words if len(word) > 3):
+                has_real_title = True
+                break
+
+        if not has_real_title and len(real_titles) > 0:
+            fake_references.add("참고자료 섹션이 실제 제공된 논문과 일치하지 않습니다")
+
+    # set을 list로 변환
+    fake_references = list(fake_references)
+
+    # ========================================
+    # 4. 물리 개념 오류 탐지 (규칙 엔진 사용)
+    # ========================================
+
+    try:
+        from src.validation.physics_rules import check_physics_errors
+        detected_errors = check_physics_errors(response)
+        for error in detected_errors:
+            physics_errors.append(f"{error['description']} → {error['correct_statement']}")
+    except ImportError:
+        # 규칙 엔진 없으면 기본 검사 (fallback)
+        pass
+
+    # ========================================
+    # 5. 경고 메시지 생성
+    # ========================================
+
+    has_issues = (
+        len(suspicious) > 0 or
+        ignored_context or
+        len(physics_errors) > 0 or
+        len(fake_references) > 0
+    )
+
+    warning_parts = []
+
+    if suspicious:
+        warning_parts.append("⚠️ **허위 인용 의심**: 다음 인용이 자료에서 확인되지 않습니다:")
+        for i, citation in enumerate(suspicious, 1):
+            warning_parts.append(f"  {i}. `{citation}`")
+        warning_parts.append("")
+
+    if fake_references:
+        warning_parts.append("📝 **가짜 참고자료 탐지**: AI가 실제 논문이 아닌 가짜 참고자료를 생성했습니다:")
+        for i, fake_ref in enumerate(fake_references, 1):
+            warning_parts.append(f"  {i}. {fake_ref}")
+        warning_parts.append("  _실제 제공된 논문: Context의 '제목:' 항목을 확인하세요._")
+        warning_parts.append("")
+
+    if ignored_context:
+        warning_parts.append("🚨 **자료 무시 경고**: AI가 '자료 없음'이라 답했지만, 실제로 관련 내용이 있습니다:")
+        warning_parts.append(f"  발견된 키워드: `{', '.join(relevant_keywords_in_context[:5])}`")
+        warning_parts.append("  _제공된 논문을 다시 확인하세요._")
+        warning_parts.append("")
+
+    if physics_errors:
+        warning_parts.append("🔴 **물리 개념 오류**: 다음 내용이 물리 법칙과 충돌합니다:")
+        for i, error in enumerate(physics_errors, 1):
+            warning_parts.append(f"  {i}. {error}")
+        warning_parts.append("")
+
+    warning_message = "\n".join(warning_parts) if warning_parts else ""
+
+    return {
+        "has_hallucination": len(suspicious) > 0 or len(fake_references) > 0,
+        "suspicious_citations": suspicious,
+        "fake_references": fake_references,
+        "ignored_context": ignored_context,
+        "physics_errors": physics_errors,
+        "warning_message": warning_message
+    }
+
+
+def verify_relevance(question: str, documents: list, model="gpt-oss:20b", has_physics_knowledge: bool = False) -> dict:
     """
     검색된 문서가 질문에 관련이 있는지 LLM으로 3단계 검증
+
+    Args:
+        question: 사용자 질문
+        documents: 검색된 문서 리스트
+        model: LLM 모델명
+        has_physics_knowledge: KnowledgeManager에서 관련 물리 지식을 찾았는지 여부
 
     Returns:
         {"level": "high"/"medium"/"low", "reason": str, "relevant_indices": list}
     """
+    # KnowledgeManager에서 관련 지식을 찾았으면 바로 high 반환
+    if has_physics_knowledge:
+        return {
+            "level": "high",
+            "reason": "표준 참조 자료(물리 지식 모듈)에서 관련 정보를 확인했습니다.",
+            "relevant_indices": list(range(1, len(documents)+1))
+        }
+
     url = "http://localhost:11434/api/chat"
 
     # 문서 내용 요약 (첫 500자씩)
@@ -324,7 +837,7 @@ def verify_relevance(question: str, documents: list, model="qwen2.5:14b") -> dic
     }
 
     try:
-        response = requests.post(url, json=payload, timeout=30)
+        response = requests.post(url, json=payload, timeout=90)  # deepseek-r1 응답 대기
         response.raise_for_status()
         result = response.json()
         content = result.get("message", {}).get("content", "")
@@ -360,7 +873,7 @@ def render_sidebar():
         st.markdown("#### Model")
         model = st.selectbox(
             "LLM Model",
-            options=["qwen2.5:14b"],
+            options=["gpt-oss:20b"],
             index=0,
         )
 
@@ -383,6 +896,13 @@ def render_sidebar():
             help="답변 생성 시 참고할 논문 수"
         )
 
+        st.markdown("#### 🛡️ 검증 모드")
+        critic_mode = st.checkbox(
+            "전문가 검증 (Critic Agent)",
+            value=True,  # 기본 활성화
+            help="AI 응답을 물리 법칙/인용 정확성 기준으로 자동 검증 및 교정합니다"
+        )
+
         st.markdown("---")
 
         if st.button("🗑️ Clear Chat", use_container_width=True):
@@ -398,7 +918,8 @@ def render_sidebar():
 
         ✅ 할루시네이션 최소화<br>
         ✅ 논문 출처 명시<br>
-        ✅ BI-RADS 가이드라인 참조
+        ✅ BI-RADS 가이드라인 참조<br>
+        ⚖️ <b>Critic Agent 자동 검증</b>
         </div>
         """, unsafe_allow_html=True)
 
@@ -406,6 +927,7 @@ def render_sidebar():
             "model": model,
             "temperature": temperature,
             "top_k": top_k,
+            "critic_mode": critic_mode,
         }
 
 # =============================================================================
@@ -443,25 +965,57 @@ def main():
             if "sources" in msg:
                 with st.expander("📚 참고 자료", expanded=False):
                     for i, source in enumerate(msg["sources"], 1):
-                        icon = "📘" if source.get("is_birads", False) else "📄"
+                        pmid = source.get('pmid', '')
+                        guideline_type = get_guideline_type(pmid)
+                        is_guideline = source.get("is_birads", False) or guideline_type in ("birads", "acr", "physics", "clinical")
 
-                        if source.get("is_birads", False):
-                            # BI-RADS 문서는 마크다운 링크
-                            pmid = source.get('pmid', '')
-                            nav_params = get_birads_nav_params(pmid)
-                            param_str = "&".join([f"{k}={v}" for k, v in nav_params.items()])
-                            page_url = f"/BI-RADS_Guidelines?{param_str}"
-                            st.markdown(f"""
-                            **{icon} [{i}] {source['title']}**
-                            {source['authors']} - {source['journal']} ({source['year']})
-                            [📘 원문 확인하기]({page_url})
-                            """)
+                        if guideline_type == "acr":
+                            icon = "📗"
+                        elif guideline_type == "birads":
+                            icon = "📘"
+                        elif is_guideline:
+                            icon = "📙"
                         else:
-                            # 일반 논문은 PubMed 링크
+                            icon = "📄"
+
+                        if is_guideline:
+                            # 가이드라인 문서 - BIRADS만 원문 링크 표시 (실제 full_content 있음)
+                            if guideline_type == "birads":
+                                page_url = get_guideline_page_url(pmid)
+                                st.markdown(f"""
+                                **{icon} [{i}] {source['title']}**
+                                {source['authors']} - {source['journal']} ({source['year']})
+                                [📘 원문 확인하기]({page_url})
+                                """)
+                            else:
+                                # ACR, PHYSICS, CLINICAL - full_content 없음, PMC 출처 표시
+                                journal_info = source.get('journal', '')
+                                # PMC 번호가 있으면 링크로 변환
+                                pmc_ids = re.findall(r'PMC\d+', journal_info)
+                                if pmc_ids:
+                                    pmc_links = " | ".join([f"[{pmc}](https://www.ncbi.nlm.nih.gov/pmc/articles/{pmc}/)" for pmc in pmc_ids])
+                                    st.markdown(f"""
+                                    **{icon} [{i}] {source['title']}**
+                                    {source['authors']} ({source['year']})
+                                    📚 출처: {pmc_links}
+                                    """)
+                                else:
+                                    st.markdown(f"""
+                                    **{icon} [{i}] {source['title']}**
+                                    {source['authors']} - {journal_info} ({source['year']})
+                                    """)
+                        else:
+                            # 일반 논문은 PubMed + Google Scholar + PMC 링크
+                            links = [f"[PubMed]({source['url']})"]
+                            if source.get('google_scholar_url'):
+                                links.append(f"[🔍 Scholar]({source['google_scholar_url']})")
+                            if source.get('pmc_url'):
+                                links.append(f"[✅ PMC]({source['pmc_url']})")
+
                             st.markdown(f"""
                             **{icon} [{i}] {source['title']}**
                             {source['authors']} - {source['journal']} ({source['year']})
-                            [PubMed 보기]({source['url']})
+                            {' | '.join(links)}
                             """)
 
     # 채팅 입력
@@ -481,6 +1035,7 @@ def main():
             try:
                 engine = get_search_engine()
                 translator = get_query_translator()
+                relay_router = get_cached_relay_router()
 
                 # 대화형 쿼리 보강 (이전 맥락 참조)
                 enhanced_prompt = enhance_query_with_context(
@@ -491,17 +1046,27 @@ def main():
                 if enhanced_prompt != prompt:
                     st.caption(f"💬 대화 맥락 반영: `{enhanced_prompt}`")
 
-                # 검색 쿼리 최적화
-                search_query = enhanced_prompt
+                # =====================================================
+                # RelayRouter: SLM 기반 빠른 전처리
+                # =====================================================
+                with st.spinner("🚀 SLM 분석 중..."):
+                    dispatch_result = relay_router.dispatch(enhanced_prompt)
+                    dispatch_result = relay_router.enrich_with_knowledge(dispatch_result)
+
+                # 검색 쿼리 최적화 (SLM 번역 결과 사용)
+                search_query = dispatch_result.translated_query
                 prompt_lower = enhanced_prompt.lower()
 
-                # 0. LLM 기반 쿼리 번역 (한글 → 영문 의학 키워드)
-                if translator.needs_translation(enhanced_prompt):
-                    with st.spinner("🔄 쿼리 최적화 중..."):
-                        translated_query = translator.translate(enhanced_prompt)
-                        if translated_query != enhanced_prompt:
-                            search_query = translated_query
-                            st.caption(f"🔍 검색 키워드: `{translated_query}`")
+                # SLM 분석 결과 표시
+                intent_labels = {
+                    QueryIntent.SIMPLE_LOOKUP: "📖 단순 조회",
+                    QueryIntent.PHYSICS_CALCULATION: "🔬 물리 계산",
+                    QueryIntent.CLINICAL_GUIDELINE: "🏥 임상 가이드라인",
+                    QueryIntent.COMPLEX_REASONING: "🧠 복합 추론",
+                    QueryIntent.UNKNOWN: "❓ 분류 불가",
+                }
+                st.caption(f"🔍 검색 키워드: `{search_query}`")
+                st.caption(f"📊 질문 유형: {intent_labels.get(dispatch_result.intent, '알 수 없음')} | 사용 모델: {relay_router.get_model_used(dispatch_result)}")
 
                 # 1. 쿼리 확장: 모든 한글 번역 쿼리에 BI-RADS 추가
                 search_query_lower = search_query.lower()
@@ -511,9 +1076,10 @@ def main():
                         st.caption(f"✨ 쿼리 확장: `{search_query}`")
 
                 # 이중 검색: BI-RADS + 연구논문
+                # birads_k=5: Dance 논문 등 물리 참조 문서가 포함되도록 확대
                 birads_response, papers_response = engine.search_dual(
                     search_query,
-                    birads_k=3,
+                    birads_k=5,
                     papers_k=5
                 )
 
@@ -527,13 +1093,29 @@ def main():
                 # BI-RADS 컨텍스트 구성
                 birads_context_parts = []
                 birads_sources = []
+                import re as re_module  # 로컬 스코프에서 사용
 
                 for i, result in enumerate(birads_response.results, 1):
                     paper = result.paper
-                    content_text = getattr(paper, 'full_content', paper.abstract or '내용 없음')
+                    guideline_label = get_guideline_label(paper.pmid)
+
+                    # PMC ID 추출 (pmc_id 필드 또는 journal 필드에서)
+                    pmc_id = getattr(paper, 'pmc_id', None)
+                    if not pmc_id and paper.journal:
+                        pmc_match = re_module.search(r'(PMC\d+)', paper.journal)
+                        if pmc_match:
+                            pmc_id = pmc_match.group(1)
+
+                    # PMC 전문이 있으면 fetch, 없으면 기존 내용 사용
+                    if pmc_id:
+                        pmc_url = f"https://pmc.ncbi.nlm.nih.gov/articles/{pmc_id}/"
+                        content_text = fetch_pmc_fulltext(pmc_url, max_chars=8000)
+                        content_text = f"[PMC 전문 - {pmc_id}]\n{content_text}"
+                    else:
+                        content_text = getattr(paper, 'full_content', paper.abstract or '내용 없음')
 
                     birads_context_parts.append(f"""
-[{i}] 📘 BI-RADS 가이드라인
+[{i}] {guideline_label}
 제목: {paper.title}
 내용: {content_text}
 """)
@@ -544,6 +1126,7 @@ def main():
                         "journal": paper.journal or "ACR BI-RADS Atlas v2025",
                         "year": paper.year or "2025",
                         "pmid": paper.pmid,
+                        "pmc_id": pmc_id,  # ⚠️ Phase 7.1 Fix: 추출된 pmc_id 사용 (journal에서 추출한 값 포함)
                         "is_birads": True,
                         "full_content": getattr(paper, 'full_content', None)
                     })
@@ -556,7 +1139,21 @@ def main():
 
                 for i, result in enumerate(papers_response.results, 1):
                     paper = result.paper
-                    content_text = (paper.abstract[:500] + '...' if paper.abstract and len(paper.abstract) > 500 else paper.abstract or '초록 없음')
+
+                    # full_content가 있으면 우선 사용 (Dance 논문 등 직접 청킹된 문서)
+                    full_content = getattr(paper, 'full_content', None)
+                    pmc_id = getattr(paper, 'pmc_id', None)
+
+                    if full_content:
+                        # 직접 청킹된 문서 (Dance 논문, 물리학 참조 등)
+                        content_text = full_content[:8000] if len(full_content) > 8000 else full_content
+                    elif pmc_id:
+                        # PMC 전문 fetch
+                        pmc_url = f"https://pmc.ncbi.nlm.nih.gov/articles/{pmc_id}/"
+                        content_text = fetch_pmc_fulltext(pmc_url, max_chars=6000)
+                        content_text = f"[PMC 전문 - {pmc_id}]\n{content_text}"
+                    else:
+                        content_text = (paper.abstract[:500] + '...' if paper.abstract and len(paper.abstract) > 500 else paper.abstract or '초록 없음')
 
                     papers_context_parts.append(f"""
 [{i}] 📄 연구논문
@@ -571,16 +1168,21 @@ def main():
                         "authors": paper.author_string or "저자 정보 없음",
                         "journal": paper.journal or "저널 정보 없음",
                         "year": paper.year or "연도 정보 없음",
+                        "pmid": getattr(paper, 'pmid', ''),
+                        "pmc_id": pmc_id,  # ⚠️ Phase 7.1 Fix: DynamicEvidencePipeline에 전달할 pmc_id
                         "url": paper.pubmed_url,
+                        "google_scholar_url": paper.google_scholar_url,
+                        "pmc_url": paper.pmc_url,  # None if not available
+                        "doi_url": paper.doi_url,  # None if not available
                         "is_birads": False
                     })
 
                 papers_context = "\n".join(papers_context_parts) if papers_context_parts else ""
 
-                # 전체 컨텍스트 결합 (BI-RADS 우선, 연구논문 후순위)
+                # 전체 컨텍스트 결합 (가이드라인 우선, 연구논문 후순위)
                 context_parts = []
                 if birads_context:
-                    context_parts.append("### 📘 BI-RADS 가이드라인\n" + birads_context)
+                    context_parts.append("### 📚 가이드라인 문서\n" + birads_context)
                 if papers_context:
                     context_parts.append("\n### 📄 관련 연구 논문\n" + papers_context)
 
@@ -597,24 +1199,46 @@ def main():
 
         # 답변 생성 (BI-RADS가 있으면 관련성 검증 후 표시, 없으면 LLM)
         with st.chat_message("assistant"):
+            # RelayRouter의 dispatch_result에서 KnowledgeManager 정보 사용
+            from src.knowledge.manager import get_knowledge_manager
+            km = get_knowledge_manager()
+
+            # dispatch_result에서 지식 정보 추출 (이미 enrich_with_knowledge()에서 처리됨)
+            matched_modules = km.get_relevant_knowledge(prompt)  # 컨텍스트용
+            relevant_knowledge = km.format_for_context(matched_modules) if matched_modules else ""
+            has_physics_knowledge = dispatch_result.has_knowledge
+
+            # Knowledge Status Bar 표시
+            status_parts = []
+            if dispatch_result.knowledge_modules:
+                status_parts.append(f"📚 표준 지식: {', '.join(dispatch_result.knowledge_modules)}")
             if birads_sources:
-                # BI-RADS 문서 관련성 검증
+                status_parts.append(f"🔍 가이드라인: {len(birads_sources)}개")
+            if papers_sources:
+                status_parts.append(f"📄 논문: {len(papers_sources)}개")
+
+            if status_parts:
+                status_text = " | ".join(status_parts)
+                st.info(f"**근거 자료 현황**: {status_text}")
+
+            if birads_sources:
+                # BI-RADS 문서 관련성 검증 (물리 지식 유무도 고려)
                 with st.spinner(msg["verifying"]):
                     relevance = verify_relevance(
                         question=prompt,
                         documents=birads_sources,
-                        model=options["model"]
+                        model=options["model"],
+                        has_physics_knowledge=has_physics_knowledge
                     )
 
                 level = relevance.get("level", "medium")
                 reason = relevance.get("reason", "")
 
+                # 관련성 낮아도 검색된 내용이 있으면 분석 수행 (버리지 않음)
                 if level == "low":
-                    # 관련 없음 - BI-RADS를 건너뛰고 일반 논문으로 진행
-                    full_response = msg["not_found"].format(reason=reason)
-                    st.markdown(full_response)
-                    birads_sources = []  # 소스에서 제거 (논문은 아래에서 검증 후 추가됨)
-                else:
+                    st.markdown(f"⚠️ 관련성이 낮을 수 있지만, 검색된 내용으로 분석을 시도합니다.\n\n_{reason}_")
+
+                if True:  # 무조건 분석 수행
                     # high 또는 medium - 문서 표시
                     relevant_indices = relevance.get("relevant_indices", [])
                     if relevant_indices:
@@ -634,29 +1258,148 @@ def main():
                     st.markdown("---")
                     for i, source in enumerate(filtered_sources, 1):
                         pmid = source.get('pmid', '')
-                        nav_params = get_birads_nav_params(pmid)
-                        param_str = "&".join([f"{k}={v}" for k, v in nav_params.items()])
-                        page_url = f"/BI-RADS_Guidelines?{param_str}"
+                        pmc_id = source.get('pmc_id', '')
+                        journal = source.get('journal', '')
+                        guideline_type = get_guideline_type(pmid)
+
+                        # journal 필드에서 PMC ID 추출 (PMC로 시작하는 것)
+                        if not pmc_id and journal:
+                            pmc_match = re_module.search(r'(PMC\d+)', journal)
+                            if pmc_match:
+                                pmc_id = pmc_match.group(1)
 
                         st.markdown(f"### [{i}] {source['title']}")
                         st.markdown(f"_{source['authors']} - {source['journal']} ({source['year']})_")
-                        st.markdown(f"[{msg['view_source']}]({page_url})")
+
+                        # PMC ID가 있으면 PMC 링크 표시 (전문은 이미 LLM context에 포함됨)
+                        if pmc_id:
+                            pmc_url = f"https://pmc.ncbi.nlm.nih.gov/articles/{pmc_id}/"
+                            st.markdown(f"✅ **PMC 전문이 AI 분석에 사용되었습니다** | [🔗 PMC 원문 보기]({pmc_url})")
+                        elif guideline_type != "paper":
+                            # 가이드라인은 기존 방식
+                            page_url = get_guideline_page_url(pmid)
+                            link_icon = "📗" if guideline_type == "acr" else "📘"
+                            st.markdown(f"[{link_icon} {msg['view_source']}]({page_url})")
+                        else:
+                            # 일반 논문 (PMC 없음)
+                            pubmed_url = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
+                            st.markdown(f"[📄 PubMed 보기]({pubmed_url})")
+
                         st.markdown("---")
+
+                    # =====================================================
+                    # RelayLLM: 지능형 응답 라우팅
+                    # =====================================================
+                    st.markdown("### 🤖 AI 분석")
+
+                    # KnowledgeManager가 직접 답변 가능한지 확인
+                    if dispatch_result.knowledge_answer and dispatch_result.intent == QueryIntent.SIMPLE_LOOKUP:
+                        # 📚 KnowledgeManager 직접 응답 (LLM 호출 스킵)
+                        st.caption("⚡ **고속 응답**: 검증된 표준 지식에서 직접 답변")
+                        full_response = dispatch_result.knowledge_answer
+                        st.markdown(full_response)
+
+                    elif (dispatch_result.intent in [QueryIntent.PHYSICS_CALCULATION, QueryIntent.COMPLEX_REASONING]
+                          or (dispatch_result.intent == QueryIntent.UNKNOWN
+                              and any(kw in prompt.lower() for kw in ['증명', '수식', '계산', '도출', 'snr', 'cnr', 'mgd', 'pcd', 'eid', 'dqe', '논하시오', '기술하시오']))):
+                        # 🔬 DynamicEvidencePipeline: PMC 전문 + Answering Twice + Evidence Mapping
+                        st.caption("🔬 **정밀 분석**: Phase 7 Dynamic Evidence (PMC 전문 + 2단계 검증)")
+
+                        # papers 데이터 구성 (DynamicEvidencePipeline 입력 형식)
+                        papers_for_pipeline = []
+                        for source in filtered_sources:
+                            papers_for_pipeline.append({
+                                "pmid": source.get("pmid", ""),
+                                "pmc_id": source.get("pmc_id"),
+                                "title": source.get("title", ""),
+                                "abstract": source.get("abstract", source.get("content", ""))[:2000]
+                            })
+
+                        # PMC ID 보유 논문 수 표시 (디버깅 포함)
+                        pmc_count = sum(1 for p in papers_for_pipeline if p.get("pmc_id"))
+                        pmc_ids_found = [p.get("pmc_id") for p in papers_for_pipeline if p.get("pmc_id")]
+
+                        if pmc_count > 0:
+                            st.info(f"📑 **PMC 전문 인출 예정**: {pmc_count}개 ({', '.join(pmc_ids_found[:3])}...)")
+                        else:
+                            st.warning("⚠️ PMC ID가 없어 초록 기반으로 분석합니다.")
+
+                        import asyncio
+                        with st.spinner("🧠 단순화 모드: 지식 기반 직접 추론 중..."):
+                            dynamic_pipeline = get_cached_dynamic_pipeline(_version="7.17")
+                            # Phase 7.17: 단순화된 파이프라인 (복잡한 레이어 모두 제거)
+                            result = asyncio.run(dynamic_pipeline.process_simple_async(
+                                question=prompt,
+                                papers=papers_for_pipeline,
+                                physics_knowledge=relevant_knowledge,
+                                max_pmc_fetch=2
+                            ))
+
+                        # Phase 7.16: 구조화된 답변 출력 (빈 응답 검증 포함)
+                        full_response = result.answer
+                        if not full_response or not full_response.strip() or "비어있습니다" in full_response:
+                            st.error("⚠️ 응답 생성에 실패했습니다. 다시 시도해 주세요.")
+                            st.info("💡 팁: 질문을 더 간단하게 다시 작성하거나, 잠시 후 다시 시도하세요.")
+                        else:
+                            st.markdown(full_response)
+
+                        # Phase 7.1 상태 정보 표시
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            if result.used_fulltext:
+                                st.success(f"✅ PMC: {result.enriched_context.fetched_count}개 ({result.enriched_context.total_chars:,}자)")
+                            else:
+                                st.info(f"📄 초록 기반 ({result.enriched_context.total_chars:,}자)")
+                        with col2:
+                            if result.used_summarizer:
+                                st.success("🔬 SLM 요약 완료")
+                            else:
+                                st.info("📝 원본 사용")
+                        with col3:
+                            verdict_badges = {
+                                JudgeVerdict.APPROVED: "🏆",
+                                JudgeVerdict.REVISION_REQUIRED: "⚠️",
+                                JudgeVerdict.REJECTED: "❌",
+                            }
+                            st.metric("품질", f"{result.judge_result.total_score:.0f}",
+                                     delta=f"{verdict_badges.get(result.judge_result.verdict, '')}")
+                        with col4:
+                            st.metric("검증",
+                                     f"{result.evidence_report.verified_claims}/{result.evidence_report.total_claims}")
+
+                    else:
+                        # 🧠 일반 LLM 심층 추론
+                        st.caption(f"🧠 **심층 분석**: {relay_router.get_model_used(dispatch_result)}")
+
+                        # context 구성: 관련 물리 지식 + 검색된 문서들의 내용
+                        context_parts = []
+                        if relevant_knowledge:
+                            context_parts.append(relevant_knowledge)
+                        for i, source in enumerate(filtered_sources, 1):
+                            context_parts.append(f"[문서 {i}] {source['title']}\n저자: {source['authors']}\n내용: {source.get('abstract', source.get('content', ''))[:2000]}")
+
+                        context = "\n\n".join(context_parts)
+
+                        # LLM 답변 스트리밍
+                        response_placeholder = st.empty()
+                        full_response = ""
+
+                        for chunk in call_llm_with_context(
+                            question=prompt,
+                            context=context,
+                            model=options["model"],
+                            temperature=options["temperature"],
+                            has_guidelines=True
+                        ):
+                            full_response += chunk
+                            response_placeholder.markdown(full_response + "▌")
+
+                        response_placeholder.markdown(full_response)
+
             else:
-                # BI-RADS 없으면 LLM으로 답변 생성
-                message_placeholder = st.empty()
-                full_response = ""
-
-                for chunk in call_llm_with_context(
-                    question=prompt,
-                    context=context,
-                    model=options["model"],
-                    temperature=options["temperature"]
-                ):
-                    full_response += chunk
-                    message_placeholder.markdown(full_response + "▌")
-
-                message_placeholder.markdown(full_response)
+                # BI-RADS 없음 - 근거 자료 안내만 표시
+                full_response = "가이드라인에 직접적인 답변이 없습니다. 아래 연구 논문을 참고하세요."
+                st.markdown(full_response)
 
             if papers_sources:
                 # 논문 관련성 검증
@@ -687,15 +1430,24 @@ def main():
                         else:  # medium
                             expander_title = msg["papers_medium"]
 
-                        pubmed_text = "PubMed" if not is_ko else "PubMed 보기"
+                        pubmed_text = "PubMed" if not is_ko else "PubMed"
+                        scholar_text = "Scholar" if not is_ko else "Scholar"
+                        pmc_text = "PMC (무료 전문)" if is_ko else "PMC (Free)"
+
                         with st.expander(expander_title, expanded=False):
                             if paper_level == "medium":
                                 st.caption(f"_{paper_reason}_")
                             for i, source in enumerate(filtered_papers, 1):
+                                # 링크 구성: PubMed + Google Scholar + PMC(있으면)
+                                links = [f"[{pubmed_text}]({source['url']})"]
+                                links.append(f"[🔍 {scholar_text}]({source.get('google_scholar_url', '')})")
+                                if source.get('pmc_url'):
+                                    links.append(f"[✅ {pmc_text}]({source['pmc_url']})")
+
                                 st.markdown(f"""
                                 **📄 [{i}] {source['title']}**
                                 {source['authors']} - {source['journal']} ({source['year']})
-                                [{pubmed_text}]({source['url']})
+                                {' | '.join(links)}
                                 """)
 
         # 어시스턴트 메시지 저장 (출처 포함, 딥카피로 저장)

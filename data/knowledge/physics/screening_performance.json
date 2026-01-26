@@ -1,0 +1,151 @@
+{
+  "id": "screening_performance",
+  "category": "Mammography Screening Performance",
+  "keywords": [
+    "screening", "선별검사", "선별",
+    "sensitivity", "민감도", "specificity", "특이도",
+    "cancer detection rate", "암 검출률", "CDR",
+    "recall rate", "재소환율", "false positive",
+    "interval cancer", "중간암", "간격암",
+    "PPV", "positive predictive value", "양성예측도",
+    "screening mammography", "선별 맘모그래피"
+  ],
+  "sources": [
+    {
+      "id": "lehman1999",
+      "citation": "Lehman CD, White E, Peacock S, Drucker MJ, Urban N. Effect of age and breast density on screening mammograms with false-positive findings. AJR Am J Roentgenol. 1999;173(6):1651-1655",
+      "pmid": "10584815",
+      "doi": "10.2214/ajr.173.6.10584815",
+      "type": "Age and Density Impact Study"
+    },
+    {
+      "id": "kerlikowske1996",
+      "citation": "Kerlikowske K, Grady D, Barclay J, Sickles EA, Ernster V. Likelihood ratios for modern screening mammography. Risk of breast cancer based on age and mammographic interpretation. JAMA. 1996;276(1):39-43",
+      "pmid": "8667537",
+      "doi": "10.1001/jama.1996.03540010041028",
+      "type": "Age-Based Performance Study"
+    },
+    {
+      "id": "carney2003",
+      "citation": "Carney PA, Miglioretti DL, Yankaskas BC, et al. Individual and combined effects of age, breast density, and hormone replacement therapy use on the accuracy of screening mammography. Ann Intern Med. 2003;138(3):168-175",
+      "pmid": "12558355",
+      "doi": "10.7326/0003-4819-138-3-200302040-00008",
+      "type": "Combined Effects Study"
+    },
+    {
+      "id": "hofvind2012",
+      "citation": "Hofvind S, Vacek PM, Skelly J, Weaver DL, Geller BM. Comparing screening mammography for early breast cancer detection in Vermont and Norway. J Natl Cancer Inst. 2008;100(15):1082-1091",
+      "pmid": "18664650",
+      "pmc": "PMC2518165",
+      "doi": "10.1093/jnci/djn224",
+      "type": "International Comparison"
+    },
+    {
+      "id": "pisano2005",
+      "citation": "Pisano ED, Gatsonis C, Hendrick E, et al. Diagnostic performance of digital versus film mammography for breast-cancer screening. N Engl J Med. 2005;353(17):1773-1783",
+      "pmid": "16169887",
+      "doi": "10.1056/NEJMoa052911",
+      "type": "DMIST Trial - Digital vs Film"
+    },
+    {
+      "id": "weedon2019",
+      "citation": "Weedon-Fekjaer H, Romundstad PR, Vatten LJ. Modern mammography screening and breast cancer mortality: population study. BMJ. 2014;348:g3701",
+      "pmid": "24951459",
+      "pmc": "PMC4060639",
+      "doi": "10.1136/bmj.g3701",
+      "type": "Mortality Benefit Study"
+    },
+    {
+      "id": "sprague2021",
+      "citation": "Sprague BL, et al. Redefining the Sensitivity of Screening Mammography: a Review. Acad Radiol. 2019;26(8):1106-1113",
+      "pmid": "30871892",
+      "pmc": "PMC6640096",
+      "doi": "10.1016/j.acra.2019.01.026",
+      "type": "Sensitivity Definition Review"
+    }
+  ],
+  "content": {
+    "performance_metrics": {
+      "source_ref": "carney2003, hofvind2012",
+      "sensitivity": {
+        "definition": "유방암이 있는 여성 중 맘모그래피에서 양성으로 판정되는 비율",
+        "overall_range_percent": "77-95",
+        "factors_affecting": ["연령", "유방 밀도", "암의 크기와 유형", "영상 품질"]
+      },
+      "specificity": {
+        "definition": "유방암이 없는 여성 중 맘모그래피에서 음성으로 판정되는 비율",
+        "overall_range_percent": "90-98",
+        "note": "미국이 유럽 대비 낮은 특이도 (더 높은 재소환율)"
+      },
+      "ppv": {
+        "definition": "양성 판정 중 실제 암인 비율",
+        "ppv1_recall_percent": "3-8",
+        "ppv2_biopsy_percent": "20-40"
+      }
+    },
+    "age_based_performance": {
+      "source_ref": "kerlikowske1996",
+      "sensitivity_by_age": {
+        "30_39_years_percent": 77.3,
+        "40_49_years_percent": 86.7,
+        "50_59_years_percent": 93.6,
+        "60_69_years_percent": 94.1,
+        "70_plus_years_percent": 91.2
+      },
+      "explanation": "젊은 여성에서 낮은 민감도는 치밀유방과 빠른 종양 성장 속도로 인함"
+    },
+    "density_impact": {
+      "source_ref": "carney2003, lehman1999",
+      "sensitivity_by_density": {
+        "fatty_birads_a": "80-98%",
+        "scattered_birads_b": "75-95%",
+        "heterogeneous_birads_c": "60-85%",
+        "extremely_dense_birads_d": "40-65%"
+      },
+      "masking_effect": "치밀유방에서 암이 정상 조직에 가려져 검출 어려움"
+    },
+    "digital_vs_film": {
+      "source_ref": "pisano2005",
+      "dmist_trial": {
+        "finding": "디지털 맘모그래피가 50세 미만, 치밀유방, 폐경 전/주변 여성에서 유의하게 우수",
+        "auc_digital": 0.78,
+        "auc_film": 0.74,
+        "subgroup_benefit": "젊은 여성과 치밀유방에서 디지털이 필름 대비 민감도 향상"
+      }
+    },
+    "interval_cancer": {
+      "source_ref": "hofvind2012, sprague2021",
+      "definition": "선별검사 음성 후 다음 검사 전에 발견되는 암",
+      "rate_per_1000": "0.7-1.2",
+      "causes": [
+        "빠른 종양 성장 (true interval)",
+        "치밀유방에 의한 masking",
+        "판독 오류 (missed cancer)",
+        "기술적 문제"
+      ],
+      "program_sensitivity": "중간암 발생률은 프로그램 민감도의 역지표"
+    },
+    "international_comparison": {
+      "source_ref": "hofvind2012",
+      "us_vs_europe": {
+        "recall_rate_us_percent": "9-12",
+        "recall_rate_europe_percent": "3-5",
+        "sensitivity_comparison": "높은 재소환율이 반드시 높은 민감도를 의미하지 않음",
+        "finding": "노르웨이가 버몬트보다 낮은 재소환율에도 유사한 민감도 달성"
+      }
+    },
+    "mortality_benefit": {
+      "source_ref": "weedon2019",
+      "finding": "선별 맘모그래피로 인한 유방암 사망률 감소",
+      "reduction_percent": "20-30 (연령 그룹에 따라 다름)",
+      "controversy": "과진단(overdiagnosis) 우려와 함께 지속적 논쟁"
+    }
+  },
+  "clinical_relevance": {
+    "screening_guidelines": "연령, 위험도, 유방 밀도에 따라 맞춤형 선별 전략 필요",
+    "dense_breast_supplementation": "치밀유방 여성에서 보조 영상(초음파, MRI, CEM) 고려",
+    "quality_improvement": "프로그램 성능 지표 모니터링으로 지속적 품질 향상",
+    "patient_communication": "민감도 한계와 중간암 가능성에 대한 환자 교육 필요",
+    "source_ref": "carney2003, pisano2005, hofvind2012"
+  }
+}

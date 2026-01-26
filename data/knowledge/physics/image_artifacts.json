@@ -1,0 +1,153 @@
+{
+  "id": "image_artifacts",
+  "category": "Digital Mammography Image Artifacts",
+  "keywords": [
+    "artifact", "아티팩트", "artifacts",
+    "ghosting", "고스팅", "잔상",
+    "dead pixel", "불량 픽셀", "defective pixel",
+    "lag", "image lag", "잔류 신호",
+    "motion artifact", "움직임 아티팩트",
+    "grid artifact", "그리드 아티팩트",
+    "underexposure", "저노출"
+  ],
+  "sources": [
+    {
+      "id": "sickles2014",
+      "citation": "Sickles EA, et al. Mammographic Artifacts on Full-Field Digital Mammography. J Clin Med. 2014;3(1):51-62",
+      "pmc": "PMC3948935",
+      "doi": "10.3390/jcm3010051",
+      "type": "Artifact Classification Study"
+    },
+    {
+      "id": "geiser2008",
+      "citation": "Geiser WR, et al. Digital mammographic artifacts on full-field systems: what are they and how do I fix them? Radiographics. 2008;28(7):1999-2008",
+      "pmid": "19001654",
+      "doi": "10.1148/rg.287085053",
+      "type": "Technical Review"
+    },
+    {
+      "id": "zhao2006",
+      "citation": "Zhao W, et al. Lag and ghosting in a clinical flat-panel selenium digital mammography system. Med Phys. 2006;33(11):4236-4244",
+      "pmid": "16964878",
+      "doi": "10.1118/1.2358833",
+      "type": "Lag/Ghosting Study"
+    },
+    {
+      "id": "seibert2011",
+      "citation": "Seibert JA, et al. Artifacts Found During Quality Assurance Testing of Computed Radiography and Digital Radiography Detectors. J Am Coll Radiol. 2011;8(2):91-98",
+      "pmc": "PMC3043706",
+      "doi": "10.1016/j.jacr.2010.08.003",
+      "type": "QA Artifact Study"
+    }
+  ],
+  "content": {
+    "artifact_classification": {
+      "source_ref": "sickles2014, geiser2008",
+      "categories": ["환자 관련", "하드웨어 관련", "소프트웨어 처리 관련"]
+    },
+    "incidence_study": {
+      "source_ref": "sickles2014",
+      "total_images_reviewed": 8582,
+      "direct_FFDM_images": 4440,
+      "indirect_FFDM_images": 4142,
+      "overall_artifact_incidence": "3.4% (292/8582)",
+      "direct_vs_indirect": "직접 변환 검출기 4.2% vs 간접 변환 검출기 2.6%"
+    },
+    "patient_related_artifacts": {
+      "source_ref": "sickles2014",
+      "incidence": "1.7%",
+      "types": {
+        "motion_artifact": {
+          "incidence": "0.4%",
+          "description": "긴 노출 시간 동안 환자 움직임으로 인한 영상 흐림",
+          "solution": "환자/기사 교육 개선, 포지셔닝 및 압박 기법 향상"
+        },
+        "skin_line_artifact": {
+          "incidence": "1.3%",
+          "description": "피부 주름에서 발생하는 선형 투명선, FFDM의 우수한 동적 범위로 더 두드러짐",
+          "solution": "포지셔닝 개선"
+        },
+        "hair_artifact": {
+          "incidence": "0.02%"
+        },
+        "antiperspirant_artifact": {
+          "description": "발한억제제의 금속 성분으로 인한 아티팩트",
+          "incidence": "최소"
+        }
+      }
+    },
+    "hardware_related_artifacts": {
+      "source_ref": "sickles2014, geiser2008",
+      "incidence": "0.7%",
+      "types": {
+        "underexposure": {
+          "incidence": "0.7%",
+          "appearance": "밝은 영역에 어두운 반점이 나타나는 'salt-and-pepper effect'",
+          "cause": "조기 노출 종료 또는 부적절한 photocell 위치",
+          "solution": "노출 파라미터 적절히 조정"
+        },
+        "dead_pixels": {
+          "source_ref": "geiser2008, seibert2011",
+          "description": "단일 불량 픽셀, 불량 픽셀 그룹, 불량 라인",
+          "clinical_concern": "석회화로 오인될 수 있음",
+          "note": "개별 불량 라인은 일반적으로 검출기 교체 사유가 되지 않음"
+        },
+        "collimator_misalignment": {
+          "incidence": "0.02%"
+        },
+        "grid_artifacts": {
+          "description": "그리드 선 가시화, moire 패턴",
+          "solution": "이동 그리드 사용, 그리드-검출기 호환성 확인"
+        }
+      }
+    },
+    "software_processing_artifacts": {
+      "source_ref": "sickles2014",
+      "incidence": "0.8%",
+      "types": {
+        "high_density_artifact": {
+          "incidence": "0.5%",
+          "cause": "spot compression paddle가 영상 알고리즘에 미치는 영향"
+        },
+        "loss_of_edge": {
+          "incidence": "0.2%",
+          "note": "직접 검출기에서만 발견됨"
+        },
+        "breast_within_breast": {
+          "incidence": "0.02%"
+        },
+        "processing_lines": {
+          "incidence": "0.03%"
+        }
+      }
+    },
+    "lag_and_ghosting": {
+      "source_ref": "zhao2006",
+      "definitions": {
+        "lag": "이전 영상에서 현재 영상으로의 신호 캐리오버",
+        "ghosting": "검출기의 이전 노출 이력으로 인한 감도 저하"
+      },
+      "study_details": {
+        "systems_studied": "6대의 셀레늄 유닛",
+        "detector_type": "flat panel selenium"
+      },
+      "selenium_specific": {
+        "description": "셀레늄 기반 디지털 맘모그래피 검출기에서 ghosting 아티팩트와 lag 효과 보고됨",
+        "crystallization_blooming": "영상 모서리 흐림과 검은 후광 내 흰 점으로 나타남"
+      }
+    },
+    "ghosting_management": {
+      "source_ref": "seibert2011",
+      "residual_image": "높은 방사선 노출로 인해 잔상 남음",
+      "flat_fielding_effect": "flat fielding이 일시적으로 잔상 제거하나, 검출기 영향이 사라지면서 역상 나타날 수 있음",
+      "solution": "새 캘리브레이션 및 재촬영"
+    }
+  },
+  "clinical_relevance": {
+    "diagnostic_impact": "아티팩트가 병변 검출 방해 또는 위양성 유발 가능",
+    "dead_pixel_concern": "불량 픽셀이 미세석회화로 오인될 수 있음",
+    "QC_importance": "정기적 품질관리로 검출기 아티팩트 조기 발견",
+    "vendor_specificity": "아티팩트는 검출기 기술(직접/간접 변환)과 제조사에 따라 다름",
+    "source_ref": "sickles2014, geiser2008"
+  }
+}

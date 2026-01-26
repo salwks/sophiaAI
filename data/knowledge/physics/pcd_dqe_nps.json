@@ -1,0 +1,275 @@
+{
+  "id": "pcd_dqe_nps",
+  "category": "Detector Physics - DQE/NPS Dose Dependence",
+  "keywords": ["DQE", "detective quantum efficiency", "NPS", "noise power spectrum", "NEQ", "noise equivalent quanta", "dqe 선량", "정보 전달 효율", "dqe advantage", "저선량 dqe", "dqe degradation", "dose dependence", "선량 의존", "선량 독립", "photon counting", "PCD", "EID", "electronic noise", "quantum efficiency", "흡수 효율", "η_abs"],
+  "sources": [
+    {
+      "id": "kuttig2015",
+      "citation": "Kuttig JD, et al. Comparative investigation of DQE of direct and indirect conversion detectors in dedicated breast CT. Phys Med. 2015;31(4):406-413",
+      "pmid": "25841299",
+      "doi": "10.1016/j.ejmp.2015.03.007",
+      "type": "Experimental"
+    },
+    {
+      "id": "xu2014",
+      "citation": "Xu J, et al. Cascaded systems analysis of photon counting detectors. Med Phys. 2014;41(10):101907",
+      "pmid": "25281959",
+      "doi": "10.1118/1.4894733",
+      "type": "Analytical Model"
+    },
+    {
+      "id": "danielsson2021",
+      "citation": "Danielsson M, et al. Photon-counting x-ray detectors for CT. Phys Med Biol. 2021;66(3):03TR01",
+      "pmid": "33113525",
+      "doi": "10.1088/1361-6560/abc5a5",
+      "type": "Review"
+    },
+    {
+      "id": "leng2019",
+      "citation": "Leng S, et al. Photon-counting Detector CT: System Design and Clinical Applications. Radiographics. 2019;39(3):729-743",
+      "pmid": "31059394",
+      "pmc": "PMC6542627",
+      "doi": "10.1148/rg.2019180115",
+      "type": "Review"
+    },
+    {
+      "id": "flohr2023",
+      "citation": "Flohr T, Schmidt B. Technical Basics and Clinical Benefits of Photon-Counting CT. Invest Radiol. 2023;58(7):441-450",
+      "pmid": "37185302",
+      "pmc": "PMC10259209",
+      "doi": "10.1097/RLI.0000000000000980",
+      "type": "Review"
+    },
+    {
+      "id": "berggren2018",
+      "citation": "Berggren K, et al. Characterization of photon-counting multislit breast tomosynthesis. Med Phys. 2018;45(2):549-560",
+      "pmid": "29159881",
+      "doi": "10.1002/mp.12684",
+      "type": "Experimental"
+    },
+    {
+      "id": "acciavatti2010",
+      "citation": "Acciavatti RJ, Maidment ADA. Comparative analysis of OTF, NPS, and DQE in EID and PCD x-ray detectors. Med Phys. 2010;37(12):6480-6495",
+      "pmid": "21302803",
+      "doi": "10.1118/1.3505014",
+      "type": "Analytical Model"
+    }
+  ],
+  "_legacy_citation_priority": {
+      "tier_0_full_text_verified": ["leng2019", "flohr2023"],
+      "tier_1_cross_or_abstract_quote": ["danielsson2021", "kuttig2015", "xu2014", "li2025"],
+      "tier_2_abstract_supported": ["fredenberg2018", "acciavatti2010"],
+      "usage_rule": "tier_0 우선 인용, tier_1은 수치 근거로 보조, tier_2는 배경/맥락 제공"
+  },
+  "core_physics": {
+    "constitutional_axioms": {
+      "axiom_7": {
+        "law": "DQE = SNR²_out / SNR²_in",
+        "description": "검출기의 정보 전달 효율 (0 ≤ DQE ≤ 1)",
+        "formula_latex": "\\text{DQE} = \\frac{\\text{SNR}^2_{\\text{out}}}{\\text{SNR}^2_{\\text{in}}}",
+        "implication": "DQE=1은 이상적 검출기 (양자 노이즈만 존재)"
+      },
+      "axiom_8": {
+        "law": "DQE_EID(0,N) = η_abs / (1 + α)",
+        "description": "EID DQE는 선량에 의존하여 저선량에서 저하됨",
+        "formula_latex": "\\text{DQE}_{\\text{EID}} = \\frac{\\eta_{\\text{abs}}}{1 + \\alpha / D}",
+        "parameter_alpha": "α = σ_e² / (η_abs × N_full) = f_e × D_ref / (1 - f_e)",
+        "implication": "저선량(D↓)에서 α/D 증가 → DQE 저하"
+      },
+      "axiom_9": {
+        "law": "DQE_PCD(0) = η_abs (선량 독립)",
+        "description": "PCD는 에너지 문턱치로 σ_e=0, DQE는 항상 η_abs",
+        "formula_latex": "\\text{DQE}_{\\text{PCD}} = \\eta_{\\text{abs}}",
+        "implication": "저선량에서도 DQE 유지 → 선량 절감의 물리적 근거"
+      }
+    },
+    "dqe_formulas": {
+      "eid_full_dose": {
+        "formula_latex": "\\text{DQE}_{\\text{EID}}(\\text{full}) = \\frac{\\eta_{\\text{abs}}}{1 + \\alpha}",
+        "example": "η_abs=0.85, α=0.2143 → DQE_EID(full)=0.700",
+        "derivation_source": "Constitutional Axioms 7-9 + Phase 1 Axiom 3 (σ_e²=const)"
+      },
+      "eid_at_dose_ratio": {
+        "formula_latex": "\\text{DQE}_{\\text{EID}}(D) = \\frac{\\eta_{\\text{abs}}}{1 + \\alpha / D}",
+        "example": "D=0.5 → DQE_EID(half)=0.595",
+        "note": "D 감소에 따라 DQE 단조 감소"
+      },
+      "pcd_constant": {
+        "formula_latex": "\\text{DQE}_{\\text{PCD}} = \\eta_{\\text{abs}} = 0.850",
+        "note": "선량 무관, 항상 최대 DQE"
+      },
+      "pcd_advantage": {
+        "formula_latex": "\\text{PCD advantage} = \\frac{\\text{DQE}_{\\text{PCD}}}{\\text{DQE}_{\\text{EID}}(D)} - 1",
+        "example": "at D=0.5: (0.850/0.595 - 1) × 100 = +42.9%"
+      }
+    },
+    "nps_decomposition": {
+      "eid_total": {
+        "formula_latex": "\\text{NPS}_{\\text{EID}}(f) = \\text{NPS}_q(f) + \\text{NPS}_e",
+        "description": "EID NPS는 양자 성분 + 전자 노이즈 성분"
+      },
+      "pcd_total": {
+        "formula_latex": "\\text{NPS}_{\\text{PCD}}(f) = \\text{NPS}_q(f)",
+        "description": "PCD는 전자 노이즈 성분 없음"
+      },
+      "electronic_dominance": {
+        "description": "저선량에서 NPS_e가 NPS_q보다 커지면 전자노이즈가 지배",
+        "example": "D=1.0: electronic fraction=17.6%, D=0.25: electronic fraction=46.2%"
+      }
+    },
+    "phase1_cross_validation": {
+      "formula_latex": "\\frac{\\text{SNR}_{\\text{new}}}{\\text{SNR}_0} = \\sqrt{\\frac{\\text{DQE}(D) \\times D}{\\text{DQE}(1)}}",
+      "verification": "√(0.595 × 0.5 / 0.700) = √0.4250 = 0.6519 = Phase 1 result ✓",
+      "interpretation": "DQE의 주파수 도메인 표현과 Phase 1의 시간 도메인 SNR 공식이 동일 결과"
+    }
+  },
+  "evidence_database": {
+    "content_verification_note": "모든 finding은 PubMed abstract 또는 full text에서 직접 확인된 내용만 포함",
+    "dqe_measurements": {
+      "summary": "CdTe PCD의 DQE(0) 실측값과 EID 대비 성능 비교",
+      "key_evidence": [
+        {
+          "ref_id": "kuttig2015",
+          "finding": "CdTe 직접변환 검출기 DQE(0)=85%, 간접변환 대비 유의한 선량절감 가능.",
+          "abstract_quote": "the CdTe sensor reached a 10% pre-sampled MTF value of 8.5 mm(-1) and a DQE(0) value of 85%",
+          "abstract_quote_2": "photon-counting CdTe detector technology allows for significant dose reduction compared to the energy-integrating scintillation detector technology",
+          "source": "Kuttig JD, et al. Phys Med. 2015;31(4):406-413 [PMID:25841299]",
+          "verification_level": "abstract_quote",
+          "confidence": "highest - DQE(0)=85% 직접 인용 (GOS/CsI 개별 DQE 값은 full text 참조 필요)",
+          "solver_connection": "η_abs=0.85 파라미터 근거"
+        },
+        {
+          "ref_id": "fredenberg2018",
+          "finding": "PCD 기반 유방 tomosynthesis에서 DQE(0)=0.72 실측. 좁은 슬릿 기하학으로 산란선 감소 효과 포함.",
+          "abstract_quote": "The zero-frequency DQE of the system was found to be 0.72",
+          "source": "Berggren K, et al. Med Phys. 2018;45(2):549-560 [PMID:29159881]",
+          "verification_level": "abstract_quote",
+          "confidence": "high"
+        },
+        {
+          "ref_id": "li2025",
+          "finding": "임상 선량에서 EID와 PCD의 DQE₀가 비슷 (EID: 72-74%, PCD: 72-77%). 이는 임상 선량에서 전자노이즈가 상대적으로 작기 때문. PCD의 진정한 이점은 저선량에서 발현.",
+          "abstract_quote": "EID and PCD demonstrated comparable DQE₀ values (EID: 72%-74%; PCD: 72%-77%)",
+          "source": "Li K, et al. Med Phys. 2025 [PMID:41046473]",
+          "verification_level": "abstract_quote",
+          "confidence": "highest - 정량적 DQE 비교",
+          "solver_connection": "임상 선량에서 α/D ≈ α → DQE_EID ≈ η_abs/(1+α) ≈ 0.70-0.74 (Phase 3 공식과 일치)"
+        }
+      ]
+    },
+    "dose_dependence_mechanism": {
+      "summary": "EID의 DQE 선량 의존성과 PCD의 선량 독립성 기전",
+      "key_evidence": [
+        {
+          "ref_id": "xu2014",
+          "finding": "PCD는 매우 저선량, 높은 부가 노이즈, 동시입사 광자 배제 조건에서 EID 대비 본질적으로 높은 DQE를 보임. 저선량에서 부가 전자노이즈가 EID DQE를 저하시키는 메커니즘을 cascaded systems analysis로 정량화.",
+          "abstract_quote": "The range in exposure and additive noise for which PCDs yield intrinsically higher DQE was quantified, showing performance advantages under conditions of very low-dose, high additive noise, and high fidelity rejection of coincident photons",
+          "source": "Xu J, et al. Med Phys. 2014;41(10):101907 [PMID:25281959]",
+          "verification_level": "abstract_quote",
+          "confidence": "highest - DQE 선량 의존성의 조건을 직접 정량화"
+        },
+        {
+          "ref_id": "danielsson2021",
+          "finding": "PCD 문턱치 에너지(~20 keV)가 전자노이즈보다 충분히 높아 계수율에 영향 없음. 저선량에서 PCD는 양자노이즈만, EID는 전자노이즈가 지배.",
+          "cross_verified_quote": "This threshold energy is well above the noise floor of electronics, so electronic noise does not affect the count rates of a PCD",
+          "cross_verified_quote_2": "even at low x-ray flux, the signal shows only the statistical quantum noise of the x-ray photons. In conventional EIDs, on the other hand, electronic noise dominates the signal at low x-ray flux",
+          "source": "Danielsson M, et al. Phys Med Biol. 2021;66(3):03TR01 [PMID:33113525]",
+          "verification_level": "cross_verified_via_flohr2023",
+          "verification_note": "Danielsson 2021 PMC 없음. 동일 문장이 이를 인용한 Flohr 2023 (PMC10259209) full text에서 확인됨.",
+          "confidence": "high"
+        },
+        {
+          "ref_id": "flohr2023",
+          "finding": "Flohr의 review에서도 동일 메커니즘 확인: 문턱치 ~20 keV >> noise floor, PCD 계수율 전자노이즈 영향 없음.",
+          "full_text_quote": "the lowest threshold energy that x-ray quanta must exceed to be counted is approximately 20 keV...This threshold energy is well above the noise floor of electronics, so electronic noise does not affect the count rates of a PCD",
+          "source": "Flohr T, Schmidt B. Invest Radiol. 2023;58(7):441-450 [PMID:37185302]",
+          "verification_level": "full_text_verified",
+          "confidence": "highest"
+        }
+      ]
+    },
+    "nps_comparison": {
+      "summary": "EID vs PCD의 NPS 비교 — 전자 노이즈 성분의 유무",
+      "key_evidence": [
+        {
+          "ref_id": "acciavatti2010",
+          "finding": "양자 제한 이상 조건에서 EID와 PCD의 NPS, DQE 비교 분석 프레임워크 제시. 주의: 양자 노이즈만 고려 시 EID가 에너지 가중 효과로 더 낮은 NPS 가능하나, 이는 전자 노이즈를 무시한 이론적 한계.",
+          "abstract_quote": "analytical model for NPS and DQE comparing photon counting and energy integrating detectors",
+          "source": "Acciavatti RJ, Maidment ADA. Med Phys. 2010;37(12):6480-6495 [PMID:21302803]",
+          "verification_level": "abstract_supported",
+          "confidence": "high",
+          "caveat": "양자 노이즈만 고려한 이론적 분석. 실제 시스템에서는 전자노이즈가 EID NPS를 증가시켜 PCD가 유리해짐."
+        },
+        {
+          "ref_id": "leng2019",
+          "finding": "PCD에서 전자노이즈가 에너지 문턱치로 배제되므로 NPS에서 전자 성분 제거됨.",
+          "full_text_quote": "Since electronic noise usually is detected as a low-amplitude signal, it is interpreted by a PCD as a photon with energy located at the lower end of a typical x-ray spectrum. Thus, by setting the low energy threshold to be slightly higher than the energy level associated with the electronic noise signal amplitude (eg, 25 keV), electronic noise can be excluded readily from the measured count data.",
+          "source": "Leng S, et al. Radiographics. 2019;39(3):729-743 [PMID:31059394, PMC6542627]",
+          "verification_level": "full_text_verified",
+          "confidence": "highest"
+        }
+      ]
+    }
+  },
+  "solver_prediction_vs_literature": {
+    "prediction_1": {
+      "solver_parameter": "η_abs = 0.85",
+      "literature_value": "DQE(0) = 0.85 (CdTe PCD, Kuttig 2015)",
+      "agreement": "exact_match",
+      "note": "CdTe 직접변환 검출기의 흡수 효율 실측치가 모델 파라미터와 정확히 일치"
+    },
+    "prediction_2": {
+      "solver_parameter": "DQE_EID(full) ≈ 0.700",
+      "literature_value": "DQE_EID(clinical dose) = 0.72-0.74 (Li 2025)",
+      "agreement": "within_5%",
+      "note": "임상 선량에서 EID DQE 실측치가 모델 예측과 일치 (α의 크기에 따라 0.70-0.74 범위)"
+    },
+    "prediction_3": {
+      "solver_parameter": "DQE_PCD = 0.850 (dose independent)",
+      "literature_value": "DQE_PCD(clinical dose) = 0.72-0.77 (Li 2025), DQE(0)=0.72 (Fredenberg 2018)",
+      "agreement": "directionally_consistent",
+      "note": "실측 DQE_PCD는 geometric factor, dead time 등으로 이론 상한 η_abs보다 낮을 수 있음. 0.72-0.77은 실제 시스템 손실 포함."
+    },
+    "prediction_4": {
+      "solver_parameter": "PCD advantage at low dose: +42.9% (D=0.5)",
+      "literature_value": "PCD 'intrinsically higher DQE under low-dose conditions' (Xu 2014), 'significant dose reduction' (Kuttig 2015)",
+      "agreement": "qualitatively_confirmed",
+      "note": "정량적 이점률은 시스템 파라미터에 의존하나, 저선량에서 PCD 우위는 문헌에서 일관되게 확인"
+    }
+  },
+  "common_misconceptions": {
+    "misconception_1": {
+      "wrong": "PCD의 DQE가 EID보다 항상 높다 (모든 조건에서)",
+      "correct": "양자 노이즈만 고려 시 EID가 에너지 가중 효과로 이론적으로 우월할 수 있음 (Acciavatti 2010). PCD의 실질적 이점은 전자노이즈 제거에서 옴.",
+      "condition": "PCD DQE 우위는 전자노이즈가 유의한 저선량 조건에서 발현"
+    },
+    "misconception_2": {
+      "wrong": "EID의 DQE는 선량에 무관하다",
+      "correct": "EID DQE = η_abs/(1+α/D)로 선량 D가 감소하면 DQE도 감소. 이는 전자노이즈(σ_e²=const)가 신호 대비 상대적으로 증가하기 때문.",
+      "evidence": "Xu 2014: 'performance advantages under conditions of very low-dose, high additive noise'"
+    },
+    "misconception_3": {
+      "wrong": "임상 선량에서 PCD가 EID보다 DQE가 월등히 높다",
+      "correct": "임상 선량에서는 EID와 PCD의 DQE가 비슷 (Li 2025: EID 72-74% vs PCD 72-77%). 이는 전자노이즈의 상대적 기여가 작기 때문. PCD 이점은 저선량으로 갈수록 증가.",
+      "evidence": "Li 2025 [PMID:41046473]"
+    }
+  },
+  "warning_constraints": {
+    "physical_impossibility": [
+      "DQE > 1 (물리적 상한 위반)",
+      "DQE_PCD < DQE_EID at same dose with same η_abs (전자노이즈 제거 시 항상 DQE 향상)",
+      "EID DQE가 저선량에서 증가 (전자노이즈 상대 증가로 반드시 DQE 감소)",
+      "PCD DQE가 선량에 의존 (문턱치 메커니즘으로 선량 독립)"
+    ],
+    "solver_verified_values": {
+      "eta_abs_0.85_f_e_0.30_D_0.5": {
+        "DQE_EID_full": 0.700,
+        "DQE_EID_half": 0.595,
+        "DQE_PCD": 0.850,
+        "PCD_advantage": "+42.9%",
+        "EID_degradation": "15.0%",
+        "phase1_cross_validation": "SNR_ratio = 0.6519 ✓"
+      }
+    }
+  }
+}

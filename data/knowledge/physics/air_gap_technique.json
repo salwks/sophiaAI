@@ -1,0 +1,156 @@
+{
+  "id": "air_gap_technique",
+  "category": "Air Gap Technique & Magnification",
+  "keywords": [
+    "air gap", "에어갭", "공기갭", "공기 간격",
+    "magnification", "확대", "확대 촬영", "mag view",
+    "OID", "object to image distance", "물체-영상 거리",
+    "SID", "source to image distance", "선원-영상 거리",
+    "magnification factor", "확대율",
+    "geometric magnification", "기하학적 확대",
+    "scatter reduction", "산란선 감소",
+    "geometric blur", "기하학적 흐림",
+    "focal spot", "초점",
+    "spatial resolution", "공간 해상도",
+    "microcalcification", "미세석회화"
+  ],
+  "sources": [
+    {
+      "id": "doi1979",
+      "citation": "Doi K, Rossmann K. Focal spot size and scatter suppression in magnification mammography. Radiology. 1979;130(1):163-170",
+      "pmid": "111504",
+      "type": "Technical Study"
+    },
+    {
+      "id": "neitzel2004",
+      "citation": "Neitzel U, et al. Imaging properties of digital magnification radiography. Med Phys. 2006;33(6):1877-1888",
+      "pmid": "16696475",
+      "doi": "10.1118/1.2197231",
+      "type": "Digital Magnification Study"
+    },
+    {
+      "id": "bochud2006",
+      "citation": "Bochud F, et al. Air gap technique effect on mammography image quality. Med Phys. 2006;33:2413-2420",
+      "type": "Image Quality Study"
+    },
+    {
+      "id": "korner2023",
+      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "type": "Review Article"
+    },
+    {
+      "id": "samei2012",
+      "citation": "Samei E, et al. Can electronic zoom replace magnification in mammography? A comparative Monte Carlo study. Br J Radiol. 2012;85(1020):e1102-e1108",
+      "pmc": "PMC3473689",
+      "doi": "10.1259/bjr/25041379",
+      "type": "Monte Carlo Comparison"
+    }
+  ],
+  "content": {
+    "principles": [
+      "에어갭은 유방과 검출기 사이 거리를 두어 산란선이 검출기에 도달하지 못하게 함",
+      "산란 광자는 넓은 각도로 퍼지므로 거리 증가 시 검출기 도달 비율↓",
+      "확대 효과로 공간 해상도 향상 (검출기 픽셀 크기 영향 감소)"
+    ],
+    "source_ref": "korner2023, samei2012",
+    "focal_spot_and_magnification": {
+      "source_ref": "doi1979, korner2023",
+      "key_findings": {
+        "recommended_focal_spot": "film-screen 시스템에서 contact 및 magnification 모두 300μm 미만 권장",
+        "smallest_focal_spots": "150μm 이하의 가장 작은 초점은 선량 감소 magnification 맘모그래피의 모든 상황에서 필수적이거나 최적이지 않을 수 있음",
+        "interplay": "영상 품질 향상은 초점 크기, X선관 출력, 검출기 해상도/감도, 에어갭 크기, 타겟 크기 간의 복잡한 상호작용에 의존"
+      },
+      "focal_spot_sizes": {
+        "contact_mammography_mm": "0.3-0.4",
+        "magnification_mammography_mm": "0.1-0.15"
+      }
+    },
+    "digital_magnification": {
+      "source_ref": "neitzel2004",
+      "crossover_point": {
+        "0_3mm_focal_spot": "맘모그래피에서 확대가 영상 품질 개선",
+        "0_6mm_focal_spot": "초점 흐림으로 인해 확대가 영상 품질 개선 안됨"
+      }
+    },
+    "scatter_reduction_by_air_gap": {
+      "source_ref": "bochud2006, samei2012",
+      "mechanism": "확대 기법 사용 시 도입되는 에어갭이 동시에 산란 제거 효과 제공",
+      "measured_spr_reduction": {
+        "1_5cm_to_5cm_gap": "SPR 21±3% 감소",
+        "1_5cm_to_10cm_gap": "SPR 45±3% 감소",
+        "phantom_thicknesses_tested_cm": [3, 5, 8]
+      },
+      "resolution_tradeoff": "에어갭 크기 증가에 따라 해상도도 유의미하게 감소 (확대 증가로 인한 초점 흐림)"
+    },
+    "geometric_blur_formula": {
+      "source_ref": "korner2023, samei2012",
+      "formula": "Ug = f × (M - 1) = f × OID / SOD",
+      "description": "기하학적 확대는 초점의 유한한 크기로 인한 반영(penumbra) 효과로 공간 해상도 저하 유발"
+    },
+    "electronic_zoom_comparison": {
+      "source_ref": "samei2012",
+      "findings": {
+        "low_magnification": "낮은 확대율에서 검출기 해상도 영향이 더 크므로 기하학적 확대가 전체 시스템 공간 해상도 향상",
+        "high_magnification": "높은 확대율에서는 초점 흐림이 지배적이 되어 기하학적 확대의 이점 감소",
+        "recommendation": "디지털 시스템에서 전자적 확대(electronic zoom)가 기하학적 확대를 일부 대체할 수 있으나 완전 대체는 제한적"
+      }
+    },
+    "drawbacks": {
+      "source_ref": "korner2023, samei2012",
+      "focal_spot_blurring": "높은 확대율에서 기하학적 흐림 증가",
+      "reduced_field_of_view": "확대로 인한 유효 시야 감소",
+      "practical_limitation": "유방 지지대와 검출기 간 분리에 물리적 제한",
+      "dose_increase": "역제곱법칙에 의한 입사선량 증가"
+    },
+    "geometry": {
+      "source_ref": "korner2023",
+      "magnification_factor": {
+        "formula": "M = SID / SOD = (SOD + OID) / SOD",
+        "typical_values": {
+          "contact": "1.0x (OID ≈ 0)",
+          "standard_mag": "1.5x-1.8x",
+          "high_mag": "2.0x"
+        }
+      },
+      "typical_distances": {
+        "SID_cm": "65-70",
+        "OID_contact_cm": "2-5",
+        "OID_magnification_cm": "20-30"
+      }
+    }
+  },
+  "formulas": {
+    "magnification_factor": {
+      "formula": "M = SID / SOD = 1 + (OID / SOD)",
+      "source_ref": "korner2023"
+    },
+    "geometric_blur": {
+      "formula": "Ug = f × (M - 1) = f × OID / SOD",
+      "variables": {
+        "f": "초점 크기 (mm)",
+        "M": "확대율",
+        "OID": "물체-영상 거리",
+        "SOD": "선원-물체 거리"
+      },
+      "source_ref": "korner2023, samei2012"
+    },
+    "effective_pixel_size": {
+      "formula": "p_eff = p_detector / M",
+      "description": "확대 시 유효 픽셀 크기 감소로 해상도 향상",
+      "source_ref": "samei2012"
+    },
+    "dose_increase": {
+      "formula": "Dose_ratio ≈ M² (동일 검출기 선량 유지 시)",
+      "source_ref": "korner2023"
+    }
+  },
+  "clinical_relevance": {
+    "indications": "미세석회화 특성화, 병변 경계 평가",
+    "optimal_focal_spot": "확대 맘모그래피에서 0.1-0.15mm 초점 필수",
+    "modern_digital_systems": "디지털 시스템의 높은 해상도로 확대 필요성 감소했으나 여전히 유용",
+    "source_ref": "doi1979, korner2023, samei2012"
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "id": "radiation_risk_benefit",
+  "category": "Mammography Radiation Risk-Benefit Analysis",
+  "keywords": [
+    "radiation risk", "방사선 위험", "radiation induced cancer",
+    "benefit risk ratio", "이익 위험 비율",
+    "lifetime attributable risk", "LAR", "평생귀속위험",
+    "mean glandular dose", "MGD",
+    "BEIR VII", "screening benefit",
+    "excess absolute risk", "초과 절대 위험"
+  ],
+  "sources": [
+    {
+      "id": "yaffe2011",
+      "citation": "Yaffe MJ, Mainprize JG. Risk of radiation-induced breast cancer from mammographic screening. Radiology. 2011;258(1):98-105",
+      "pmid": "21081671",
+      "doi": "10.1148/radiol.10100655",
+      "type": "Risk Modeling Study"
+    },
+    {
+      "id": "miglioretti2016",
+      "citation": "Miglioretti DL, Lange J, van den Broek JJ, et al. Radiation-Induced Breast Cancer Incidence and Mortality From Digital Mammography Screening. Ann Intern Med. 2016;164(4):205-214",
+      "pmid": "26756606",
+      "pmc": "PMC4878445",
+      "doi": "10.7326/M15-1241",
+      "type": "Comprehensive Modeling Study"
+    },
+    {
+      "id": "hendrick2010",
+      "citation": "Hendrick RE. Radiation doses and cancer risks from breast imaging studies. Radiology. 2010;257(1):246-253",
+      "pmid": "20736332",
+      "doi": "10.1148/radiol.10100570",
+      "type": "Dose and Risk Review"
+    },
+    {
+      "id": "beemsterboer1998",
+      "citation": "Beemsterboer PM, Warmerdam PG, Boer R, de Koning HJ. Radiation risk of mammography related to benefit in screening programmes. J Med Screen. 1998;5(2):79-83",
+      "pmid": "9718526",
+      "doi": "10.1136/jms.5.2.79",
+      "type": "Classic Benefit-Risk Analysis"
+    },
+    {
+      "id": "nrc_beir2006",
+      "citation": "National Research Council. Health Risks from Exposure to Low Levels of Ionizing Radiation: BEIR VII Phase 2. Washington, DC: National Academies Press, 2006",
+      "type": "Authoritative Risk Model"
+    },
+    {
+      "id": "sechopoulos2019",
+      "citation": "Hendrick RE, Pisano ED, Averbukh A, et al. Comparison of Acquisition Parameters and Breast Dose in Digital Mammography and Screen-Film Mammography. AJR Am J Roentgenol. 2010;194(2):362-369",
+      "pmid": "20093597",
+      "doi": "10.2214/AJR.09.2908",
+      "type": "Dose Comparison Study"
+    }
+  ],
+  "content": {
+    "risk_models": {
+      "source_ref": "nrc_beir2006, yaffe2011",
+      "beir_vii_model": {
+        "description": "저선량 방사선의 건강 위험 추정을 위한 표준 모델",
+        "assumption": "Linear no-threshold (LNT) 모델 - 역치 없이 선량에 비례하여 위험 증가",
+        "breast_specific": "유방은 방사선에 민감한 장기, 젊은 연령에서 노출 시 더 높은 위험"
+      },
+      "excess_absolute_risk": {
+        "description": "특정 선량에서 추가로 발생하는 암 발생률",
+        "formula": "EAR = β × dose × age_modifier × attained_age_modifier"
+      },
+      "lifetime_attributable_risk": {
+        "description": "특정 노출로 인해 평생 동안 발생할 암 위험",
+        "source_ref": "yaffe2011"
+      }
+    },
+    "typical_dose_values": {
+      "source_ref": "hendrick2010, miglioretti2016",
+      "single_view_mgd_mGy": "1.0-2.0",
+      "bilateral_2view_mgd_mGy": "3.0-5.0",
+      "dbt_additional_mGy": "0.5-1.5",
+      "variation_factors": ["유방 두께", "유방 밀도", "기술적 파라미터", "장비 유형"]
+    },
+    "risk_estimates": {
+      "source_ref": "miglioretti2016, yaffe2011",
+      "biennial_50_74_screening": {
+        "description": "50-74세 2년 간격 선별검사 (13회)",
+        "induced_cases_per_100000": "11-23",
+        "induced_deaths_per_100000": "2-4",
+        "source_ref": "miglioretti2016"
+      },
+      "annual_40_74_screening": {
+        "description": "40-74세 매년 선별검사 (35회)",
+        "induced_cases_per_100000": "125 (median)",
+        "induced_deaths_per_100000": "16 (median)",
+        "source_ref": "miglioretti2016"
+      },
+      "age_dependence": {
+        "finding": "젊은 연령에서 시작할수록 방사선 유발 암 위험 증가",
+        "40_vs_50_start": "40세 시작이 50세 시작보다 약 2배 높은 유발 암 위험"
+      }
+    },
+    "benefit_risk_ratio": {
+      "source_ref": "hendrick2010, beemsterboer1998",
+      "screening_50_69": {
+        "lives_saved_per_induced_death": "242:1",
+        "source_ref": "beemsterboer1998",
+        "conditions": "50-69세, 2년 간격, 2 mGy/view"
+      },
+      "overall_ratio": {
+        "range": "50:1 to 100:1 (연령과 프로토콜에 따라 다름)",
+        "source_ref": "hendrick2010"
+      },
+      "40_49_age_group": {
+        "ratio": "약 3:1 로 낮음",
+        "reason": "베이스라인 암 발생률 낮고 방사선 민감도 높음",
+        "note": "그러나 여전히 이점이 위험보다 큼"
+      }
+    },
+    "factors_affecting_risk": {
+      "source_ref": "miglioretti2016",
+      "breast_size": {
+        "finding": "큰 유방은 더 높은 선량 → 더 높은 유발암 위험",
+        "note": "자동노출제어가 두꺼운 유방에 더 많은 선량 적용"
+      },
+      "screening_frequency": {
+        "annual_vs_biennial": "매년 검사가 2년 간격보다 약 2배 위험"
+      },
+      "starting_age": {
+        "40_vs_50": "40세 시작이 더 긴 노출 기간과 높은 민감도로 인해 위험 증가"
+      }
+    },
+    "dose_optimization": {
+      "source_ref": "hendrick2010",
+      "strategies": [
+        "적절한 압박으로 유방 두께 최소화",
+        "AEC 최적화로 불필요한 선량 방지",
+        "적절한 target/filter 조합 선택",
+        "품질관리로 재촬영 최소화"
+      ],
+      "technology_advances": "디지털 맘모그래피와 DBT가 필름 대비 동등하거나 낮은 선량 가능"
+    }
+  },
+  "clinical_relevance": {
+    "informed_consent": "환자에게 방사선 위험과 선별 이점에 대한 균형 잡힌 정보 제공",
+    "screening_guidelines": "연령과 위험도에 따른 맞춤형 선별 권고",
+    "dose_tracking": "개인 선량 기록 및 누적 노출 모니터링",
+    "risk_communication": "절대적 위험 수치로 환자에게 명확히 전달 (예: 10만 명당 발생 수)",
+    "source_ref": "miglioretti2016, hendrick2010"
+  }
+}

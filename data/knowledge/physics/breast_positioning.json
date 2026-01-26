@@ -1,0 +1,148 @@
+{
+  "id": "breast_positioning",
+  "category": "Mammography Breast Positioning",
+  "keywords": [
+    "positioning", "포지셔닝", "breast positioning",
+    "CC", "craniocaudal", "두미방향",
+    "MLO", "mediolateral oblique", "내외사위",
+    "pectoralis muscle", "대흉근", "pectoral muscle",
+    "nipple", "유두", "nipple in profile",
+    "PNL", "posterior nipple line", "후방유두선",
+    "inframammary angle", "유방하주름",
+    "image quality criteria", "영상품질기준"
+  ],
+  "sources": [
+    {
+      "id": "sinha2014",
+      "citation": "Sinha S, Sharma A, Kaur J. Breast Positioning during Mammography: Mistakes to be Avoided. Indian J Clin Anat Physiol. 2014;1(1):51-56",
+      "pmid": "25125982",
+      "pmc": "PMC4125373",
+      "type": "Positioning Error Analysis"
+    },
+    {
+      "id": "spuur2017",
+      "citation": "Spuur KM, et al. A review of mammographic positioning image quality criteria for the craniocaudal projection. Br J Radiol. 2018;91(1082):20170611",
+      "pmid": "29125335",
+      "pmc": "PMC5965788",
+      "doi": "10.1259/bjr.20170611",
+      "type": "Systematic Review"
+    },
+    {
+      "id": "bassett1993",
+      "citation": "Bassett LW, Farria DM, Bansal S, et al. Mammographic positioning: evaluation from the view box. Radiology. 1993;188(3):803-806",
+      "pmid": "8351351",
+      "doi": "10.1148/radiology.188.3.8351351",
+      "type": "Prospective Evaluation"
+    },
+    {
+      "id": "waade2022",
+      "citation": "Waade GG, et al. Automated Assessment of Breast Positioning Quality in Screening Mammography. Cancers. 2022;14(19):4610",
+      "pmc": "PMC9562663",
+      "doi": "10.3390/cancers14194610",
+      "type": "Automated Assessment Study"
+    },
+    {
+      "id": "eklund2010",
+      "citation": "Eklund GW, et al. Mammography image quality: model for predicting compliance with posterior nipple line criterion. Radiology. 2010;256(3):786-794",
+      "pmid": "20621431",
+      "doi": "10.1148/radiol.10091014",
+      "type": "Predictive Model"
+    }
+  ],
+  "content": {
+    "importance": {
+      "source_ref": "sinha2014",
+      "statement": "포지셔닝은 맘모그래피 영상 결과에 영향을 미치는 가장 중요한 요소",
+      "impact": "부적절한 포지셔닝 → 검사 결론 불가 → 맘모그래피 민감도 저하"
+    },
+    "MLO_view_criteria": {
+      "source_ref": "sinha2014, spuur2017",
+      "ideal_MLO": [
+        "유두가 프로파일에 위치",
+        "대흉근 경계가 잘 보임",
+        "대흉근 하단이 PNL 아래에 위치",
+        "유방하주름(inframammary angle) 포함"
+      ],
+      "common_errors": {
+        "pectoralis_not_visible": {
+          "bilateral_incidence": "0.520%",
+          "source_ref": "sinha2014"
+        },
+        "pectoralis_margin_not_straight": {
+          "incidence": "0.706%"
+        },
+        "pectoralis_above_PNL": {
+          "incidence": "2.081%"
+        }
+      }
+    },
+    "CC_view_criteria": {
+      "source_ref": "spuur2017",
+      "key_metrics": [
+        "대흉근 가시화",
+        "후방유두선(PNL) 측정",
+        "후방유선지방 묘사"
+      ],
+      "pectoralis_importance": "대흉근이 최적 유방조직 포함 확인을 위한 핵심 후방 해부학적 구조"
+    },
+    "nipple_positioning": {
+      "source_ref": "sinha2014, bassett1993",
+      "most_common_problem": "부적절한 유두 포지셔닝 - CC 뷰에서 3.827%로 가장 흔한 문제",
+      "ideal": "유두가 프로파일에 위치해야 함"
+    },
+    "prospective_study_results": {
+      "source_ref": "bassett1993",
+      "sample_size": "1,000 연속 양측 선별 맘모그래피 검사",
+      "MLO_findings": {
+        "pectoralis_within_1cm_of_nipple_line": "81% (1,612/2,000 MLO)",
+        "all_fibroglandular_tissue_depicted": "77% (1,532)",
+        "nipple_in_profile": "88% (1,769)"
+      },
+      "CC_findings": {
+        "depth_within_1cm_of_MLO": "79% (1,586)",
+        "pectoralis_visible": "32% (646)",
+        "nipple_in_profile": "89% (1,783)"
+      }
+    },
+    "posterior_nipple_line_PNL": {
+      "source_ref": "waade2022, eklund2010",
+      "definition": "유두에서 대흉근선까지 수직으로 그은 선",
+      "purpose": "맘모그램이 후방 유방조직을 적절히 포함하는지 확인",
+      "risk_if_not_met": "PNL이 영상 영역 내 대흉근선과 교차하지 않으면 유방조직 제외 위험"
+    },
+    "automated_assessment": {
+      "source_ref": "waade2022",
+      "findings": {
+        "most_frequently_missed": "MLO 뷰에서 대흉근 수준이 가장 자주 누락되는 기준",
+        "second_most_missed": "유방하주름 가시화"
+      },
+      "application": "영상품질 평가 자동화로 맘모그래피 영상품질 평가 일관성 향상 가능"
+    },
+    "predictive_model": {
+      "source_ref": "eklund2010",
+      "purpose": "대흉근 폭/길이 측정과 PNL 기준 허용 여부를 사용하여 MLO 뷰 대흉근 표현 허용 여부 예측",
+      "clinical_benefit": "영상품질 최적화로 방사선학적 해석 정확도 향상 → 조기 유방암 검출 극대화"
+    }
+  },
+  "quality_criteria_summary": {
+    "source_ref": "sinha2014, spuur2017, bassett1993",
+    "MLO_view": {
+      "pectoralis_muscle": "가시적, 경계 직선/볼록, 하단이 PNL 아래",
+      "nipple": "프로파일에 위치",
+      "inframammary_fold": "포함",
+      "breast_tissue": "모든 유선조직 포함"
+    },
+    "CC_view": {
+      "pectoralis_muscle": "가시적 (목표, 항상 달성 불가)",
+      "nipple": "프로파일에 위치",
+      "PNL_comparison": "MLO 뷰 PNL과 1cm 이내 차이",
+      "medial_tissue": "내측 유방조직 포함"
+    }
+  },
+  "clinical_relevance": {
+    "cancer_detection": "적절한 포지셔닝은 유방암 효과적 검출에 필수",
+    "tissue_exclusion_risk": "부적절한 포지셔닝으로 유방조직 제외 시 병변 누락 위험",
+    "recall_rate": "재촬영 필요성 감소로 환자 불안 및 추가 선량 노출 방지",
+    "source_ref": "sinha2014, waade2022"
+  }
+}

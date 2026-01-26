@@ -1,0 +1,823 @@
+# PRD: Maria-Mammo RAG 시스템 개선
+## 논문 기반 아키텍처 재설계 (v2.0 - 전문 검토 완료)
+
+버전: 2.0
+작성일: 2026-01-26
+상태: Draft (전문 검토 완료)
+
+---
+
+## 1. 현재 시스템 분석
+
+### 1.1 현재 아키텍처 문제점
+
+| 문제 | 원인 | 영향 |
+|------|------|------|
+| 빈 응답 발생 | 과도한 레이어 복잡도 | 파이프라인 붕괴 |
+| 정확도 불안정 | 논문 방법론 미적용 | 45-85% 편차 |
+| 느린 응답 속도 | 불필요한 분해/검증 루프 | 사용자 경험 저하 |
+| 프롬프트 순서 오류 | Causal Attention 미고려 | 14.7% 정확도 손실 |
+
+### 1.2 기존 "논문 참조" 구현 vs 실제 논문 내용
+
+| 참조 논문 | 논문 실제 내용 | 기존 구현 | 차이 |
+|----------|---------------|----------|------|
+| Numina-Lean-Agent | Lean 정리 증명 + MCP | Sympy 수치 계산 | 완전히 다름 |
+| Lost in Prompt Order | CQO/QOCO 순서 (+14.7%) | 텍스트 단순 복사 | 핵심 미적용 |
+
+---
+
+## 2. 논문 전문 검토 결과
+
+### 2.1 [P1] Lost in the Prompt Order (arXiv:2601.14152)
+
+**전문 검토 완료**
+
+#### 핵심 발견
+- 21개 Decoder-only 모델에서 **CQO vs QOC 평균 14.7% 정확도 차이**
+- 원인: Causal Attention으로 QOC에서 옵션이 컨텍스트 참조 불가
+
+#### 정확한 템플릿 정의
+```
+# CQO (Context-Question-Options) - 권장
+"Context: {Context}
+Question: {Question}
+Options: A: {A} B: {B} C: {C} D: {D}
+Among A to D, the answer is:"
+
+# QOC (Question-Options-Context) - 피해야 함
+"Question: {Question}
+Options: A: {A} B: {B} C: {C} D: {D}
+Context: {Context}
+Among A to D, the answer is:"
+
+# QOCO (Question-Options-Context-Options) - 복잡한 질문용
+"Question: {Question}
+Options: A: {A} B: {B} C: {C} D: {D}
+Context: {Context}
+Options: A: {A} B: {B} C: {C} D: {D}  # 반복!
+Among A to D, the answer is:"
+```
+
+#### 실험 결과 (데이터셋별)
+| Dataset | CQO | QOC | Gap |
+|---------|-----|-----|-----|
+| LogiQA | 39.1% | 33.0% | +6.1% |
+| SciQ | 94.1% | 86.9% | +7.2% |
+| RACE-M | 74.3% | 49.6% | +24.7% |
+| RACE-H | 69.5% | 48.8% | +20.7% |
+
+#### 적용 방안
+1. 모든 프롬프트를 CQO 형식으로 변환
+2. 복잡한 물리 질문은 QOCO 형식 사용 (옵션 반복)
+3. Activation Patching은 모델 수정 필요 → 우선순위 낮음
+
+---
+
+### 2.2 [P2] MedAgents (arXiv:2311.10537)
+
+**전문 검토 완료**
+
+#### 5단계 프레임워크 상세
+
+**1단계: Expert Gathering**
+- 질문 분야 전문가 5명 소집
+- 선택지 분야 전문가 2명 소집
+- 프롬프트: "You are a medical expert who specializes in categorizing a specific medical scenario"
+
+**2단계: Analysis Proposition**
+- 각 전문가가 독립적으로 분석
+- 질문 분석: "scrutinize and diagnose the symptoms"
+- 선택지 분석: "analyze individual options with your expert medical knowledge"
+
+**3단계: Report Summarization**
+- LLM이 모든 분석을 종합
+- "extract key knowledge and total analysis based on previous analyses"
+
+**4단계: Collaborative Consultation**
+```python
+max_attempts = 5  # 최대 5라운드
+while not all_experts_agree AND attempts < max_attempts:
+    for expert in experts:
+        vote = expert.vote(current_report)  # yes/no
+        if vote == "no":
+            modification = expert.propose_modification()
+    if any_no_votes:
+        current_report = synthesize_revisions(modifications)
+    attempts += 1
+```
+
+**5단계: Decision Making**
+- 최종 합의된 보고서 기반 결정
+
+#### 성능 (Zero-shot)
+| Model | MedQA | MedMCQA | PubMedQA |
+|-------|-------|---------|----------|
+| GPT-3.5 MedAgents | 64.1% | 59.3% | 72.9% |
+| GPT-4 MedAgents | 83.7% | 74.8% | 76.8% |
+
+#### 오류 분석
+- 77% 도메인 지식 부족
+- 15% 질문 이해 실패
+- 8% 추론 오류
+
+#### 적용 방안 (Maria-Mammo)
+```python
+EXPERT_ROLES = {
+    "physics_expert": {
+        "role": "의료영상물리학 전문가",
+        "prompt": "You are a medical imaging physicist specializing in mammography...",
+        "modules": ["snr_cnr", "detector_physics", "system_mtf_chain"]
+    },
+    "clinical_expert": {
+        "role": "유방영상의학과 전문의",
+        "prompt": "You are a breast imaging radiologist...",
+        "modules": ["birads_guidelines", "calcification_contrast"]
+    },
+    "equipment_expert": {
+        "role": "의료장비 엔지니어",
+        "prompt": "You are a medical equipment engineer...",
+        "modules": ["exposure_factors", "pcd_spectral_contrast"]
+    }
+}
+```
+
+---
+
+### 2.3 [P3] MDAgents (arXiv:2404.15155)
+
+**전문 검토 완료**
+
+#### 복잡도 기반 적응형 라우팅
+
+**복잡도 3단계 정의**
+| Level | 정의 | 팀 구성 | 응답 시간 |
+|-------|------|---------|----------|
+| Low | 단순, 명확한 의료 문제 | 단일 PCP 에이전트 | 14.7초 |
+| Moderate | 다학제 협업 필요 | MDT + 반복 합의 | 95.5초 |
+| High | 광범위 조율 필요 | ICT + 단계별 보고서 | 226초 |
+
+**Moderator 역할**
+- GP/응급의학과 의사 역할
+- 초기 분류 (Triage)
+- 팀 구성 감독
+- 합의 실패 시 피드백 제공
+- 최종 결정 종합
+
+**MedRAG 통합 효과**
+| 구성 | 정확도 향상 |
+|------|------------|
+| MedRAG only | +4.7% |
+| Moderator only | +8.1% |
+| Combined | +11.8% |
+
+#### 성능 (10개 벤치마크 중 7개 최고)
+| Benchmark | MDAgents | Best Solo |
+|-----------|----------|-----------|
+| MedQA | 88.7% | 83.9% |
+| DDXPlus | 77.9% | 72.7% |
+| MedBullets | 80.8% | 76.0% |
+
+#### 적용 방안
+```python
+def classify_complexity(question: str) -> str:
+    """Moderator가 복잡도 분류"""
+    # 키워드 기반 + LLM 분류 하이브리드
+    physics_keywords = ["MTF", "DQE", "SNR", "μ", "계산", "공식"]
+    multi_domain = ["대조도", "해상도", "선량", "동시에"]
+
+    physics_count = sum(1 for k in physics_keywords if k in question)
+    multi_count = sum(1 for k in multi_domain if k in question)
+
+    if physics_count >= 3 or multi_count >= 2:
+        return "high"  # Multi-Agent ICT
+    elif physics_count >= 1 or len(question) > 200:
+        return "moderate"  # MDT
+    else:
+        return "low"  # 단일 에이전트
+```
+
+---
+
+### 2.4 [P4] MedAgent-Pro (arXiv:2503.18968)
+
+**전문 검토 완료**
+
+#### 2단계 계층 구조
+
+**Task Level (질병별)**
+1. RAG 에이전트: 임상 가이드라인/프로토콜 검색
+2. Planner 에이전트: 진단 워크플로우 생성
+   - 트리플릿 형식: (object, tool, action)
+
+**Case Level (환자별)**
+1. Orchestrator: 환자 데이터 분석
+2. Tool Agents 순차 실행:
+   - Classification (BioMedclip, RetiZero)
+   - Segmentation (Medical SAM Adapter)
+   - VQA (LLaVa-Med, VisionUnite)
+3. Coding Agent (GPT-o1): 지표 계산
+4. Summary Agent: 출력 정제
+5. Decider Agent: 최종 진단
+
+#### 증거 기반 추론 메커니즘
+```python
+# 정량적 분석
+segmentation_result = sam_adapter.segment(image)
+metrics = coding_agent.compute(segmentation_result)
+# 예: vertical cup-to-disc ratio, ejection fraction
+
+# 정성적 평가
+visual_features = vqa_model.identify(image)
+# 예: hemorrhages, atrophy
+
+# 지표 통합 (MOE Decider)
+risk_score = sum(weight_i * status_i for i in indicators)
+# status: abnormal=1, uncertain=0.5, normal=0
+```
+
+#### 적용 방안 (영상 물리)
+- 물리 계산도 트리플릿 형식으로 분해
+- 예: (dose_reduction, snr_formula, calculate_change)
+- Sympy를 Tool Agent로 통합
+
+---
+
+### 2.5 [P5] Agent-as-a-Judge (arXiv:2601.05111)
+
+**전문 검토 완료**
+
+#### LLM-as-Judge vs Agent-as-Judge
+
+| 차원 | LLM-as-Judge | Agent-as-Judge |
+|------|-------------|----------------|
+| Robustness | 단일 모델, 편향 있음 | 다중 에이전트 협업 |
+| Verification | 직관적 평가 | 도구 기반 검증 |
+| Granularity | 전역 점수 | 세분화된 평가 |
+
+#### 도구 기반 검증 상세
+```python
+# 증거 수집
+evidence = tool.collect_evidence(response)
+
+# 정확성 검증 (HERMES 방식)
+if task_type == "MATH":
+    verified = theorem_prover.verify(derivation)
+elif task_type == "PHYSICS":
+    verified = sympy_checker.validate(formula, values)
+elif task_type == "FACTUAL":
+    verified = knowledge_base.cross_reference(claims)
+```
+
+#### Multi-Agent 평가 토폴로지
+
+**1. Collective Consensus (수평적 토론)**
+- ChatEval 방식: 법정 토론 메커니즘
+- 다양한 관점의 에이전트가 동등하게 토론
+
+**2. Task Decomposition (역할 분담)**
+- CAFES/GEMA-Score 방식
+- 단계별 평가: Evidence Gathering → Reasoning → Scoring
+
+#### 적용 방안
+```python
+class AgentJudgeV2:
+    def evaluate(self, question, answer, knowledge):
+        # 1. 도구 기반 검증
+        physics_check = self.sympy_verify(answer)
+        unit_check = self.dimensional_analysis(answer)
+        kb_check = self.knowledge_cross_ref(answer, knowledge)
+
+        # 2. 다중 에이전트 토론
+        scores = []
+        for agent in [self.physics_agent, self.clinical_agent]:
+            score = agent.evaluate(answer)
+            scores.append(score)
+
+        # 3. 합의 도출
+        if max(scores) - min(scores) > 20:
+            return self.moderator.resolve(scores, answer)
+        return mean(scores)
+```
+
+---
+
+### 2.6 [P6] O1-style Medical Reasoning (arXiv:2501.06458)
+
+**전문 검토 완료**
+
+#### Inference-Time Scaling 전략
+
+**4가지 CoT 전략 비교**
+| 전략 | 설명 | 토큰 수 | 개선폭 |
+|------|------|---------|--------|
+| Vanilla | 기본 step-by-step | 300-500 | baseline |
+| CoT SFT | GPT-4o CoT 예시로 학습 | 500-700 | +3.28% |
+| LongStep | 상세 분석 단계 | 800-1000 | +5.12% |
+| LongMonolog | 자기 수정 포함 내적 독백 | 1000+ | +11.36% |
+
+**토큰 길이와 난이도 상관관계**
+| 난이도 | 데이터셋 | 평균 토큰 |
+|--------|---------|----------|
+| 쉬움 | MedQA | 873-997 |
+| 중간 | Medbullets | 917-1,023 |
+| 어려움 | JAMA | 1,076+ |
+
+#### 모델별 성능
+| Model | Vanilla | LongMonolog | 개선 |
+|-------|---------|-------------|------|
+| Qwen2.5-72B | 65.82% | 77.18% | +11.36% |
+| LLama3.1-70B | 71.39% | 77.36% | +5.97% |
+
+**주의**: 7B 이하 작은 모델은 긴 추론 시 성능 저하
+
+#### 적용 방안
+```python
+def adaptive_reasoning(question, model_capacity):
+    complexity = assess_complexity(question)
+
+    if complexity == "low" and model_capacity < "20B":
+        return vanilla_cot(question)
+    elif complexity == "medium":
+        return long_step(question)  # 상세 분석
+    else:
+        return long_monolog(question)  # 자기 수정 포함
+```
+
+---
+
+### 2.7 [P7] HALO Framework (arXiv:2409.10011)
+
+**전문 검토 완료**
+
+#### 환각 제거 3단계 메커니즘
+
+**1. Query Expansion**
+```python
+# LangChain Multiquery Retriever
+queries = llm.generate_alternative_queries(original_query, n=3)
+# "유방 대조도" → ["mammography contrast", "breast tissue attenuation", "X-ray energy spectrum"]
+```
+
+**2. Knowledge Prioritization (MMR)**
+```python
+# Maximum Marginal Relevance
+score = lambda(relevance, diversity)
+selected_docs = []
+for doc in retrieved_docs:
+    mmr = alpha * relevance(doc, query) - (1-alpha) * max_similarity(doc, selected_docs)
+    if mmr > threshold:
+        selected_docs.append(doc)
+```
+
+**3. Guided Reasoning**
+- Few-shot 프롬프팅
+- Chain-of-Thought 단계별 추론
+
+#### 성능 향상
+| Model | Before HALO | After HALO |
+|-------|------------|------------|
+| ChatGPT | 56% | 70% (+14%) |
+| Llama-3.1 | 44% | 65% (+21%) |
+| Mistral | 37% | 58% (+21%) |
+
+#### 적용 방안
+```python
+class HALOEnhancedRAG:
+    def retrieve(self, question):
+        # 1. 쿼리 확장
+        queries = self.expand_query(question)
+
+        # 2. 병렬 검색
+        all_docs = []
+        for q in queries:
+            docs = self.retriever.search(q)
+            all_docs.extend(docs)
+
+        # 3. MMR 순위화
+        selected = self.mmr_rank(all_docs, question)
+
+        return selected[:5]  # Top 5
+```
+
+---
+
+### 2.8 [P8] Hallucination Mitigation Survey (arXiv:2510.24476)
+
+**전문 검토 완료**
+
+#### RAG 파이프라인 3단계
+
+**Pre-retrieval**
+- 쿼리 재구성 (Query Reformulation)
+- 경량 모델로 초기 답변 생성
+- 반복 피드백 메커니즘
+
+**Retrieval**
+| 유형 | 예시 | 특징 |
+|------|------|------|
+| Sparse | BM25, SPLADE | 키워드 기반, 해석 가능 |
+| Dense | DPR, Contriever | 의미 매칭 |
+| Hybrid | ColBERTv2 | 최고 성능 |
+
+**Post-retrieval**
+- 입력 수준: 단순 연결 (가장 실용적)
+- 중간 레이어: Cross-attention 융합
+- 출력 수준: 토큰 리랭킹
+
+#### 의료 도메인 Best Practices
+
+1. **외부 지식 주입**: Fine-tuning 없이 의료 코퍼스 활용
+2. **쿼리 리라이팅**: 도메인 특화 용어로 변환
+3. **문서 리랭킹**: 관련성 + 다양성 균형
+4. **추적성**: 의료 출처 명시 필수
+
+#### 핵심 인사이트
+> "환각 완화는 '오류 억제'가 아닌 '능력 향상'으로 접근해야 한다"
+
+---
+
+### 2.9 [P9] FineMedLM-o1 (arXiv:2501.09213)
+
+**전문 검토 완료**
+
+#### 3단계 점진적 학습
+
+| Stage | 데이터 | 샘플 수 | LR |
+|-------|--------|---------|-----|
+| 1 | General Medical | 228,000 | 1e-5 |
+| 2 | Internal Medicine | 25,600 | 5e-6 |
+| 3 | Endocrinology | 10,240 | 5e-6 |
+
+#### DPO 2단계
+1. **Cold-start**: 12,800개 명시적 추론 샘플
+2. **Preference Learning**: 33,000개 복잡 지시 (LR: 1e-7)
+
+#### Test-Time Training (TTT)
+```python
+def ttt_inference(question, training_data):
+    # 1. 유사 추론 예시 검색
+    similar_examples = retriever.search(question, training_data)
+
+    # 2. 추론 전 짧은 학습
+    model.train(similar_examples, epochs=1)
+
+    # 3. 답변 생성
+    answer = model.generate(question)
+
+    # 4. 파라미터 복원 (망각 방지)
+    model.restore_original_weights()
+
+    return answer
+```
+
+#### 성능 향상 누적
+| 단계 | 개선폭 |
+|------|--------|
+| SFT | +12% |
+| DPO | +10% |
+| TTT | +14% |
+| **Total** | **+23%** |
+
+---
+
+### 2.10 [P10] ART Benchmark (arXiv:2601.08988)
+
+**전문 검토 완료**
+
+#### 의료 AI 에이전트 약점 분석
+
+| 능력 | GPT-4o-mini | Claude 3.5 |
+|------|-------------|------------|
+| Retrieval | ~100% | ~100% |
+| Aggregation | 36-72% | 28-64% gap |
+| Threshold Logic | 62-68% | 32-38% gap |
+
+#### 핵심 발견
+- 현대 LLM은 정보 검색에 강함
+- 시간적 데이터 집계 + 조건부 임계값 로직에서 취약
+- 다단계 추론이 필요한 임상 환경에서 주의 필요
+
+---
+
+## 3. 개선 아키텍처 설계 (v2.0)
+
+### 3.1 새로운 파이프라인 구조
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    Maria-Mammo v2.0 Architecture                        │
+│                    (논문 전문 검토 기반 설계)                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  [1] Query Intake & Preprocessing                                       │
+│      │                                                                  │
+│      ├── Complexity Classifier (MDAgents P3)                            │
+│      │   ├── Low → 단일 에이전트 (14.7s)                                │
+│      │   ├── Moderate → MDT 협업 (95.5s)                                │
+│      │   └── High → ICT 다단계 (226s)                                   │
+│      │                                                                  │
+│      └── Prompt Reorderer (Lost in Prompt Order P1)                     │
+│          ├── Simple → CQO 형식                                          │
+│          └── Complex → QOCO 형식 (옵션 반복)                            │
+│                                                                         │
+│  [2] HALO-Enhanced RAG (P7)                                             │
+│      ├── Query Expansion (3+ 변형 생성)                                 │
+│      ├── Parallel Retrieval (Physics KB + BI-RADS + PMC)                │
+│      └── MMR Ranking (관련성 + 다양성)                                  │
+│                                                                         │
+│  [3] Adaptive Multi-Agent Reasoning                                     │
+│      │                                                                  │
+│      ├── [Low] Single Agent Direct                                      │
+│      │   └── CQO Prompt → SLM → Answer                                  │
+│      │                                                                  │
+│      ├── [Moderate] MedAgents 5-Step (P2)                               │
+│      │   ├── Expert Gathering (Physics, Clinical, Equipment)            │
+│      │   ├── Individual Analysis                                        │
+│      │   ├── Report Synthesis                                           │
+│      │   ├── Collaborative Voting (max 5 rounds)                        │
+│      │   └── Decision Making                                            │
+│      │                                                                  │
+│      └── [High] MedAgent-Pro Hierarchical (P4)                          │
+│          ├── Task Level: RAG → Planner → Workflow                       │
+│          └── Case Level: Orchestrator → Tools → Decider                 │
+│                                                                         │
+│  [4] O1-Style Reasoning (P6)                                            │
+│      ├── Confidence Check (threshold: 0.8)                              │
+│      │   ├── High Confidence → Return directly                          │
+│      │   └── Low Confidence → LongMonolog reasoning                     │
+│      └── Token Budget: Easy(500) / Medium(800) / Hard(1200)             │
+│                                                                         │
+│  [5] Agent-as-a-Judge Verification (P5)                                 │
+│      ├── Tool-based Verification                                        │
+│      │   ├── Sympy Formula Checker                                      │
+│      │   ├── Dimensional Analysis                                       │
+│      │   └── Knowledge Base Cross-ref                                   │
+│      ├── Multi-Agent Review (if confidence < 0.7)                       │
+│      │   ├── Physics Agent Score                                        │
+│      │   ├── Clinical Agent Score                                       │
+│      │   └── Moderator Resolution (if gap > 20)                         │
+│      └── Memory Update                                                  │
+│                                                                         │
+│  [6] Output Formatting                                                  │
+│      ├── Structured Answer                                              │
+│      ├── Evidence Citations                                             │
+│      └── Confidence Badge                                               │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 프롬프트 템플릿 (Lost in Prompt Order 준수)
+
+#### 단순 질문용 (CQO)
+```python
+CQO_TEMPLATE = """
+### 참고 지식 (Context)
+{physics_knowledge}
+
+{retrieved_documents}
+
+### 질문 (Question)
+{question}
+
+### 답변 형식 (Options)
+다음 형식으로 답변하세요:
+1. 핵심 물리 원리
+2. 수치 계산 (필요시)
+3. 결론
+
+### 답변:
+"""
+```
+
+#### 복잡한 질문용 (QOCO)
+```python
+QOCO_TEMPLATE = """
+### 질문 (Question)
+{question}
+
+### 기대 답변 구조 (Options - 1차)
+- 물리적 인과관계 분석
+- 수식 유도 과정
+- 기술적 결론
+
+### 참고 지식 (Context)
+{physics_knowledge}
+
+{retrieved_documents}
+
+### 기대 답변 구조 (Options - 2차 반복)
+- 물리적 인과관계 분석
+- 수식 유도 과정
+- 기술적 결론
+
+### 답변:
+"""
+```
+
+### 3.3 Multi-Agent 구성 (MedAgents + MDAgents)
+
+```python
+from dataclasses import dataclass
+from enum import Enum
+from typing import List, Dict
+
+class ComplexityLevel(Enum):
+    LOW = "low"
+    MODERATE = "moderate"
+    HIGH = "high"
+
+@dataclass
+class ExpertRole:
+    name: str
+    prompt: str
+    knowledge_modules: List[str]
+
+EXPERTS = {
+    "physics": ExpertRole(
+        name="의료영상물리학 전문가",
+        prompt="""You are a medical imaging physicist specializing in mammography.
+        Focus on: X-ray physics, detector characteristics (MTF, DQE, NPS),
+        dose optimization, and image quality metrics.
+        Always cite physics formulas and provide numerical analysis.""",
+        knowledge_modules=["snr_cnr", "detector_physics", "system_mtf_chain"]
+    ),
+    "clinical": ExpertRole(
+        name="유방영상의학과 전문의",
+        prompt="""You are a breast imaging radiologist with expertise in BI-RADS.
+        Focus on: Lesion characterization, calcification morphology,
+        clinical significance, and diagnostic accuracy implications.""",
+        knowledge_modules=["birads_guidelines", "calcification_contrast"]
+    ),
+    "equipment": ExpertRole(
+        name="의료장비 엔지니어",
+        prompt="""You are a medical equipment engineer specializing in mammography systems.
+        Focus on: System design, filter-detector combinations,
+        magnification techniques, and practical optimization.""",
+        knowledge_modules=["exposure_factors", "pcd_spectral_contrast"]
+    )
+}
+
+class AdaptiveOrchestrator:
+    def __init__(self):
+        self.moderator = Moderator()
+        self.experts = EXPERTS
+
+    def process(self, question: str, knowledge: str) -> str:
+        # 1. 복잡도 분류 (MDAgents)
+        complexity = self.moderator.classify_complexity(question)
+
+        # 2. 프롬프트 재구성 (Lost in Prompt Order)
+        if complexity == ComplexityLevel.LOW:
+            prompt = self._build_cqo_prompt(question, knowledge)
+            return self._single_agent(prompt)
+        else:
+            prompt = self._build_qoco_prompt(question, knowledge)
+
+        # 3. 적응형 라우팅
+        if complexity == ComplexityLevel.MODERATE:
+            return self._medagents_5step(question, prompt)
+        else:
+            return self._medagent_pro_hierarchical(question, prompt)
+```
+
+---
+
+## 4. 구현 계획 (상세)
+
+### Phase 1: 프롬프트 재구성 (1주)
+
+| Task | 논문 근거 | 예상 효과 |
+|------|----------|----------|
+| CQO 템플릿 구현 | P1 | +14.7% 정확도 |
+| QOCO 템플릿 구현 | P1 | +8.2% 추가 |
+| 기존 프롬프트 마이그레이션 | - | 전체 적용 |
+
+**검증 방법**: 동일 질문 CQO vs 현재 형식 A/B 테스트
+
+### Phase 2: HALO RAG 강화 (1주)
+
+| Task | 논문 근거 | 예상 효과 |
+|------|----------|----------|
+| Query Expansion 구현 | P7 | +21% 정확도 |
+| MMR Ranking 구현 | P7 | 관련성 향상 |
+| 병렬 검색 최적화 | P7 | 속도 향상 |
+
+**검증 방법**: 환각 발생률 측정 (Before/After)
+
+### Phase 3: 복잡도 기반 라우팅 (1주)
+
+| Task | 논문 근거 | 예상 효과 |
+|------|----------|----------|
+| Complexity Classifier | P3 | 리소스 최적화 |
+| 단일 vs 다중 에이전트 분기 | P3 | 속도 개선 |
+| Moderator 역할 구현 | P3 | +11.8% 정확도 |
+
+**검증 방법**: 복잡도별 정확도/속도 측정
+
+### Phase 4: MedAgents 5-Step (2주)
+
+| Task | 논문 근거 | 예상 효과 |
+|------|----------|----------|
+| Expert Role 정의 | P2 | 전문성 향상 |
+| Voting 메커니즘 | P2 | 합의 품질 |
+| Report Synthesis | P2 | 일관성 |
+| Max 5 rounds 제한 | P2 | 안정성 |
+
+**검증 방법**: MedQA 벤치마크 (목표: 80%+)
+
+### Phase 5: Agent-as-a-Judge (1주)
+
+| Task | 논문 근거 | 예상 효과 |
+|------|----------|----------|
+| Tool-based 검증 | P5 | 정확성 |
+| Multi-Agent 평가 | P5 | 편향 제거 |
+| 합의 메커니즘 | P5 | 신뢰성 |
+
+**검증 방법**: 물리 계산 검증 정확도
+
+### Phase 6: O1-style 적응형 추론 (1주)
+
+| Task | 논문 근거 | 예상 효과 |
+|------|----------|----------|
+| 신뢰도 기반 분기 | P6 | 효율성 |
+| LongMonolog 구현 | P6 | +11.36% |
+| 토큰 예산 관리 | P6 | 비용 절감 |
+
+**검증 방법**: 난이도별 성능 측정
+
+---
+
+## 5. 성공 지표
+
+### 5.1 정확도 지표
+
+| 지표 | 현재 | Phase 1 후 | Phase 4 후 | 최종 목표 |
+|------|------|-----------|-----------|----------|
+| 물리 계산 정확도 | 70% | 85% | 92% | 95% |
+| BI-RADS 분류 일치 | 75% | 80% | 87% | 90% |
+| 빈 응답률 | 15% | 5% | 2% | <1% |
+
+### 5.2 효율성 지표
+
+| 지표 | 현재 | 목표 | 논문 근거 |
+|------|------|------|----------|
+| 단순 질문 응답 시간 | 45초 | 15초 | P3 (14.7s) |
+| 복잡 질문 응답 시간 | 120초 | 90초 | P3 (95.5s) |
+| LLM 호출 비용 | 100% | 40% | P6 효율화 |
+
+### 5.3 품질 지표
+
+| 지표 | 현재 | 목표 | 측정 방법 |
+|------|------|------|----------|
+| 환각률 | ~20% | <5% | P7 HALO |
+| 근거 인용률 | 30% | 80% | 출처 추적 |
+| 전문가 평가 | - | 4.5/5 | 의료진 리뷰 |
+
+---
+
+## 6. 위험 요소 및 완화
+
+| 위험 | 영향 | 완화 방안 | 논문 근거 |
+|------|------|----------|----------|
+| Multi-Agent 지연 | 응답 시간 3배 | 복잡도별 분기 | P3 MDAgents |
+| 에이전트 간 충돌 | 일관성 저하 | Moderator 중재 | P2 MedAgents |
+| 프롬프트 길이 초과 | 컨텍스트 손실 | MMR 압축 | P7 HALO |
+| 작은 모델 성능 저하 | LongMonolog 실패 | 모델 크기별 분기 | P6 O1 |
+
+---
+
+## 7. 참고 논문 전체 목록 (전문 검토 완료)
+
+### Priority 1 (필수 - 전문 검토 완료 ✅)
+| # | 논문 | arXiv | 핵심 기여 |
+|---|------|-------|----------|
+| P1 | Lost in the Prompt Order | 2601.14152 | CQO/QOCO (+14.7%) |
+| P2 | MedAgents | 2311.10537 | 5-Step Multi-Agent |
+| P3 | MDAgents | 2404.15155 | 복잡도 적응형 (+11.8%) |
+| P4 | MedAgent-Pro | 2503.18968 | 계층적 에이전트 |
+| P5 | Agent-as-a-Judge | 2601.05111 | 도구 기반 검증 |
+
+### Priority 2 (권장 - 전문 검토 완료 ✅)
+| # | 논문 | arXiv | 핵심 기여 |
+|---|------|-------|----------|
+| P6 | O1 Medical Reasoning | 2501.06458 | LongMonolog (+11.36%) |
+| P7 | HALO | 2409.10011 | 환각 제거 (+21%) |
+| P8 | Hallucination Survey | 2510.24476 | RAG Best Practices |
+| P9 | FineMedLM-o1 | 2501.09213 | TTT (+23%) |
+| P10 | ART Benchmark | 2601.08988 | 에이전트 약점 분석 |
+
+---
+
+## 8. 승인
+
+| 역할 | 이름 | 날짜 | 서명 |
+|------|------|------|------|
+| 제품 책임자 | | | |
+| 기술 책임자 | | | |
+| 의료 자문 | | | |
+
+---
+
+*Last Updated: 2026-01-26*
+*Version: 2.0 (전문 검토 완료)*

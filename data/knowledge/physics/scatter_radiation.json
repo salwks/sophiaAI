@@ -1,0 +1,194 @@
+{
+  "id": "scatter_radiation",
+  "category": "Scatter Radiation Physics",
+  "keywords": [
+    "scatter", "산란", "scattered radiation", "산란선",
+    "Compton", "콤프턴", "Compton scattering", "콤프턴 산란",
+    "scatter to primary", "SPR", "산란선비", "scatter ratio",
+    "primary radiation", "일차선", "primary beam",
+    "contrast degradation", "대조도 저하",
+    "scatter fraction", "산란분율", "SF",
+    "breast thickness", "유방 두께",
+    "field size", "조사야", "field of view",
+    "scatter rejection", "산란선 제거",
+    "thick breast", "두꺼운 유방", "6cm", "두께",
+    "dense breast", "치밀유방", "치밀 유방",
+    "blurring", "뭉개", "흐림",
+    "CNR 저하", "대조도 손실", "contrast loss"
+  ],
+  "sources": [
+    {
+      "id": "boone2000a",
+      "citation": "Boone JM, Lindfors KK, Cooper VN III, Seibert JA. Scatter/primary in mammography: comprehensive results. Med Phys. 2000;27(10):2408-2416",
+      "pmid": "11099211",
+      "doi": "10.1118/1.1312812",
+      "type": "Comprehensive Monte Carlo Study"
+    },
+    {
+      "id": "boone2000b",
+      "citation": "Boone JM, Cooper VN III. Scatter/primary in mammography: Monte Carlo validation. Med Phys. 2000;27(8):1818-1831",
+      "pmid": "10984229",
+      "doi": "10.1118/1.1287052",
+      "type": "Monte Carlo Validation"
+    },
+    {
+      "id": "cooper2000",
+      "citation": "Cooper VN III, Boone JM, Seibert JA, Pellot-Barakat CJ. An edge spread technique for measurement of the scatter-to-primary ratio in mammography. Med Phys. 2000;27(5):845-853",
+      "pmid": "10841386",
+      "doi": "10.1118/1.598950",
+      "type": "Experimental Measurement"
+    },
+    {
+      "id": "korner2023",
+      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "type": "Review Article"
+    }
+  ],
+  "content": {
+    "principles": [
+      "산란선은 영상 대조도를 저하시키고 SNR을 감소시킴",
+      "맘모그래피 에너지 범위(17-30 keV)에서 Compton 산란이 지배적",
+      "유방 두께 증가 시 산란선 비율이 급격히 증가"
+    ],
+    "source_ref": "korner2023",
+    "scatter_to_primary_ratio": {
+      "definition": "SPR = 산란선 강도(S) / 일차선 강도(P)",
+      "source_ref": "boone2000a, cooper2000",
+      "measured_values_at_28kV": {
+        "source_ref": "cooper2000",
+        "note": "Edge spread technique으로 측정, Mo/Mo 스펙트럼",
+        "0_percent_glandular": {
+          "2cm": "0.21±0.01",
+          "4cm": "0.39±0.01",
+          "6cm": "0.57±0.02"
+        },
+        "43_percent_glandular": {
+          "2cm": "0.20±0.01",
+          "4cm": "0.35±0.02",
+          "6cm": "0.53±0.02"
+        },
+        "100_percent_glandular": {
+          "2cm": "0.22±0.02",
+          "4cm": "0.42±0.03",
+          "6cm": "0.88±0.08"
+        }
+      },
+      "clinical_measurements": {
+        "source_ref": "boone2000a",
+        "sample_size": 82,
+        "compressed_breast_thickness_cm": {
+          "median": 5.2,
+          "range_95_percent": "2.4-7.9"
+        },
+        "projected_breast_area_cm2": {
+          "median": 146,
+          "range_95_percent": "58-298"
+        },
+        "measured_SPR_range": "0.2-2.0"
+      }
+    },
+    "spr_parametric_equation": {
+      "source_ref": "boone2000a",
+      "formula": "SPR = [a + b × (diameter)^(-1.5) + c × (thickness)^(-0.5)]^(-1)",
+      "coefficients": {
+        "a": -2.35452817439093,
+        "b": 22.3960980055927,
+        "c": 8.85064260299289
+      },
+      "valid_range": {
+        "thickness_cm": "2-8",
+        "diameter_cm": "3-30"
+      },
+      "accuracy": "평균 오차 약 1%",
+      "conditions": "반원형 유방 형태, Mo/Mo 스펙트럼, 15mm 에어갭"
+    },
+    "factors_affecting_spr": {
+      "source_ref": "boone2000a, cooper2000",
+      "breast_thickness": "두께↑ → SPR 급격히↑ (주요 인자)",
+      "field_of_view": "조사야↑ → SPR↑",
+      "kvp": "임상 kVp 범위에서 SPR 변화 미미 (effectively independent of energy)",
+      "tissue_composition": "유선 조직 비율에 따른 약간의 변화",
+      "air_gap": "소형 에어갭(0-30mm)에서 영향 미미"
+    },
+    "monte_carlo_validation": {
+      "source_ref": "boone2000b",
+      "methods": ["direct method (기하학적으로 정확한 시뮬레이션)", "convolution method (scatter PSF 사용)"],
+      "accuracy": {
+        "direct_method": "문헌 대비 3.7% 정확도 (N=5)",
+        "convolution_method": "평균 7.1% 정확도 (N=14)"
+      }
+    },
+    "contrast_degradation": {
+      "source_ref": "korner2023",
+      "formula": "C_actual = C_ideal / (1 + SPR)",
+      "relationship": "SPR = S/P, 최대 대조도 C₀ = ΔP/P, 산란 포함 대조도 Cs = C₀/(1 + SPR)",
+      "examples": {
+        "SPR_0.5": "대조도 33% 감소",
+        "SPR_1.0": "대조도 50% 감소",
+        "SPR_1.5": "대조도 60% 감소"
+      }
+    }
+  },
+  "formulas": {
+    "spr_parametric": {
+      "formula": "SPR = [a + b × d^(-1.5) + c × t^(-0.5)]^(-1)",
+      "variables": {
+        "d": "유방 직경 (cm)",
+        "t": "유방 두께 (cm)",
+        "a": -2.35452817439093,
+        "b": 22.3960980055927,
+        "c": 8.85064260299289
+      },
+      "source_ref": "boone2000a"
+    },
+    "contrast_degradation": {
+      "formula": "C_measured = C₀ / (1 + SPR)",
+      "variables": {
+        "C₀": "산란 없는 이상적 대조도",
+        "SPR": "scatter-to-primary ratio"
+      },
+      "source_ref": "korner2023"
+    },
+    "scatter_fraction": {
+      "formula": "SF = SPR / (1 + SPR)",
+      "alternative": "SF = S / (P + S)",
+      "source_ref": "boone2000a"
+    }
+  },
+  "common_misconceptions": {
+    "WARNING": "다음은 LLM이 자주 잘못 설명하는 산란선 관련 오류입니다. 반드시 올바른 물리로 답변하세요.",
+    "misconception_1_scatter_formula": {
+      "WRONG": "Cs = C₀ × (1 - SPR) 또는 Cs = C₀ - SPR × C₀",
+      "CORRECT": "Cs = C₀ / (1 + SPR)",
+      "physics_proof": "SPR=0.7일 때: 올바른 공식 Cs = C₀/1.7 = 0.588×C₀, 틀린 공식은 Cs = 0.3×C₀ (과대평가)",
+      "derivation": "I_total = P + S, Contrast = ΔP/(P+S) = ΔP/P × P/(P+S) = C₀/(1+SPR)",
+      "source": "korner2023 (PMC10606465), boone2000a"
+    },
+    "misconception_2_scatter_improves_anything": {
+      "WRONG": "산란선이 영상 품질의 어떤 측면을 향상시킨다",
+      "CORRECT": "산란선은 항상 대조도를 저하시키고 SNR을 감소시킴. 향상시키는 것은 없음",
+      "physics_proof": "산란선은 공간적으로 분산된 배경 노이즈로, 신호에 정보 없이 추가됨"
+    },
+    "misconception_3_high_energy_reduces_scatter": {
+      "WRONG": "높은 에너지(kVp)가 산란선을 감소시킨다",
+      "CORRECT": "임상 맘모그래피 에너지 범위(25-35 kVp)에서 SPR은 에너지에 거의 무관함",
+      "physics_proof": "Boone 2000: SPR은 유방 두께와 조사야 크기에 주로 의존",
+      "source": "boone2000a"
+    },
+    "misconception_4_6cm_spr_value": {
+      "correct_SPR_range_6cm": "0.57-0.88 (조직 구성에 따라)",
+      "source": "cooper2000 edge spread measurements",
+      "note": "100% 유선 조직에서 SPR 최대 0.88±0.08"
+    }
+  },
+  "clinical_relevance": {
+    "thick_breast_challenge": "두꺼운 유방에서 SPR 급격 증가 - 그리드 또는 에어갭 필요",
+    "compression_benefit": "압박으로 두께 감소 → SPR 감소 → 대조도 향상",
+    "grid_necessity": "SPR > 0.5-0.7 시 산란 제거 방법 권장",
+    "energy_independence": "임상 kVp 범위(25-35 kVp)에서 SPR은 에너지에 거의 무관",
+    "source_ref": "boone2000a, cooper2000"
+  }
+}

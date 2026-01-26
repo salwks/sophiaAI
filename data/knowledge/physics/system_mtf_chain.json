@@ -1,0 +1,155 @@
+{
+  "id": "system_mtf_chain",
+  "title": "System MTF Chain: Focal Spot × Detector × Motion",
+  "domain": "image_quality",
+  "keywords": [
+    "시스템 MTF", "system MTF", "MTF chain",
+    "MTF 합성", "cascaded MTF", "total MTF",
+    "초점 MTF", "focal spot MTF", "검출기 MTF", "detector MTF",
+    "움직임 블러", "motion blur", "MTF product",
+    "뭉개", "blurring", "형태 손실", "형태 왜곡",
+    "fine linear", "amorphous", "4c", "4b",
+    "석회화 형태", "microcalcification morphology",
+    "해상도 저하", "resolution degradation"
+  ],
+  "content": {
+    "cascade_principle": {
+      "fundamental_law": "MTF_system(f) = MTF_focal(f) × MTF_detector(f) × MTF_motion(f) × ...",
+      "implication": "각 단계의 MTF가 곱해져 최종 시스템 해상도 결정",
+      "worst_component": "가장 낮은 MTF 요소가 전체 시스템 제한"
+    },
+    "mtf_components": {
+      "focal_spot_mtf": {
+        "source": "유한 크기 초점에 의한 기하학적 블러 (penumbra)",
+        "formula": "MTF_focal(f) = |sinc(π × f × P)|, P = focal_size × (M-1)",
+        "magnification_impact": "확대율 ↑ → penumbra ↑ → MTF_focal ↓"
+      },
+      "detector_mtf": {
+        "source": "픽셀 어퍼쳐 + 섬광체 빛 확산 (간접변환) 또는 전하 확산 (직접변환)",
+        "formula": "MTF_det(f) = sinc(π × f × p) × MTF_scintillator(f)",
+        "energy_dependence": "간접변환: 고에너지에서 MTF 저하"
+      },
+      "motion_mtf": {
+        "source": "촬영 중 환자/장비 움직임",
+        "formula": "MTF_motion(f) = |sinc(π × f × d_motion)|",
+        "typical_values": "d_motion < 0.1mm for acceptable sharpness"
+      },
+      "scatter_mtf": {
+        "source": "산란선에 의한 영상 흐림",
+        "formula": "MTF_scatter ≈ 1 / (1 + SPR) (simplified)",
+        "air_gap_benefit": "산란선 감소 → MTF_scatter 개선"
+      }
+    },
+    "combined_analysis": {
+      "magnification_biopsy_1.8x": {
+        "scenario": "6cm 두꺼운 유방, W/Ag 필터, CsI 검출기, 소초점",
+        "mtf_focal": "penumbra 0.08mm → MTF_focal(5 lp/mm) ≈ 0.64",
+        "mtf_detector": "고에너지 빔 → 빛 확산 증가 → MTF_det(5 lp/mm) ≈ 0.25",
+        "mtf_system": "0.64 × 0.25 = 0.16 at 5 lp/mm",
+        "consequence": "Fine Linear (5 lp/mm 필요) 형태 분해 불가"
+      },
+      "contact_imaging": {
+        "scenario": "일반 접촉 촬영, 대초점, 최적 에너지",
+        "mtf_focal": "penumbra 최소 → MTF_focal(5 lp/mm) ≈ 0.9",
+        "mtf_detector": "적정 에너지 → MTF_det(5 lp/mm) ≈ 0.4",
+        "mtf_system": "0.9 × 0.4 = 0.36 at 5 lp/mm",
+        "consequence": "Fine Linear 분해 가능"
+      }
+    },
+    "resolution_requirements": {
+      "fine_linear_calcification": {
+        "width": "< 0.5 mm, often ~0.1 mm",
+        "required_frequency": "5-10 lp/mm",
+        "mtf_threshold": "MTF > 0.2 for visibility (Rose criterion adapted)"
+      },
+      "amorphous_calcification": {
+        "characteristics": "둥글고 경계 불명확",
+        "dominant_frequency": "1-2 lp/mm",
+        "mtf_threshold": "MTF > 0.5 easily achieved"
+      },
+      "misclassification_risk": {
+        "condition": "MTF_system(5 lp/mm) < 0.15",
+        "result": "Fine Linear → Amorphous 오분류"
+      }
+    },
+    "optimization_strategies": {
+      "focal_spot": "확대 촬영 시 반드시 소초점(0.1mm) 사용",
+      "energy_spectrum": "두꺼운 유방에서도 불필요한 빔 경화 방지 (필터 선택)",
+      "detector_choice": "고해상도 필요 시 직접변환 검출기 고려 (a-Se)",
+      "motion_control": "짧은 노출 시간, 환자 고정"
+    }
+  },
+  "formulas": {
+    "system_mtf": "MTF_sys(f) = Π MTF_i(f)",
+    "focal_mtf": "MTF_f(f) = |sinc(π × f × P)|",
+    "detector_mtf": "MTF_d(f) = sinc(π × f × p) × MTF_scint(f)",
+    "penumbra": "P = focal_size × (M - 1)",
+    "resolution_limit": "f_limit where MTF_sys(f) = 0.1"
+  },
+  "common_misconceptions": {
+    "WARNING": "다음은 LLM이 자주 잘못 설명하는 MTF 관련 오류입니다. 반드시 올바른 물리로 답변하세요.",
+    "misconception_1_dose_improves_mtf": {
+      "WRONG": "선량 증가가 MTF(해상도)를 향상시킨다",
+      "CORRECT": "MTF는 기하학적/검출기 특성에만 의존. 선량은 노이즈만 감소시키며 MTF와 무관",
+      "physics_proof": "MTF = 공간주파수 응답 함수, Dose = 광자 수. 둘은 독립적 요소"
+    },
+    "misconception_2_beam_hardening_improves_mtf": {
+      "WRONG": "빔 경화가 검출기 MTF를 향상시킨다",
+      "CORRECT": "간접변환(CsI) 검출기에서 빔 경화(고에너지)는 오히려 MTF를 저하시킴",
+      "physics_proof": "고에너지 X선 → 깊은 섬광체 침투 → 빛 확산 증가 → MTF_scintillator 감소"
+    },
+    "misconception_3_magnification_always_good": {
+      "WRONG": "확대 촬영이 항상 해상도를 향상시킨다",
+      "CORRECT": "확대율 증가 → penumbra 증가 → MTF_focal 감소. 반드시 소초점 사용 필요",
+      "physics_proof": "P = focal_size × (M-1), 1.8x 확대 + 0.3mm 초점 = 0.24mm penumbra"
+    },
+    "misconception_4_mtf_values": {
+      "correct_example": "두꺼운 유방 1.8x 확대: MTF_system(5 lp/mm) ≈ 0.16",
+      "implication": "Fine Linear 석회화(5+ lp/mm 필요) 형태 분해 어려움"
+    },
+    "misconception_5_morphology_change_not_mtf": {
+      "WRONG": "Fine Linear가 Amorphous로 보이는 것은 대조도(Contrast) 문제이다",
+      "CORRECT": "Fine Linear → Amorphous 형태 변화의 주원인은 **고주파(High-frequency) MTF 손실**이다",
+      "physics_proof": "Fine Linear는 <0.5mm 폭으로 5-10 lp/mm 해상 필요. MTF_system(5 lp/mm) < 0.15면 고주파 성분이 손실되어 날카로운 선이 둥근 점으로 보임",
+      "clinical_consequence": "BI-RADS 4C(Fine Linear, PPV 26-40%) → BI-RADS 4B(Amorphous, PPV 13-25%) 오분류 → 악성도 과소평가"
+    }
+  },
+  "mtf_morphology_connection": {
+    "title": "⚠️ 핵심 연결: MTF 손실 → 형태 오분류 (MUST EXPLAIN)",
+    "causal_chain": [
+      "1. 두꺼운 유방(6cm) + 확대 촬영(1.8x) + CsI 검출기",
+      "2. 빔 경화 → 고에너지 광자 → CsI 섬광체 깊이 침투 → 빛 확산 증가",
+      "3. MTF_detector(5 lp/mm) 저하: 0.4 → 0.25",
+      "4. MTF_system(5 lp/mm) = 0.64 × 0.25 = 0.16 (< 0.2 threshold)",
+      "5. Fine Linear의 고주파 성분(5-10 lp/mm) 손실",
+      "6. 날카로운 선상 구조 → 둥근 점상 구조로 보임",
+      "7. BI-RADS 4C(Fine Linear) → 4B(Amorphous) 오분류"
+    ],
+    "key_insight": "대조도(Δμ)가 충분해도 MTF가 낮으면 형태 정보가 손실된다",
+    "dose_cannot_fix": "선량 증가는 노이즈만 감소시키고, MTF(공간해상도)는 개선하지 못함"
+  },
+  "clinical_relevance": {
+    "birads_morphology": "MTF 저하 → 석회화 형태 오분류 위험 (4C→4B)",
+    "biopsy_targeting": "형태 왜곡 → 타겟 정확도 저하",
+    "dose_irrelevance": "MTF는 기하/검출기 특성 → 선량으로 개선 불가",
+    "ppv_impact": "Fine Linear(PPV 26-40%) vs Amorphous(PPV 13-25%) - 오분류 시 악성도 과소평가"
+  },
+  "sources": [
+    {
+      "id": "Cunningham2000",
+      "citation": "Cunningham IA, Shaw R. Signal-to-noise optimization of medical imaging systems. J Opt Soc Am A. 1999;16(3):621-632.",
+      "pmid": "10069050",
+      "type": "primary"
+    },
+    {
+      "id": "IEC62220",
+      "citation": "IEC 62220-1-2: Determination of the detective quantum efficiency - Mammography detectors. 2015.",
+      "type": "standard"
+    },
+    {
+      "id": "ICRU87",
+      "citation": "ICRU Report 87: Radiation Dose and Image-Quality Assessment in Computed Tomography. 2012.",
+      "type": "report"
+    }
+  ]
+}

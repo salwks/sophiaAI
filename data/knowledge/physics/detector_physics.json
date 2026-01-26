@@ -1,0 +1,369 @@
+{
+  "id": "detector_physics",
+  "keywords": [
+    "DQE", "dqe", "detective quantum efficiency",
+    "MTF", "mtf", "modulation transfer function",
+    "a-Se", "a-se", "selenium", "셀레늄", "비정질 셀레늄",
+    "CsI", "csi", "cesium iodide", "요오드화세슘",
+    "a-Si", "silicon", "실리콘",
+    "직접변환", "direct conversion",
+    "간접변환", "indirect conversion",
+    "검출기", "detector", "detectors",
+    "섬광체", "scintillator",
+    "NPS", "noise power spectrum",
+    "SDNR", "signal difference",
+    "NEQ", "noise equivalent",
+    "fill factor", "pixel",
+    "kVp", "kvp", "관전압",
+    "mAs", "mas", "관전류",
+    "target", "filter", "필터",
+    "Mo", "Rh", "W", "Ag", "몰리브덴", "로듐", "텅스텐",
+    "AEC", "자동노출",
+    "photon counting", "광자계수", "PCD", "pcd", "photon-counting detector",
+    "dual energy", "이중에너지",
+    "substantial equivalence", "510k"
+  ],
+  "sources": [
+    {
+      "id": "marshall2007",
+      "citation": "Marshall NW, et al. A comparison of the performance of digital mammography systems. Phys Med Biol. 2007;52(9):2817-2839",
+      "pmid": "17441236",
+      "doi": "10.1088/0031-9155/52/10/012",
+      "type": "System Comparison - MTF, NPS, DQE measurements"
+    },
+    {
+      "id": "monnin2016",
+      "citation": "Monnin P, et al. A comprehensive model for quantum noise characterization in digital mammography. Phys Med Biol. 2016;61(5):2083-2106",
+      "pmid": "26895467",
+      "doi": "10.1088/0031-9155/61/5/2083",
+      "type": "Detector Noise Model - a-Se, CsI, Photon Counting"
+    },
+    {
+      "id": "vedantham2000",
+      "citation": "Vedantham S, et al. Analysis of the detective quantum efficiency of a developmental detector for digital mammography. Med Phys. 1999;26(11):2508-2518",
+      "pmid": "10587208",
+      "type": "DQE Analysis"
+    },
+    {
+      "id": "korner2023",
+      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "type": "Review Article"
+    },
+    {
+      "id": "iec62220",
+      "citation": "IEC 62220-1-2:2007. Medical electrical equipment - Characteristics of digital X-ray imaging devices - Part 1-2: Determination of the detective quantum efficiency - Mammography detectors",
+      "type": "International Standard"
+    },
+    {
+      "id": "giger2012",
+      "citation": "Giger ML, Karssemeijer N, Schnabel JA. Breast image analysis for risk assessment, detection, diagnosis, and treatment of cancer. Annu Rev Biomed Eng. 2013;15:327-357",
+      "pmid": "23683087",
+      "doi": "10.1146/annurev-bioeng-071812-152416",
+      "type": "Review - Detector Technology Overview"
+    },
+    {
+      "id": "samei2019",
+      "citation": "Samei E, et al. Detective quantum efficiency measured as a function of energy for two full-field digital mammography systems. Med Phys. 2009;36(7):3283-3296",
+      "pmid": "19384004",
+      "doi": "10.1118/1.3148527",
+      "type": "DQE Energy Dependence Study - a-Se vs CsI"
+    },
+    {
+      "id": "liu2017",
+      "citation": "Liu X, et al. An experimental comparison of detector performance for direct and indirect digital radiography systems. Med Phys. 2003;30(4):616-625",
+      "pmid": "12722813",
+      "doi": "10.1118/1.1536950",
+      "type": "Direct vs Indirect Comparison"
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "phase": "7.3",
+    "description": "Digital Mammography Detector Physics - Hardware-level knowledge for manufacturer R&D questions",
+    "last_updated": "2025-01-21",
+    "coverage": ["DQE", "MTF", "NPS", "detector_types", "dose_optimization", "system_parameters"]
+  },
+
+  "detector_types": {
+    "direct_conversion": {
+      "description": "X선 광자가 검출기 물질에서 직접 전기 신호로 변환",
+      "primary_material": "a-Se (amorphous Selenium)",
+      "a_Se": {
+        "atomic_number": 34,
+        "k_edge_keV": 12.7,
+        "optimal_energy_range_keV": "15-25",
+        "electric_field_V_per_um": "10-15",
+        "electron_hole_pair_energy_eV": 50,
+        "advantages": [
+          "높은 공간 해상도 (no light spread)",
+          "우수한 MTF at high spatial frequencies",
+          "미세석회화 에지 선예도 보존",
+          "Fill factor ~100%"
+        ],
+        "disadvantages": [
+          "낮은 X선 흡수 효율 (low Z)",
+          "높은 전압 필요 (~10kV)",
+          "온도 민감성"
+        ],
+        "typical_DQE": {
+          "at_0_lp_mm": "0.65-0.75",
+          "at_5_lp_mm": "0.35-0.45",
+          "dose_dependence": "DQE slightly decreases at very low dose"
+        },
+        "typical_MTF": {
+          "at_2_lp_mm": "0.70-0.80",
+          "at_5_lp_mm": "0.40-0.50",
+          "at_10_lp_mm": "0.15-0.25",
+          "limiting_resolution_lp_mm": "7-10"
+        }
+      }
+    },
+
+    "indirect_conversion": {
+      "description": "X선 → 가시광선(섬광체) → 전기 신호(광다이오드) 2단계 변환",
+      "primary_materials": ["CsI:Tl", "Gd2O2S:Tb"],
+      "CsI_aSi": {
+        "scintillator": "CsI:Tl (Cesium Iodide doped with Thallium)",
+        "photodiode": "a-Si (amorphous Silicon)",
+        "structure": "Columnar (needle-like crystals)",
+        "column_diameter_um": "5-10",
+        "thickness_um": "150-600",
+        "light_yield_photons_per_keV": 54,
+        "advantages": [
+          "높은 X선 흡수 효율 (high Z: Cs=55, I=53)",
+          "우수한 DQE at zero frequency",
+          "columnar 구조로 광산란 최소화",
+          "저선량에서 SNR 우수"
+        ],
+        "disadvantages": [
+          "광확산으로 인한 MTF 저하",
+          "고주파 해상도 손실",
+          "Fill factor < 100% (TFT gap)"
+        ],
+        "typical_DQE": {
+          "at_0_lp_mm": "0.70-0.80",
+          "at_5_lp_mm": "0.25-0.35",
+          "dose_dependence": "DQE maintained at low dose due to high absorption"
+        },
+        "typical_MTF": {
+          "at_2_lp_mm": "0.55-0.65",
+          "at_5_lp_mm": "0.25-0.35",
+          "at_10_lp_mm": "0.05-0.15",
+          "limiting_resolution_lp_mm": "5-7"
+        }
+      },
+      "GOS": {
+        "scintillator": "Gd2O2S:Tb (Gadolinium Oxysulfide)",
+        "structure": "Powder/granular",
+        "notes": "Older technology, higher light scatter than CsI",
+        "typical_DQE_at_0": "0.50-0.60",
+        "typical_MTF_at_5_lp_mm": "0.15-0.25"
+      }
+    },
+
+    "comparison_table": {
+      "parameter": ["DQE(0)", "DQE(5 lp/mm)", "MTF(5 lp/mm)", "Microcalc Detection", "Low Dose Performance"],
+      "a_Se_direct": ["0.65-0.75", "0.35-0.45", "0.40-0.50", "Excellent (edge preservation)", "Moderate"],
+      "CsI_indirect": ["0.70-0.80", "0.25-0.35", "0.25-0.35", "Good (some blur)", "Excellent"],
+      "clinical_implication": [
+        "간접변환 더 우수",
+        "직접변환 더 우수",
+        "직접변환 더 우수",
+        "직접변환 더 우수",
+        "간접변환 더 우수"
+      ]
+    }
+  },
+
+  "DQE_physics": {
+    "definition": "Detective Quantum Efficiency - 입력 SNR 대비 출력 SNR의 제곱비",
+    "formula": "DQE(f) = (SNR_out(f))^2 / (SNR_in(f))^2",
+    "expanded_formula": "DQE(f) = (MTF(f))^2 / (NPS_normalized(f) * q)",
+    "components": {
+      "MTF": "Modulation Transfer Function - 공간주파수별 대조도 전달 효율",
+      "NPS": "Noise Power Spectrum - 주파수별 노이즈 분포",
+      "q": "입사 X선 광자 밀도 (photons/mm^2)"
+    },
+    "frequency_dependence": {
+      "at_zero_frequency": "최대값, 전체 흡수 효율 반영",
+      "at_high_frequency": "MTF 저하로 급격히 감소",
+      "clinical_relevance": "미세석회화 검출은 2-5 lp/mm 범위의 DQE가 중요"
+    },
+    "dose_relationship": {
+      "general": "DQE는 선량에 약간 의존 (quantum-limited regime에서 일정)",
+      "low_dose_behavior": "매우 낮은 선량에서 electronic noise가 지배적 → DQE 감소",
+      "formula_approximation": "DQE_eff ≈ DQE_ideal * (1 - σ_electronic²/σ_quantum²)"
+    }
+  },
+
+  "MTF_physics": {
+    "definition": "Modulation Transfer Function - 시스템의 공간 해상도 특성",
+    "formula": "MTF(f) = |FT{LSF(x)}| = |FT{PSF(x,y)}|",
+    "measurement_methods": ["Edge method (slanted edge)", "Slit method", "Bar pattern"],
+    "factors_affecting_MTF": {
+      "detector_element_size": "픽셀 크기 ↓ → MTF ↑",
+      "scintillator_thickness": "두께 ↑ → 흡수 ↑, MTF ↓ (trade-off)",
+      "light_spread": "광확산 ↑ → MTF ↓ (간접변환의 주요 제한)",
+      "focal_spot_size": "초점 크기 ↑ → geometric unsharpness ↑ → MTF ↓"
+    },
+    "clinical_thresholds": {
+      "microcalcification_detection": "MTF(5 lp/mm) ≥ 0.30 권장",
+      "mass_detection": "MTF(2 lp/mm) ≥ 0.50 권장"
+    }
+  },
+
+  "dose_optimization": {
+    "parameters": {
+      "kVp": {
+        "definition": "관전압 (peak kilovoltage)",
+        "typical_range_mammography": "24-35 kVp",
+        "dose_relationship": "Dose ∝ kVp^2.5 (approximately)",
+        "effect_on_contrast": "kVp ↑ → Contrast ↓ (beam hardening)",
+        "optimization_rule": "1 kVp 증가 → 약 10-15% 선량 감소 (동일 광학밀도)",
+        "trade_off": "kVp ↑ → 선량 ↓, 대조도 ↓ → CNR 변화는 복합적"
+      },
+      "mAs": {
+        "definition": "관전류-시간적 (mA × seconds)",
+        "dose_relationship": "Dose ∝ mAs (linear)",
+        "effect_on_noise": "mAs ↑ → Noise ↓ (σ ∝ 1/√mAs)",
+        "optimization_rule": "mAs 10% 감소 → 선량 10% 감소, 노이즈 5.4% 증가"
+      },
+      "target_filter": {
+        "combinations": {
+          "Mo_Mo": {"use": "Thin breast (<4cm)", "HVL_mmAl": "0.30-0.35", "mean_energy_keV": "17-18"},
+          "Mo_Rh": {"use": "Medium breast (4-6cm)", "HVL_mmAl": "0.38-0.42", "mean_energy_keV": "18-19"},
+          "Rh_Rh": {"use": "Thick breast (>6cm)", "HVL_mmAl": "0.42-0.48", "mean_energy_keV": "20-22"},
+          "W_Rh": {"use": "DBT/combo modes", "HVL_mmAl": "0.45-0.55", "mean_energy_keV": "19-21"},
+          "W_Ag": {"use": "Very thick/dense breast", "HVL_mmAl": "0.50-0.60", "mean_energy_keV": "21-23"}
+        },
+        "dose_reduction_by_filter_change": {
+          "Mo_Mo_to_Mo_Rh": "15-25% reduction",
+          "Mo_Rh_to_Rh_Rh": "10-20% reduction",
+          "Mo_Mo_to_W_Rh": "20-40% reduction"
+        }
+      },
+      "AEC_mode": {
+        "definition": "Automatic Exposure Control - 자동노출제어",
+        "modes": ["DOSE", "STD", "CNT (Contrast)"],
+        "dose_mode": "최소 선량 우선, CNR 다소 감소 허용",
+        "contrast_mode": "최대 대조도 우선, 선량 증가 허용"
+      }
+    },
+
+    "CNR_maintenance_formulas": {
+      "CNR_definition": "CNR = (S_object - S_background) / σ_background",
+      "Rose_Criterion": "CNR ≥ 5 for 95% detection probability",
+      "CNR_vs_dose": "CNR ∝ √Dose (quantum noise limited)",
+      "dose_reduction_with_CNR_maintenance": {
+        "scenario": "선량 X% 감소하면서 동일 CNR 유지",
+        "required_DQE_increase": "DQE_new / DQE_old = 1 / (1 - X/100)",
+        "example_10_percent": "10% 선량 감소 → DQE 11.1% 증가 필요",
+        "example_20_percent": "20% 선량 감소 → DQE 25% 증가 필요",
+        "alternative_approaches": [
+          "검출기 DQE 향상 (hardware)",
+          "노이즈 감소 알고리즘 적용 (software)",
+          "적응적 필터링 (iterative reconstruction)"
+        ]
+      }
+    }
+  },
+
+  "manufacturer_design_considerations": {
+    "detector_selection_criteria": {
+      "microcalcification_priority": {
+        "recommended": "a-Se direct conversion",
+        "reason": "Higher MTF at high spatial frequencies preserves calcification edges",
+        "trade_off": "May require slightly higher dose for equivalent SNR"
+      },
+      "low_dose_priority": {
+        "recommended": "CsI/a-Si indirect conversion",
+        "reason": "Higher DQE(0) and X-ray absorption efficiency",
+        "trade_off": "Some loss of high-frequency detail"
+      },
+      "balanced_design": {
+        "approach": "Optimize pixel size and scintillator thickness",
+        "pixel_size_recommendation": "50-100 μm for mammography",
+        "considerations": "Smaller pixels improve MTF but may reduce fill factor"
+      }
+    },
+
+    "substantial_equivalence_metrics": {
+      "FDA_510k_key_parameters": [
+        "DQE at 0, 2, 4 lp/mm",
+        "MTF at Nyquist frequency",
+        "Limiting spatial resolution",
+        "SDNR (Signal Difference to Noise Ratio)",
+        "MGD at clinically relevant phantom thicknesses"
+      ],
+      "acceptable_variation": {
+        "DQE": "±10% of predicate device",
+        "MTF": "±10% of predicate device",
+        "MGD": "≤predicate device at same image quality"
+      }
+    }
+  },
+
+  "advanced_metrics": {
+    "SDNR": {
+      "definition": "Signal Difference to Noise Ratio",
+      "formula": "SDNR = |S1 - S2| / σ",
+      "relation_to_CNR": "Essentially equivalent to CNR in practice",
+      "clinical_threshold": "SDNR ≥ 5 (Rose Criterion)"
+    },
+    "NEQ": {
+      "definition": "Noise Equivalent Quanta",
+      "formula": "NEQ(f) = DQE(f) × q",
+      "meaning": "Effective number of quanta contributing to image at frequency f"
+    },
+    "d_prime": {
+      "definition": "Detectability index (d')",
+      "formula_simple": "d' = CNR = ΔS/σ",
+      "formula_frequency": "d'^2 = ∫ (C(f)² × MTF(f)² / NPS(f)) df",
+      "relation_to_dose": "d' ∝ √Dose",
+      "dose_reduction_effect": "40% dose reduction → d' decreases by 22.5%"
+    }
+  },
+
+  "clinical_application_examples": {
+    "example_1": {
+      "question": "a-Se에서 CsI로 변경 시 동일 CNR 유지를 위한 선량 변화",
+      "given": {
+        "a_Se_DQE_5lp": 0.40,
+        "CsI_DQE_5lp": 0.30,
+        "target": "Same CNR at 5 lp/mm"
+      },
+      "calculation": {
+        "step1": "CNR ∝ √(DQE × Dose)",
+        "step2": "CNR_aSe = CNR_CsI",
+        "step3": "√(0.40 × Dose_aSe) = √(0.30 × Dose_CsI)",
+        "step4": "Dose_CsI / Dose_aSe = 0.40 / 0.30 = 1.33"
+      },
+      "conclusion": "CsI 시스템은 동일 CNR을 위해 33% 더 높은 선량 필요 (at 5 lp/mm)"
+    },
+    "example_2": {
+      "question": "선량 10% 감소하면서 CNR 유지를 위한 설계 변경",
+      "approach": [
+        "Option A: DQE 11.1% 향상 (검출기 개선)",
+        "Option B: 노이즈 감소 알고리즘 적용 (effective noise 10% 감소)",
+        "Option C: Target/Filter 최적화로 contrast 증가"
+      ],
+      "Rose_Criterion_check": "최종 CNR ≥ 5 확인 필수"
+    }
+  },
+
+  "expert_insight": {
+    "design_trade_offs": {
+      "resolution_vs_dose": "해상도 ↑ (작은 픽셀) → 노이즈 ↑ → 선량 ↑ 필요",
+      "thickness_dilemma": "섬광체 두께 ↑ → 흡수 ↑, DQE(0) ↑ → MTF ↓, 해상도 ↓",
+      "optimization_strategy": "임상 목적(석회화 vs 종괴)에 따른 차별화된 최적화"
+    },
+    "future_technologies": {
+      "photon_counting": "에너지 분별 → spectral imaging, 노이즈 제거",
+      "dual_energy": "조직 특성화, 대조도 향상",
+      "deep_learning_denoising": "effective dose reduction without hardware change"
+    }
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "id": "contrast_enhanced_mammography",
+  "category": "Contrast-Enhanced Mammography",
+  "keywords": [
+    "CEM", "contrast enhanced mammography", "조영증강 유방촬영",
+    "CEDM", "contrast enhanced digital mammography",
+    "dual energy", "이중에너지", "spectral mammography",
+    "iodine", "요오드", "contrast agent", "조영제",
+    "angiogenesis", "신생혈관", "enhancement",
+    "k-edge", "low energy", "high energy",
+    "recombined image", "재조합 영상"
+  ],
+  "sources": [
+    {
+      "id": "jochelson2021",
+      "citation": "Jochelson MS, Lobbes MBI. Contrast-enhanced Mammography: State of the Art. Radiology. 2021;299(1):36-48",
+      "pmid": "33650905",
+      "pmc": "PMC7997616",
+      "doi": "10.1148/radiol.2021201948",
+      "type": "State of the Art Review"
+    },
+    {
+      "id": "dromain2011",
+      "citation": "Dromain C, Thibault F, Muller S, et al. Dual-energy contrast-enhanced digital mammography: initial clinical results. Eur Radiol. 2011;21(3):565-574",
+      "pmid": "20857116",
+      "doi": "10.1007/s00330-010-1944-y",
+      "type": "Initial Clinical Results"
+    },
+    {
+      "id": "fallenberg2014",
+      "citation": "Fallenberg EM, Dromain C, Diekmann F, et al. Contrast-enhanced spectral mammography versus MRI: Initial results in the detection of breast cancer and assessment of tumour size. Eur Radiol. 2014;24(1):256-264",
+      "pmid": "24048724",
+      "doi": "10.1007/s00330-013-3007-7",
+      "type": "CEM vs MRI Comparison"
+    },
+    {
+      "id": "lobbes2014",
+      "citation": "Lobbes MBI, Smidt ML, Houwers J, Tjan-Heijnen VC, Wildberger JE. Contrast enhanced mammography: techniques, current results, and potential indications. Clin Radiol. 2013;68(9):935-944",
+      "pmid": "23790691",
+      "doi": "10.1016/j.crad.2013.04.009",
+      "type": "Technical Review"
+    },
+    {
+      "id": "sung2022",
+      "citation": "Sung JS, Lebron L, Keating D, et al. Performance of Dual-Energy Contrast-enhanced Digital Mammography for Screening Women at Increased Risk of Breast Cancer. Radiology. 2019;293(1):81-88",
+      "pmid": "31429682",
+      "pmc": "PMC6776325",
+      "doi": "10.1148/radiol.2019182660",
+      "type": "Screening Performance Study"
+    },
+    {
+      "id": "travieso2022",
+      "citation": "Travieso-Aja MDM, et al. Investigation of test methods for QC in dual-energy based contrast-enhanced digital mammography systems. Med Phys. 2023;50(10):6411-6426",
+      "pmid": "37820689",
+      "doi": "10.1002/mp.16750",
+      "type": "QC Methods Study"
+    }
+  ],
+  "content": {
+    "principles": {
+      "source_ref": "jochelson2021, lobbes2014",
+      "description": "CEM은 요오드화 조영제를 정맥 주사한 후 이중 에너지 기법을 사용하여 종양 신생혈관을 시각화하는 기술",
+      "mechanism": "유방암의 종양 신생혈관(angiogenesis)으로 인해 조영제가 축적되어 증강됨",
+      "naming": "CEM, CEDM, CESM, contrast-enhanced spectral mammography 등으로 불림"
+    },
+    "dual_energy_technique": {
+      "source_ref": "jochelson2021, dromain2011",
+      "iodine_k_edge_keV": 33.2,
+      "low_energy_image": {
+        "energy_range_keV": "26-32",
+        "description": "K-edge 아래에서 획득, 기존 맘모그램과 유사"
+      },
+      "high_energy_image": {
+        "energy_range_keV": "45-49",
+        "description": "K-edge 위에서 획득, 요오드 감쇠 증가"
+      },
+      "recombined_image": {
+        "description": "두 영상을 가중 로그 감산하여 유방 조직 신호 제거, 요오드 신호만 남김",
+        "formula": "I_recombined = ln(I_low) - w × ln(I_high)",
+        "weighting_factor": "유방 조직 신호 제거를 위해 최적화"
+      }
+    },
+    "acquisition_protocol": {
+      "source_ref": "jochelson2021, lobbes2014",
+      "contrast_injection": {
+        "agent": "요오드화 조영제 (300-370 mgI/mL)",
+        "dose_ml_kg": "1.5",
+        "injection_rate_ml_s": "3",
+        "delay_min": "2"
+      },
+      "imaging_sequence": {
+        "timing": "조영제 주입 2분 후 첫 영상 시작",
+        "order": "MLO → CC 순서 또는 CC → MLO (기관별 프로토콜)",
+        "total_time_min": "6-10"
+      }
+    },
+    "clinical_performance": {
+      "source_ref": "jochelson2021, sung2022, fallenberg2014",
+      "sensitivity": {
+        "cem": "88-100%",
+        "mammography_alone": "50-75%",
+        "comparison": "CEM이 표준 맘모그래피 대비 20-50% 민감도 향상"
+      },
+      "specificity": {
+        "cem": "67-94%",
+        "note": "MRI보다 위양성률 낮음"
+      },
+      "cem_vs_mri": {
+        "source_ref": "fallenberg2014",
+        "finding": "암 검출에서 CEM과 MRI 유사한 성능",
+        "advantages_cem": ["낮은 비용", "빠른 검사", "접근성 높음", "폐소공포증 없음"],
+        "advantages_mri": ["더 높은 민감도", "다면 영상", "조영 동역학 평가"]
+      }
+    },
+    "indications": {
+      "source_ref": "jochelson2021, lobbes2014",
+      "established": [
+        "치밀유방에서 암 검출 향상",
+        "진단 해결(diagnostic workup)",
+        "수술 전 병기 결정",
+        "신보조 화학요법 반응 평가"
+      ],
+      "emerging": [
+        "고위험 여성 선별검사",
+        "MRI 대안 (금기증 또는 접근성 문제)",
+        "잔여 암 평가"
+      ]
+    },
+    "dose_considerations": {
+      "source_ref": "jochelson2021",
+      "total_mgd": "이중 노출로 인해 기존 맘모그래피의 약 1.2-1.5배",
+      "note": "낮은 에너지 + 높은 에너지 영상 합산",
+      "justification": "추가 진단 정보로 인한 이점이 소량의 추가 선량보다 큼"
+    },
+    "qc_considerations": {
+      "source_ref": "travieso2022",
+      "iodine_signal_testing": {
+        "description": "요오드 신호 정량화를 위한 QC 팬텀 테스트",
+        "systems_tested": ["Fujifilm", "GE Healthcare", "Hologic", "Siemens"]
+      },
+      "challenges": [
+        "재조합 영상의 정량적 평가",
+        "요오드 농도 정확도",
+        "시스템 간 표준화"
+      ]
+    }
+  },
+  "clinical_relevance": {
+    "dense_breast_imaging": "치밀유방에서 표준 맘모그래피의 한계 극복",
+    "mri_alternative": "MRI 접근성이 제한된 환경에서 대안",
+    "cost_effectiveness": "MRI 대비 낮은 비용으로 유사한 진단 성능",
+    "contraindications": "요오드 조영제 금기(신기능 저하, 알레르기), 갑상선 질환 고려",
+    "source_ref": "jochelson2021, lobbes2014"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "id": "cesm_iodine_contrast",
+  "title": "CESM Iodine Contrast Agent Physics",
+  "domain": "contrast_agent",
+  "keywords": [
+    "CESM", "contrast enhanced", "조영증강", "아이오딘 조영제",
+    "iodine contrast", "dual-energy", "이중에너지",
+    "조영제 K-edge", "contrast K-edge", "iodinated contrast",
+    "enhancement", "증강 영상", "recombined image"
+  ],
+  "disambiguation": {
+    "context": "contrast_agent",
+    "not_context": ["CsI 검출기", "섬광체", "detector material"],
+    "note": "CESM의 Iodine은 조영제이며, CsI 검출기의 Iodine과 구분 필요. 조영증강/CESM/dual-energy 언급 시 조영제 맥락"
+  },
+  "content": {
+    "principle": {
+      "mechanism": "혈관 투과성 증가 병변에 아이오딘 조영제 축적 → K-edge 효과로 대조도 증강",
+      "iodine_k_edge": "33.2 keV",
+      "dual_energy": {
+        "low_energy": "26-32 keV (K-edge 아래, 조직 대조도)",
+        "high_energy": "45-49 keV (K-edge 위, 아이오딘 강조)",
+        "recombined": "로그 차감 → 조직 신호 제거, 아이오딘만 표시"
+      }
+    },
+    "clinical_application": {
+      "indications": [
+        "유방 MRI 금기 환자",
+        "Problem-solving (불확실 소견)",
+        "신생물 혈관성 평가",
+        "치료 반응 모니터링"
+      ],
+      "contraindications": [
+        "아이오딘 과민증",
+        "신기능 저하 (eGFR < 30)",
+        "갑상선 기능 항진증"
+      ]
+    },
+    "physics_optimization": {
+      "energy_separation": "LE/HE 에너지 차이가 클수록 아이오딘 CNR 향상",
+      "k_edge_positioning": "HE 평균 에너지가 K-edge 직상(35-40 keV)일 때 최적",
+      "dose_allocation": "LE:HE = 1:1 또는 1.5:1 권장"
+    },
+    "difference_from_calcification": {
+      "iodine_contrast": "혈관성 병변 (Mass, Enhancement)",
+      "calcification": "석회질 침착 (조영제 불필요, 일반 맘모그래피)",
+      "key_distinction": "석회화 진단 시 조영제 사용 안 함"
+    }
+  },
+  "formulas": {
+    "iodine_cnr": "CNR_I = (S_enhanced - S_background) / σ_noise",
+    "recombined_image": "I_rec = ln(I_LE) - w × ln(I_HE), w = weighting factor",
+    "optimal_weighting": "w = μ_tissue(LE) / μ_tissue(HE)"
+  },
+  "clinical_relevance": {
+    "birads_application": "CESM 소견은 BI-RADS MRI 어휘 차용",
+    "false_positive": "배경 실질 증강이 높으면 병변 가림 가능",
+    "not_for_calcification": "미세석회화 진단에는 CESM 불필요 (일반 맘모/DBT 사용)"
+  },
+  "sources": [
+    {
+      "id": "Dromain2011",
+      "citation": "Dromain C, et al. Dual-energy contrast-enhanced digital mammography: initial clinical results. Eur Radiol. 2011;21(3):565-574.",
+      "pmid": "20865420",
+      "type": "primary"
+    },
+    {
+      "id": "Jochelson2013",
+      "citation": "Jochelson MS, et al. Bilateral contrast-enhanced dual-energy digital mammography: feasibility and comparison with conventional digital mammography and MR imaging in women with known breast carcinoma. Radiology. 2013;266(3):743-751.",
+      "pmid": "23220899",
+      "type": "primary"
+    },
+    {
+      "id": "ACR_CEM",
+      "citation": "ACR Practice Parameter for the Performance of Contrast-Enhanced Mammography (CEM). 2022.",
+      "type": "guideline"
+    }
+  ]
+}

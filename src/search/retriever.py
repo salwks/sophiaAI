@@ -190,19 +190,8 @@ class HybridRetriever:
         for rank, (pmid, _) in enumerate(vector_results, 1):
             fusion_scores[pmid] += vector_w * (1.0 / (k + rank))
 
-        # BI-RADS Lexicon 섹션 Boost (canonical definitions)
-        lexicon_boost = 1.2  # 20% 가중치 추가
-        lexicon_sections = [
-            "BIRADS_2025_SECTION_II",    # Breast Imaging Lexicon
-            "BIRADS_2025_SECTION_III",   # Breast Density
-            "BIRADS_2025_SECTION_IV_A",  # Masses
-            "BIRADS_2025_SECTION_IV_B",  # Calcifications
-            "BIRADS_2025_SECTION_IV_C",  # Architectural Distortion
-        ]
-
-        for pmid in fusion_scores:
-            if pmid in lexicon_sections:
-                fusion_scores[pmid] *= lexicon_boost
+        # NOTE: BI-RADS Lexicon Boost는 Phase 3 WMR의 type_weight로 이전됨
+        # WeightedMedicalReranker가 prefix_weights["BIRADS_"] = 1.5로 처리
 
         # 정렬
         sorted_results = sorted(
@@ -212,6 +201,9 @@ class HybridRetriever:
         )
 
         return sorted_results
+
+    # NOTE: BI-RADS Lexicon Boost 로직은 Phase 3 WMR로 이전됨
+    # WeightedMedicalReranker가 type_weight로 가이드라인 우선순위 처리
 
     def reciprocal_rank_fusion(
         self,
@@ -251,6 +243,9 @@ class HybridRetriever:
     ) -> List[Tuple[str, float]]:
         """
         가이드라인 의도 감지 시 BI-RADS 문서를 상위에 강제 주입
+
+        NOTE: Phase 3 WMR 사용 시, 이 로직은 WeightedMedicalReranker의
+        type_weight + intent_boost로 대체됩니다. WMR 미사용 시 fallback.
 
         Args:
             results: 기존 검색 결과
@@ -347,6 +342,10 @@ class HybridRetriever:
     ) -> List[Tuple[str, float]]:
         """
         케이스 리포트를 하위로 다운랭킹
+
+        NOTE: Phase 3 WMR 사용 시, 이 로직은 WeightedMedicalReranker의
+        publication_type_penalties로 대체됩니다 (case report: 0.6배).
+        WMR 미사용 시 fallback.
 
         LLM이 recommended_exclusions에 "Case Reports"를 포함시킨 경우 또는
         연구 관련 의도가 감지된 경우 동작
@@ -462,6 +461,16 @@ class HybridRetriever:
         # MeSH 용어도 BM25에 포함
         if query.mesh_terms:
             bm25_keywords = bm25_keywords + query.mesh_terms
+
+        # Phase 1: CoT 확장 키워드 추가 (Medical-Logic-CoT)
+        if hasattr(query, 'expanded_keywords') and query.expanded_keywords:
+            bm25_keywords = bm25_keywords + query.expanded_keywords
+            logger.info(f"Added {len(query.expanded_keywords)} CoT-expanded keywords")
+
+        # Phase 1: 시맨틱 변형도 BM25에 포함
+        if hasattr(query, 'semantic_variations') and query.semantic_variations:
+            bm25_keywords = bm25_keywords + query.semantic_variations
+            logger.info(f"Added {len(query.semantic_variations)} semantic variations")
 
         bm25_results = self.search_bm25(
             bm25_keywords,

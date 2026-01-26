@@ -1,0 +1,225 @@
+{
+  "id": "pcd_spectral_contrast",
+  "category": "Detector Physics - PCD Spectral Contrast Enhancement",
+  "keywords": ["PCD", "EID", "spectral", "스펙트럼", "contrast", "대조도", "CNR", "energy weighting", "에너지 가중", "K-edge", "iodine", "아이오딘", "요오드", "조영제", "contrast agent", "CESM", "material decomposition", "물질 분해", "dual energy", "이중 에너지", "energy bin", "에너지 빈", "detectability", "CdTe", "spectral mammography", "조영증강"],
+  "sources": [
+    {
+      "id": "fredenberg2010",
+      "citation": "Fredenberg E, et al. Contrast-enhanced spectral mammography with photon-counting detector. Med Phys. 2010;37(5):2017-2029",
+      "pmid": "20527535",
+      "doi": "10.1118/1.3371689",
+      "type": "Experimental"
+    },
+    {
+      "id": "berglund2014",
+      "citation": "Berglund J, et al. Energy weighting improves dose efficiency on spectral photon-counting mammography. J Med Imaging. 2014;1(3):031003",
+      "pmid": "26158045",
+      "doi": "10.1117/1.JMI.1.3.031003",
+      "type": "Clinical Implementation"
+    },
+    {
+      "id": "ding2017",
+      "citation": "Ding H, Molloi S. Quantitative contrast-enhanced spectral mammography with PCDs. Med Phys. 2017;44(8):3939-3951",
+      "pmid": "28432828",
+      "doi": "10.1002/mp.12296",
+      "type": "Feasibility Study"
+    },
+    {
+      "id": "ruth2020",
+      "citation": "Ruth V, et al. Spectral performance for contrast-enhanced breast CT with photon-counting. Med Phys. 2020;47(7):2826-2837",
+      "pmid": "32155660",
+      "doi": "10.1002/mp.14133",
+      "type": "Phantom Study"
+    },
+    {
+      "id": "jost2023",
+      "citation": "Jost G, et al. New Contrast Media for K-Edge Imaging With PCD CT. Invest Radiol. 2023;58(7):515-522",
+      "pmid": "37068840",
+      "doi": "10.1097/RLI.0000000000000978",
+      "type": "Review"
+    },
+    {
+      "id": "flohr2023",
+      "citation": "Flohr T, Schmidt B. Technical Basics and Clinical Benefits of Photon-Counting CT. Invest Radiol. 2023;58(7):441-450",
+      "pmid": "37185302",
+      "pmc": "PMC10259209",
+      "doi": "10.1097/RLI.0000000000000980",
+      "type": "Review"
+    },
+    {
+      "id": "kalluri2013",
+      "citation": "Kalluri KS, et al. Energy weighting with energy discriminating PCD for breast CT. Med Phys. 2013;40(8):081923",
+      "pmid": "23927337",
+      "pmc": "PMC3745502",
+      "doi": "10.1118/1.4813901",
+      "type": "Simulation"
+    },
+    {
+      "id": "day2024",
+      "citation": "Day JA, Tanguay J. Monte-Carlo study of CEM with CdTe PCDs. Med Phys. 2024;51(4):2479-2498",
+      "pmid": "37967277",
+      "doi": "10.1002/mp.16837",
+      "type": "Simulation"
+    }
+  ],
+  "core_physics": {
+    "phase2_axioms": {
+      "axiom_4": {
+        "law": "μ(E) is energy-dependent",
+        "description": "감쇠계수는 에너지의 함수. 광전효과(μ_pe ∝ Z³/E³)와 콤프턴산란(μ_compton ≈ ρ)의 합.",
+        "formula_latex": "\\mu(E) = \\mu_{pe}(E) + \\mu_{compton}(E)",
+        "implication": "대조도 Δμ(E)는 에너지에 따라 크게 변화 → 에너지 분해가 대조도 향상의 열쇠"
+      },
+      "axiom_5": {
+        "law": "EID는 에너지 비례 가중(w∝E)으로 대조도를 구조적으로 희석",
+        "description": "EID는 광자 에너지에 비례하는 가중치(w=E)로 신호를 통합. 대조도가 높은 저에너지 광자보다 대조도가 낮은 고에너지 광자에 더 큰 가중치를 부여하여 CNR을 희석.",
+        "formula_latex": "\\text{CNR}_{\\text{EID}} = \\frac{\\sum E_i \\times \\Delta\\mu_i \\times N_i}{\\sqrt{\\sum E_i^2 \\times N_i}}",
+        "implication": "EID의 에너지 비례 가중은 대조도에 역행 — 이것이 PCD 우위의 근본 원인 [Kalluri 2013, PMC3745502]",
+        "source_quote": "For energy integrating detectors, this weight is inherently proportional to the photon energy deposited, whereas for photon counting detectors, this weighting function is simply equal to 1 [PMC3745502]"
+      },
+      "axiom_6": {
+        "law": "PCD 에너지 빈 → 최적 가중 → CNR_PCD ≥ CNR_EID",
+        "description": "PCD의 에너지 빈별 독립 측정 → matched filter (최적 가중) 적용 가능. Cauchy-Schwarz 부등식에 의해 항상 CNR_PCD ≥ CNR_EID.",
+        "formula_latex": "\\text{CNR}_{\\text{PCD}}^2 = \\sum [\\Delta\\mu_i]^2 \\times N_i \\geq \\frac{[\\sum \\Delta\\mu_i \\times N_i]^2}{\\sum N_i} = \\text{CNR}_{\\text{EID}}^2",
+        "implication": "η = CNR_PCD/CNR_EID ≥ 1 (항상). 스펙트럼이 넓을수록, K-edge 효과가 클수록 η 증가."
+      }
+    },
+    "energy_weighting_gain": {
+      "formula_latex": "\\eta^2 = \\frac{[\\sum \\Delta\\mu_i^2 \\times N_i] \\times [\\sum N_i]}{[\\sum \\Delta\\mu_i \\times N_i]^2}",
+      "description": "에너지 가중 이득: PCD가 EID 대비 CNR을 향상시키는 비율",
+      "solver_result": {
+        "cesm_4bin": "η = 1.1840 (+18.4% CNR 향상, Iodine CESM 4-빈 모델)",
+        "kedge_2bin": "η = 1.1194 (+11.9% CNR 향상, Iodine K-edge 2-빈 모델)",
+        "boundary_mono": "η = 1.0000 (단색 빔: 에너지 가중 이득 없음)",
+        "boundary_uniform_dmu": "η = 1.0092 (균일 Δμ, 다른 에너지: EID w∝E 효과로 미세 이득)"
+      },
+      "eid_formula_note": "EID CNR = [Σ E_i × Δμ_i × N_i] / √(Σ E_i² × N_i) — EID는 w∝E 가중 [Kalluri 2013, PMC3745502]",
+      "cauchy_schwarz_guarantee": "η ≥ 1 항상 성립 (Cauchy-Schwarz 부등식). CNR_PCD < CNR_EID는 물리적으로 불가능."
+    },
+    "kedge_imaging": {
+      "iodine_kedge_keV": 33.2,
+      "mechanism": "아이오딘 K-edge (33.2 keV)에서 μ가 급격히 증가. PCD는 K-edge 전후 에너지 빈을 분리하여 극대 대조도 달성.",
+      "optimal_threshold": "32.59 keV (Ruth et al. 2020에서 실험적으로 확인)",
+      "clinical_note": "CESM 프로토콜: 49 kVp W/Ag 또는 W/Rh, 아이오딘 조영제 투여 후 촬영"
+    }
+  },
+  "evidence_database": {
+    "content_verification_note": "모든 finding은 PubMed abstract에서 직접 확인된 내용만 포함. verification_level: abstract_quote(직접 인용), abstract_supported(abstract에서 확인 가능), full_text_needed(추가 확인 필요)",
+    "energy_weighting": {
+      "summary": "PCD의 에너지 가중(energy weighting)을 통한 CNR 향상 및 선량 감소. EID는 w∝E (sub-optimal), PCD는 w=1 (photon counting) 또는 w_opt (matched filter).",
+      "key_evidence": [
+        {
+          "ref_id": "kalluri2013",
+          "finding": "EID의 가중치는 광자 에너지에 비례(w∝E)하여 sub-optimal. PCD는 w=1 (photon counting) 또는 최적 가중 적용 가능. 유방 CT에서 에너지 가중의 효과를 시뮬레이션으로 검증.",
+          "full_text_quote": "For energy integrating detectors, this weight is inherently proportional to the photon energy deposited, whereas for photon counting detectors, this weighting function is simply equal to 1",
+          "source": "Kalluri KS, et al. Med Phys. 2013;40(8):081923 [PMID:23927337, PMC3745502]",
+          "verification_level": "full_text_verified",
+          "confidence": "highest - defines the fundamental EID vs PCD weighting difference",
+          "critical_insight": "이 논문이 Phase 2 Law 5의 핵심 근거: EID의 에너지 비례 가중(w∝E)이 대조도에 역행하는 이유를 명확히 정의"
+        },
+        {
+          "ref_id": "fredenberg2015",
+          "finding": "에너지 가중의 CNR 이득은 2.2~5.2% 범위. 이는 동일 CNR에서 4.5~11% 선량 감소로 환산됨. 미세석회화 및 자동 영상 분석에서도 에너지 가중 효과 확인.",
+          "abstract_quote": "CNR benefit of energy weighting for a number of relevant target-background combinations...fell in the range of 2.2 to 5.2% when using optimal weight factors...translates to a potential dose reduction at constant CNR in the range of 4.5 to 11%",
+          "source": "Berglund J, et al. J Med Imaging. 2014;1(3):031003 [PMID:26158045]",
+          "verification_level": "abstract_quote",
+          "confidence": "highest - quantitative clinical implementation data from abstract"
+        },
+        {
+          "ref_id": "flohr2023",
+          "finding": "EID는 총 에너지를 적분(w∝E)하여 저에너지 광자의 기여가 감소. PCD는 모든 광자를 동일 가중(w=1)으로 계수. Iodine CNR 향상: 80 kVp +11%, 100 kVp +23%, 120 kVp +31%, 140 kVp +38% (kVp 높을수록 스펙트럼 넓어져 EID w∝E 불이익 증가).",
+          "full_text_quotes": [
+            "An EID generates a signal corresponding to the total x-ray energy registered during the measurement time of a projection",
+            "Photon-counting detectors, on the other hand, count all x-ray quanta whose energy exceeds the lowest energy threshold with equal weight",
+            "a mean increase in iodine CNR of 11%, 23%, 31%, and 38% was observed at 80, 100, 120, and 140 kVp, respectively"
+          ],
+          "source": "Flohr T, Schmidt B. Invest Radiol. 2023;58(7):441-450 [PMID:37185302]",
+          "verification_level": "full_text_verified",
+          "confidence": "highest - full text explicitly describes EID w∝E vs PCD w=1, with quantitative iodine CNR data",
+          "critical_insight": "kVp 의존성은 스펙트럼 폭과 EID 가중 불이익의 관계를 직접 증명. 80 kVp(좁은 스펙트럼) → +11%, 140 kVp(넓은 스펙트럼) → +38%. Phase 2 Solver의 η와 정성적으로 일치."
+        },
+        {
+          "ref_id": "day2024",
+          "finding": "CdTe PCD CESM에서 3빈 접근이 2빈 대비 detectability를 ~55% 감소시킴. 2빈 최적화가 CESM에 더 효과적. 전자노이즈 standard deviation 감소(3.4→1.7 keV) 시 iodine detectability 2-bin ~5%, 3-bin ~30% 향상.",
+          "abstract_quote": "Adding a third energy bin increased quantum noise levels and reduced detectability by ~55%",
+          "source": "Day JA, Tanguay J. Med Phys. 2024;51(4):2479-2498 [PMID:37967277]",
+          "verification_level": "abstract_quote",
+          "confidence": "highest - Monte Carlo simulation with quantitative results",
+          "note": "3빈 > 2빈이 아님! CESM에서는 2빈 최적화가 더 효과적 (노이즈 증가 때문)"
+        }
+      ]
+    },
+    "spectral_detectability": {
+      "summary": "PCD 스펙트럼 영상의 detectability 향상 (에너지 분리 vs 에너지 가중)",
+      "key_evidence": [
+        {
+          "ref_id": "fredenberg2010",
+          "finding": "에너지 분리(energy subtraction, 해부학적 노이즈 최소화)로 ideal-observer detectability 약 50% 향상. 임상적 유방 밀도에서 약 30% 향상. 고밀도 유방에서 6배 향상. 에너지 가중은 'only a minute improvement' — 핵심은 해부학적 노이즈 제거.",
+          "abstract_quote": "an ideal-observer detectability index could be improved close to 50%...energy weighting yielded only a minute improvement",
+          "source": "Fredenberg E, et al. Med Phys. 2010;37(5):2017-2029 [PMID:20527535]",
+          "verification_level": "abstract_quote",
+          "confidence": "highest - foundational quantitative study",
+          "critical_insight": "순수 에너지 가중(양자 노이즈 최적화)의 이득은 작음. 진정한 이득은 에너지 분리를 통한 해부학적 노이즈(anatomical noise) 제거에서 나옴. 이는 Phase 2 공식 η의 실제 임상 적용 시 고려해야 할 중요한 점."
+        }
+      ]
+    },
+    "kedge_quantification": {
+      "summary": "PCD K-edge 영상에서의 아이오딘 정량 정확도",
+      "key_evidence": [
+        {
+          "ref_id": "ruth2020",
+          "finding": "PCD breast CT에서 최적 에너지 문턱치 32.59 keV 확인. 아이오딘 정량 RMSE 0.56 mg/mL 달성, 최소 검출 농도 2.5 mg/mL. 단일 스캔으로 아이오딘 맵과 가상 비조영(VNC) 영상 동시 생성.",
+          "abstract_quote": "Maximal signal-to-noise ratios were found at a threshold position of 32.59 keV...Accurate iodine quantification (average root mean square error of 0.56 mg/ml) was possible...down to a concentration of 2.5 mg/ml",
+          "source": "Ruth V, et al. Med Phys. 2020;47(7):2826-2837 [PMID:32155660]",
+          "verification_level": "abstract_quote",
+          "confidence": "highest - quantitative phantom study with precise threshold optimization"
+        },
+        {
+          "ref_id": "ding2017",
+          "finding": "PCD 기반 CESM에서 아이오딘 정량 RMS 오차 0.20 mg/cm² 달성. 최적 빔 에너지 42-46 kVp, 분리 에너지 34 keV. 비선형 분해법이 가중 차감법 대비 유방 두께/밀도 변화에 강건.",
+          "abstract_quote": "root-mean-square error of 0.20 mg/cm² and standard deviation of 0.18 mg/cm² for centimeter-scale lesion phantoms...optimal imaging parameters between 42-46 kVp with 34 keV splitting energy",
+          "source": "Ding H, Molloi S. Med Phys. 2017;44(8):3939-3951 [PMID:28432828]",
+          "verification_level": "abstract_quote",
+          "confidence": "high - feasibility study with quantitative iodine quantification"
+        }
+      ]
+    },
+    "material_decomposition": {
+      "summary": "PCD-CT의 물질 분해 능력을 통한 조영제 분리 및 새로운 조영제 활용",
+      "key_evidence": [
+        {
+          "ref_id": "jost2023",
+          "finding": "PCD-CT에서 기존 아이오딘 조영제의 효능 향상 → 아이오딘 용량 감소 또는 화질 개선 가능. K-edge 영상으로 고원자번호 물질(W, Ta, Bi) 활용 가능. 스펙트럼 분리와 물질 분해의 조합으로 2개 이상 조영 원소 동시 구별.",
+          "abstract_quote": "the efficacy of available iodine-based contrast media improves, allowing for a reduction of iodine dosage...spectral separation in combination with improved material decomposition, enabling discrimination of contrast media from intrinsic or pathological tissues",
+          "source": "Jost G, et al. Invest Radiol. 2023;58(7):515-522 [PMID:37068840]",
+          "verification_level": "abstract_quote",
+          "confidence": "high - review article on novel contrast media for PCD-CT"
+        }
+      ]
+    }
+  },
+  "clinical_significance": {
+    "energy_weighting_pathway": "PCD 에너지 빈 → 최적 가중(matched filter) → CNR_PCD/CNR_EID = η ≥ 1 → 동일 선량에서 12-18% CNR 향상 (이론) 또는 동일 CNR에서 4.5-11% 선량 감소 (임상)",
+    "anatomical_noise_insight": "⚠️ 순수 에너지 가중의 CNR 이득은 2-5%로 제한적. 진정한 임상적 이득은 에너지 분리(subtraction)를 통한 해부학적 노이즈 제거에서 발생 (detectability 30-50% 향상). [Fredenberg 2010]",
+    "kedge_application": "아이오딘 K-edge (33.2 keV) 기반 CESM: 최적 문턱치 32.59 keV, 아이오딘 정량 RMSE < 0.56 mg/mL, 최소 검출 2.5 mg/mL",
+    "cesm_optimization": "CESM에서 2-빈 접근이 3-빈 대비 더 효과적 (3빈 시 노이즈 증가로 detectability 55% 감소). [Day 2024]",
+    "solver_prediction_vs_literature": "Solver η = +12-18% (EID w∝E 대비 PCD 최적 가중 이론) vs Flohr 2023 phantom data: +11%(80kVp), +23%(100kVp), +31%(120kVp), +38%(140kVp) [EID vs PCD counting, iodine CNR] vs 임상 에너지 가중 최적화 +2-5% (Fredenberg 2015, PCD counting 대비 PCD optimal). Solver K-edge +11.9%는 Flohr 80kVp +11%와 일치 (유방영상은 저에너지 스펙트럼). kVp↑ → 스펙트럼 폭↑ → EID w∝E 불이익↑ → η↑ (물리적으로 일관됨)."
+  },
+  "response_template": {
+    "citation_format": "[저자 et al. (연도), PMID:XXXXXXXX]",
+    "example_usage": "PCD의 에너지 가중으로 CNR이 2.2~5.2% 향상되며, 이는 4.5~11% 선량 감소에 해당합니다 [Berglund/Fredenberg et al. (2014), PMID:26158045]. K-edge 영상에서 최적 문턱치 32.59 keV에서 아이오딘 정량 RMSE 0.56 mg/mL 달성이 확인되었습니다 [Ruth et al. (2020), PMID:32155660]. 그러나 진정한 detectability 향상(30-50%)은 에너지 분리를 통한 해부학적 노이즈 제거에서 비롯됩니다 [Fredenberg et al. (2010), PMID:20527535].",
+    "mandatory_citations": [
+      "Kalluri et al. (2013) PMID:23927337 PMC3745502 - EID w∝E (sub-optimal), PCD w=1 정의 (Law 5 핵심 근거)",
+      "Fredenberg et al. (2010) PMID:20527535 - 에너지 분리 detectability 50% 향상, 에너지 가중은 'minute improvement'",
+      "Berglund/Fredenberg et al. (2014) PMID:26158045 - 임상 에너지 가중 CNR 2.2-5.2%, 선량 감소 4.5-11%",
+      "Ruth et al. (2020) PMID:32155660 - K-edge 최적 문턱치 32.59 keV, 아이오딘 RMSE 0.56 mg/mL",
+      "Day & Tanguay (2024) PMID:37967277 - CESM 2빈 > 3빈, 전자노이즈 감소 효과"
+    ],
+    "citation_priority": {
+      "tier_1_abstract_quote": ["kalluri2013", "fredenberg2010", "fredenberg2015", "ruth2020", "day2024", "ding2017", "jost2023"],
+      "tier_2_abstract_supported": [],
+      "tier_3_full_text_needed": []
+    },
+    "warning": "⚠️ PMID가 없는 논문은 인용하지 마세요. ⚠️ Solver의 이론적 η(+12-18%)와 임상 에너지 가중 이득(+2-5%)의 차이를 반드시 설명하세요. 이론값은 이상적 조건(완벽한 에너지 분해능, EID w∝E vs PCD optimal)의 상한값입니다."
+  }
+}

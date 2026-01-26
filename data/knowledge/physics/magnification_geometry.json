@@ -1,0 +1,100 @@
+{
+  "id": "magnification_geometry",
+  "title": "Magnification Mammography Geometry and Penumbra",
+  "domain": "imaging_geometry",
+  "keywords": [
+    "확대촬영", "magnification", "확대 맘모그래피",
+    "기하학적 확대", "geometric magnification",
+    "penumbra", "반그림자", "기하학적 블러",
+    "초점 크기", "focal spot", "소초점", "small focus",
+    "SID", "SOD", "OID", "air gap",
+    "확대", "1.8배", "1.5배", "2배", "배 확대",
+    "스테레오", "stereotactic", "생검", "biopsy",
+    "타겟팅", "targeting"
+  ],
+  "content": {
+    "magnification_principle": {
+      "definition": "M = SID / SOD = (SOD + OID) / SOD",
+      "typical_values": {
+        "1.5x": "일반 확대",
+        "1.8x": "스테레오 생검용 확대",
+        "2.0x": "고확대 (미세석회화 분석)"
+      },
+      "benefit": "유효 픽셀 크기 감소 → 공간해상도 향상",
+      "trade_off": "기하학적 블러(penumbra) 증가, 선량 증가"
+    },
+    "penumbra_physics": {
+      "definition": "유한 크기 초점으로 인한 기하학적 블러",
+      "formula": "P = f × OID / SOD = f × (M - 1)",
+      "parameters": {
+        "P": "penumbra width (mm)",
+        "f": "focal spot size (mm)",
+        "OID": "object-to-image distance (mm)",
+        "SOD": "source-to-object distance (mm)",
+        "M": "magnification factor"
+      },
+      "example_1.8x": {
+        "focal_spot": "0.1 mm (소초점)",
+        "penumbra": "P = 0.1 × (1.8 - 1) = 0.08 mm",
+        "significance": "80μm 블러 → 미세석회화 형태에 영향"
+      }
+    },
+    "focal_spot_selection": {
+      "large_focus": {
+        "size": "0.3 mm",
+        "use": "일반 접촉 촬영, 높은 mA 용량",
+        "magnification_penumbra_1.8x": "0.24 mm (불가)"
+      },
+      "small_focus": {
+        "size": "0.1 mm",
+        "use": "확대 촬영 전용",
+        "magnification_penumbra_1.8x": "0.08 mm",
+        "limitation": "mA 용량 제한 → 촬영 시간 증가"
+      }
+    },
+    "resolution_limit": {
+      "geometric_mtf": "MTF_geo(f) = sinc(π × f × P)",
+      "cutoff_frequency": "f_cutoff = 1 / P",
+      "example": "P = 0.08mm → f_cutoff = 12.5 lp/mm (이론적 한계)"
+    },
+    "air_gap_effect": {
+      "principle": "OID 증가 → 산란선 자연 제거",
+      "benefit": "그리드 불필요 → 선량 감소",
+      "trade_off": "penumbra 증가, 기하학적 왜곡"
+    },
+    "combined_with_detector_blur": {
+      "system_mtf": "MTF_system = MTF_focal × MTF_detector × MTF_motion",
+      "critical_insight": "penumbra + CsI 빛 확산 = 이중 블러 → Fine Linear 형태 손실"
+    }
+  },
+  "formulas": {
+    "magnification": "M = SID / SOD",
+    "penumbra": "P = f × (M - 1)",
+    "geometric_unsharpness": "U_g = f × OID / SOD",
+    "effective_pixel_size": "p_eff = p_detector / M",
+    "geometric_mtf": "MTF_geo(ν) = |sinc(π × ν × P)|"
+  },
+  "clinical_relevance": {
+    "stereotactic_biopsy": "1.8x 확대 + 소초점 필수 → penumbra 0.08mm 수준",
+    "microcalcification": "Fine Linear 석회화 두께 ~0.1mm → penumbra와 비슷한 스케일",
+    "combined_blur_risk": "기하학적 블러 + 검출기 블러 = 형태 왜곡"
+  },
+  "sources": [
+    {
+      "id": "Bushberg2012",
+      "citation": "Bushberg JT, et al. The Essential Physics of Medical Imaging. 3rd ed. Lippincott Williams & Wilkins; 2012. Chapter 8.",
+      "type": "textbook"
+    },
+    {
+      "id": "Niklason1998",
+      "citation": "Niklason LT, et al. Digital tomosynthesis in breast imaging. Radiology. 1997;205(2):399-406.",
+      "pmid": "9356620",
+      "type": "primary"
+    },
+    {
+      "id": "ACR_Mammo",
+      "citation": "ACR Practice Parameter for the Performance of Screening and Diagnostic Mammography. 2018.",
+      "type": "guideline"
+    }
+  ]
+}

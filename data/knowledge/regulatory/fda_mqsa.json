@@ -1,0 +1,169 @@
+{
+  "id": "fda_mqsa",
+  "title": "FDA MQSA (Mammography Quality Standards Act)",
+  "domain": "regulatory_standards",
+  "keywords": [
+    "FDA", "MQSA", "mammography quality", "맘모그래피 품질",
+    "유방 치밀도", "breast density", "density notification",
+    "품질 관리", "quality control", "QC", "인증", "certification",
+    "미국 FDA", "US regulation", "510k", "premarket",
+    "시설 인증", "facility certification", "ACR accreditation"
+  ],
+  "content": {
+    "overview": {
+      "act_name": "Mammography Quality Standards Act (MQSA)",
+      "authority": "U.S. Food and Drug Administration (FDA)",
+      "purpose": "맘모그래피 서비스 품질 보증 및 환자 보호",
+      "final_rule_2023": {
+        "publication_date": "2023-03-10",
+        "enforcement_date": "2024-09-10",
+        "federal_register": "88 FR 14884"
+      }
+    },
+    "key_requirements_2024": {
+      "breast_density_notification": {
+        "effective_date": "2024-09-10",
+        "requirement": "모든 맘모그래피 리포트에 유방 치밀도 분류 필수 포함",
+        "density_categories": {
+          "a": "Almost entirely fatty (거의 전체가 지방)",
+          "b": "Scattered fibroglandular (산재된 섬유선 조직)",
+          "c": "Heterogeneously dense (불균일 치밀)",
+          "d": "Extremely dense (매우 치밀)"
+        },
+        "patient_notification": {
+          "category_c_d": "치밀 유방이 암을 가릴 수 있고, 암 위험 증가와 관련됨을 고지",
+          "category_a_b": "치밀 유방 관련 위험 정보 불필요"
+        },
+        "lay_summary": "환자에게 이해하기 쉬운 언어로 된 요약본 제공 필수"
+      },
+      "mammography_report": {
+        "required_elements": [
+          "시설 이름 및 위치 (도시, 주, 우편번호, 전화번호)",
+          "검사의 전체 평가 (overall assessment)",
+          "유방 치밀도 전체 평가 (overall density assessment)",
+          "BI-RADS 카테고리"
+        ],
+        "timing_requirements": {
+          "suspicious_or_malignant": "7일 이내 의료진 및 환자에게 전달",
+          "incomplete_need_comparison": "30일 이내 최종 평가 리포트 발행"
+        }
+      },
+      "medical_outcomes_audit": {
+        "annual_metrics": [
+          "양성 예측도 (Positive Predictive Value, PPV)",
+          "암 검출률 (Cancer Detection Rate)",
+          "재촬영률 (Recall Rate)"
+        ],
+        "scope": "각 판독의 및 시설 전체 통계"
+      },
+      "personnel_requirements": {
+        "interpreting_physician": {
+          "qualification": "초기 자격 요건 충족",
+          "continuing_experience": "24개월 동안 최소 200건 판독",
+          "continuing_education": "36개월 동안 15시간 CME"
+        },
+        "technologist": {
+          "certification": "ARRT 또는 동등 인증",
+          "continuing_education": "24개월 동안 15시간"
+        },
+        "medical_physicist": {
+          "survey_frequency": "연간 1회 이상",
+          "qualification": "주정부 요건 충족"
+        }
+      },
+      "equipment_requirements": {
+        "fda_premarket_authorization": "모든 맘모그래피 장비는 FDA 사전 승인 필수 (510(k) 또는 PMA)",
+        "digital_image_transfer": "디지털 맘모그래피/DBT 전송 시 원본 디지털 이미지 전자 제공 가능해야 함"
+      },
+      "facility_requirements": {
+        "accreditation": {
+          "body": "ACR 또는 FDA 승인 인증 기관",
+          "failure_penalty": "3회 연속 인증 실패 시 1년간 재신청 불가"
+        },
+        "records_retention": {
+          "mammogram_images": "최소 5년 또는 마지막 검사 후 10년",
+          "personnel_records": "퇴사 후 최소 24개월"
+        },
+        "closure_requirements": "폐업 전 환자 및 의료진 기록 접근 방안 마련, 인증 기관에 서면 통보"
+      },
+      "self_referred_patients": {
+        "requirement": "의료진 없는 환자 의뢰 시스템 구축",
+        "malignant_findings": "악성 소견 시 적절한 의료 연계 보장"
+      }
+    },
+    "enforcement": {
+      "inspection": "FDA 또는 주정부의 연간 검사",
+      "non_compliance_penalties": [
+        "인증 정지 또는 취소",
+        "금전적 벌금",
+        "법적 조치 (금지 명령 등)"
+      ],
+      "warning_letters": "위반 사항 통보 및 시정 기한 부여"
+    },
+    "equipment_qc_requirements": {
+      "daily": [
+        "평판 검출기 균일성 확인",
+        "아티팩트 검사"
+      ],
+      "weekly": [
+        "팬텀 영상 품질",
+        "AEC 재현성"
+      ],
+      "monthly": [
+        "압박력 정확도",
+        "시각적 체크리스트"
+      ],
+      "quarterly": [
+        "반복 분석 (Repeat Analysis)",
+        "어둠 노이즈 및 균일성"
+      ],
+      "annual": [
+        "의학물리사 전체 서베이",
+        "MGD 측정",
+        "해상도 및 대조도 검증"
+      ]
+    }
+  },
+  "formulas": {
+    "ppv_calculation": {
+      "formula": "PPV = TP / (TP + FP) × 100%",
+      "variables": {
+        "TP": "True Positive (병변 확인된 양성 판정)",
+        "FP": "False Positive (정상 확인된 양성 판정)"
+      }
+    },
+    "cancer_detection_rate": {
+      "formula": "CDR = (암 검출 수 / 검사 수) × 1000",
+      "unit": "per 1000 examinations"
+    },
+    "recall_rate": {
+      "formula": "Recall Rate = (추가 검사 권고 수 / 총 선별 검사 수) × 100%",
+      "benchmark": "10% 이하 권장"
+    }
+  },
+  "clinical_relevance": {
+    "manufacturer_impact": "미국 시장 진입을 위한 510(k) 또는 PMA 승인 필수",
+    "facility_compliance": "인증 유지를 위한 지속적 품질관리 프로그램 운영",
+    "patient_communication": "치밀 유방 환자에게 추가 검사 옵션 안내 의무화"
+  },
+  "sources": [
+    {
+      "id": "FDA_MQSA_Final_Rule_2023",
+      "citation": "FDA. Final Rule to Amend the Mammography Quality Standards Act (MQSA). Federal Register 88 FR 14884. March 10, 2023.",
+      "url": "https://www.fda.gov/radiation-emitting-products/mammography-quality-standards-act-mqsa-and-mqsa-program/important-information-final-rule-amend-mammography-quality-standards-act-mqsa",
+      "type": "regulation"
+    },
+    {
+      "id": "FDA_MQSA_Guidance_2024",
+      "citation": "FDA. Mammography Quality Standards Act and Regulation Amendments: Small Entity Compliance Guide. August 2024.",
+      "url": "https://www.fda.gov/media/181152/download",
+      "type": "guidance"
+    },
+    {
+      "id": "ACR_MQSA_Requirements",
+      "citation": "ACR. FDA Document Outlines MQSA Final Rule Requirements. January 2024.",
+      "url": "https://www.acr.org/Advocacy-and-Economics/Advocacy-News/Advocacy-News-Issues/In-the-Jan-20-2024-Issue/FDA-Document-Outlines-MQSA-Final-Rule-Requirements",
+      "type": "summary"
+    }
+  ]
+}

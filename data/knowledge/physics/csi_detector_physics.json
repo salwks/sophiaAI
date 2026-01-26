@@ -1,0 +1,127 @@
+{
+  "id": "csi_detector_physics",
+  "title": "CsI Scintillator Detector Physics (Material Properties)",
+  "domain": "detector_material",
+  "keywords": [
+    "CsI", "cesium iodide", "요오드화 세슘", "섬광체", "scintillator",
+    "간접변환", "indirect conversion", "EID", "섬광 검출기",
+    "광변환", "light conversion", "photodiode", "포토다이오드",
+    "CsI K-edge", "검출기 K-edge", "detector K-edge"
+  ],
+  "disambiguation": {
+    "context": "detector_material",
+    "not_context": ["contrast_agent", "CESM", "조영증강"],
+    "note": "CsI는 검출기 소재이며, 조영제 Iodine과 구분 필요. 질문에 석회화/calcification이 언급되면 조영제가 아닌 검출기 맥락으로 해석"
+  },
+  "content": {
+    "physical_properties": {
+      "composition": "CsI:Tl (탈륨 도핑 요오드화 세슘)",
+      "density": "4.51 g/cm³",
+      "k_edges": {
+        "iodine": "33.2 keV",
+        "cesium": "36.0 keV",
+        "effective_range": "33-36 keV에서 광전효과 흡수 급증"
+      },
+      "light_output": "~54,000 photons/MeV (NaI 대비 ~85%)",
+      "emission_peak": "550 nm (녹색광)"
+    },
+    "absorption_physics": {
+      "principle": "K-edge 직상(just above)에서 광전효과 단면적 급증",
+      "optimal_energy": "36-40 keV (양 K-edge 위, Compton 지배 전)",
+      "high_energy_degradation": {
+        "mechanism": "E > 50 keV에서 Compton 산란 지배 → 흡수 효율 저하",
+        "impact_on_dqe": "DQE 감소 (광전효과 감소로 신호 생성 효율 저하)"
+      }
+    },
+    "light_spread_mtf": {
+      "mechanism": "섬광체 두께 방향으로 빛 확산 (columnar structure 완화)",
+      "energy_dependence": {
+        "low_energy": "표면 근처 흡수 → 빛 확산 적음 → MTF 양호",
+        "high_energy": "깊은 위치 흡수 → 빛 확산 증가 → MTF 저하"
+      },
+      "impact": "고에너지 빔에서 Fine Linear 석회화가 Amorphous로 뭉개질 수 있음"
+    },
+    "comparison_with_direct": {
+      "CsI_indirect": {
+        "pros": "높은 DQE at K-edge, 대면적 제작 용이",
+        "cons": "빛 확산으로 MTF 제한, 에너지 분해능 없음"
+      },
+      "a_Se_direct": {
+        "pros": "빛 확산 없음 → MTF 우수, 높은 공간해상도",
+        "cons": "K-edge 낮음(12.7keV), 두꺼운 유방에서 효율 저하"
+      }
+    }
+  },
+  "formulas": {
+    "absorption_efficiency": "η_abs = 1 - exp(-μ(E) × t)",
+    "k_edge_jump": "Photoelectric cross-section increases ~5× at K-edge",
+    "light_spread_approximation": "σ_light ∝ depth_of_interaction / columnar_structure_aspect_ratio"
+  },
+  "common_misconceptions": {
+    "WARNING": "⚠️ LLM이 자주 혼동하는 개념입니다. 아래 구분을 반드시 따르세요.",
+    "misconception_1_dqe_vs_subject_contrast": {
+      "WRONG": "CsI K-edge에서 DQE가 높으므로, 빔 경화가 대조도를 향상시킨다",
+      "CORRECT": "DQE(검출기 효율)와 Subject Contrast(피사체 대조도 Δμ)는 완전히 다른 개념이다. DQE가 높아도 Δμ가 낮으면 대조도는 낮다",
+      "physics_proof": "대조도 = Δμ × t = (μ_calc - μ_tissue) × t. 이것은 피사체 고유 특성이며, 검출기 DQE와 무관",
+      "analogy": "마이크 감도(DQE)를 높여도 원래 소리(Δμ)가 작으면 녹음된 소리도 작다"
+    },
+    "misconception_2_beam_hardening_shifts_above_kedge": {
+      "WRONG": "빔 경화가 에너지를 K-edge(33keV)로 맞춰 흡수 효율을 최적화한다",
+      "CORRECT": "6cm 두꺼운 유방에서 빔 경화는 평균 에너지를 42-50keV로 상승시켜 K-edge(33keV)를 훨씬 초과한다",
+      "physics_proof": "K-edge 직상(33-40keV)에서 흡수 효율 최대. 50keV 이상에서는 Compton 지배로 효율 저하",
+      "consequence": "빔 경화 → K-edge 초과 → DQE도 감소 (K-edge 이점 상실)"
+    },
+    "misconception_3_kedge_compensates_contrast_loss": {
+      "WRONG": "CsI K-edge가 빔 경화로 인한 대조도 손실을 보상할 수 있다",
+      "CORRECT": "K-edge는 검출기 흡수 효율에만 영향. 피사체에서 이미 손실된 Δμ(= μ_calc - μ_tissue)는 검출기가 회복 불가",
+      "physics_proof": "Δμ ∝ Z³/E³ (광전효과). 에너지 28→42keV 상승 시 Δμ = (28/42)³ = 0.30 → 70% 손실. 검출기는 이를 보상 불가",
+      "key_distinction": "검출기 K-edge (DQE 영향) ≠ 피사체 대조도 (Δμ = μ_calc - μ_tissue)"
+    }
+  },
+  "critical_concept_separation": {
+    "title": "⚠️ 핵심 개념 분리 (MUST UNDERSTAND)",
+    "concept_1_detector_efficiency": {
+      "name": "검출기 효율 (DQE)",
+      "definition": "입사 X선을 신호로 변환하는 효율",
+      "kedge_effect": "K-edge(33keV)에서 광전흡수 급증 → DQE 향상 가능",
+      "beam_hardening_effect": "42-50keV로 상승 시 K-edge 초과 → DQE 감소"
+    },
+    "concept_2_subject_contrast": {
+      "name": "피사체 대조도 (Δμ)",
+      "definition": "Δμ = μ_calcification - μ_tissue (석회화-조직 간 감쇠 차이)",
+      "energy_dependence": "Δμ ∝ 1/E³ → 에너지 상승 시 감소",
+      "detector_independence": "검출기와 무관한 피사체 고유 특성"
+    },
+    "concept_3_final_image_contrast": {
+      "name": "최종 영상 대조도 (C)",
+      "formula": "C ∝ Δμ × DQE",
+      "implication": "DQE가 높아도 Δμ가 낮으면 C는 낮다",
+      "beam_hardening_result": "빔 경화 → Δμ 감소(70%) > DQE 변화 → 최종 대조도 감소"
+    }
+  },
+  "clinical_relevance": {
+    "thick_breast_imaging": "6cm+ 유방에서 빔 경화 → CsI K-edge 위 에너지 → 흡수 효율 및 MTF 저하",
+    "microcalcification": "고에너지 빔에서 미세석회화 대조도 손실 + 빛 확산으로 형태 왜곡",
+    "biopsy_targeting": "Fine Linear(4C) → Amorphous(4B) 오분류 위험"
+  },
+  "sources": [
+    {
+      "id": "Zhao2004",
+      "citation": "Zhao W, et al. X-ray imaging performance of structured cesium iodide scintillators. Med Phys. 2004;31(9):2594-2605.",
+      "pmid": "15487737",
+      "type": "primary"
+    },
+    {
+      "id": "Samei2007",
+      "citation": "Samei E, Flynn MJ. An experimental comparison of detector performance for direct and indirect digital radiography systems. Med Phys. 2003;30(4):608-622.",
+      "pmid": "12722812",
+      "type": "primary"
+    },
+    {
+      "id": "Dance2014",
+      "citation": "Dance DR, et al. Breast dosimetry using high-resolution voxel phantoms. Radiat Prot Dosimetry. 2005;114(1-3):359-363.",
+      "pmid": "15933136",
+      "type": "supporting"
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "id": "scintillator_light_spread",
+  "title": "Scintillator Light Spread and Energy-Dependent MTF",
+  "domain": "detector_physics",
+  "keywords": [
+    "빛 확산", "light spread", "light diffusion",
+    "섬광체 MTF", "scintillator MTF", "CsI MTF",
+    "columnar structure", "주상 구조", "needle structure",
+    "에너지 의존 MTF", "energy-dependent resolution",
+    "흡수 깊이", "absorption depth", "interaction depth",
+    "섬광체", "CsI", "간접변환", "indirect conversion",
+    "EID", "고에너지", "high energy", "빔 경화",
+    "형태 왜곡", "blur", "뭉개"
+  ],
+  "content": {
+    "light_spread_mechanism": {
+      "principle": "X선 → 섬광체에서 가시광 생성 → 광센서로 전달",
+      "spread_source": "섬광광이 측면으로 퍼지며 인접 픽셀에 기록",
+      "columnar_CsI": {
+        "structure": "수직 주상(needle) 구조로 빛을 광섬유처럼 안내",
+        "benefit": "측면 확산 감소 → MTF 개선",
+        "limitation": "완벽하지 않음 → 여전히 일부 확산 발생"
+      }
+    },
+    "energy_dependence": {
+      "principle": "X선 에너지 ↑ → 흡수 깊이 ↑ → 빛 전파 거리 ↑ → 확산 ↑",
+      "low_energy_25keV": {
+        "absorption_depth": "표면 근처 (~50 μm)",
+        "light_path": "짧음",
+        "mtf_impact": "양호 (확산 최소)"
+      },
+      "medium_energy_35keV": {
+        "absorption_depth": "중간 (~150 μm)",
+        "light_path": "중간",
+        "mtf_impact": "약간 저하"
+      },
+      "high_energy_50keV": {
+        "absorption_depth": "깊음 (~300+ μm)",
+        "light_path": "김",
+        "mtf_impact": "현저한 저하 (확산 증가)"
+      }
+    },
+    "mtf_degradation_model": {
+      "simplified_formula": "MTF_scint(f) ≈ exp(-2π²σ²f²)",
+      "sigma_energy_relation": "σ ∝ absorption_depth ∝ 1/μ(E)",
+      "practical_impact": {
+        "at_2_lp_mm": "고에너지에서 MTF 20-30% 저하 가능",
+        "at_5_lp_mm": "고에너지에서 MTF 50% 이상 저하"
+      }
+    },
+    "comparison_scintillators": {
+      "CsI_columnar": {
+        "thickness": "~500-700 μm",
+        "mtf_at_5lpmm": "~0.3-0.4 (에너지 의존)",
+        "light_output": "높음"
+      },
+      "Gd2O2S_powder": {
+        "thickness": "~100-200 μm",
+        "mtf_at_5lpmm": "~0.2-0.3",
+        "light_output": "중간"
+      },
+      "a_Se_direct": {
+        "no_light_spread": "직접 전하 수집 → 빛 확산 없음",
+        "mtf_at_5lpmm": "~0.5-0.6 (픽셀 구조 제한)",
+        "advantage": "에너지 무관 MTF"
+      }
+    },
+    "fine_linear_to_amorphous": {
+      "mechanism": {
+        "step1": "W/Ag 필터로 빔 경화 → 평균 에너지 45-50 keV",
+        "step2": "고에너지 → CsI 깊은 위치에서 흡수",
+        "step3": "깊은 흡수 → 빛 확산 증가 → MTF 저하",
+        "step4": "Fine Linear의 고주파 성분 손실 → Amorphous로 보임"
+      },
+      "spatial_frequency_analysis": {
+        "fine_linear": "0.1mm width → ~5 lp/mm 고주파 성분 필수",
+        "amorphous": "저주파 성분 우세 (< 2 lp/mm)",
+        "mtf_cutoff": "고에너지에서 5 lp/mm MTF < 0.2 → Fine Linear 형태 손실"
+      }
+    }
+  },
+  "formulas": {
+    "light_spread_sigma": "σ_light ≈ d_absorption / (2 × AR)",
+    "mtf_scintillator": "MTF(f) = exp(-2π²σ²f²)",
+    "absorption_depth": "d = -ln(0.5) / μ(E) (half-value depth)",
+    "ar_columnar": "AR = column_height / column_diameter"
+  },
+  "clinical_relevance": {
+    "thick_breast_imaging": "두꺼운 유방 → 빔 경화 → 고에너지 → MTF 저하",
+    "microcalcification_morphology": "Fine Linear, Pleomorphic 형태 왜곡 위험",
+    "biopsy_precision": "형태 오분류 → 타겟팅 정확도 저하"
+  },
+  "sources": [
+    {
+      "id": "Samei2007",
+      "citation": "Samei E, et al. Performance of digital radiographic detectors: quantification and assessment methods. Adv Radiol. 2007;2007:1-7.",
+      "type": "primary"
+    },
+    {
+      "id": "Zhao2004",
+      "citation": "Zhao W, et al. X-ray imaging performance of structured cesium iodide scintillators. Med Phys. 2004;31(9):2594-2605.",
+      "pmid": "15487737",
+      "type": "primary"
+    },
+    {
+      "id": "IEC62220",
+      "citation": "IEC 62220-1-2: Medical electrical equipment - Characteristics of digital X-ray imaging devices - Part 1-2: Determination of the detective quantum efficiency - Mammography detectors. 2015.",
+      "type": "standard"
+    }
+  ]
+}

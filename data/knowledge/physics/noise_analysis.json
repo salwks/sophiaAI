@@ -1,0 +1,139 @@
+{
+  "id": "noise_analysis",
+  "category": "Noise Analysis & NPS",
+  "keywords": [
+    "noise", "노이즈", "NPS", "noise power spectrum", "노이즈 파워 스펙트럼",
+    "quantum noise", "양자 노이즈", "electronic noise", "전자 노이즈",
+    "structured noise", "구조적 노이즈", "fixed pattern noise",
+    "aliasing", "앨리어싱", "Nyquist"
+  ],
+  "sources": [
+    {
+      "id": "vedantham1999",
+      "citation": "Vedantham S, Karellas A, Suryanarayanan S, et al. Noise power spectra of images from digital mammography detectors. Med Phys. 1999;26(8):1492-1502",
+      "pmid": "10435530",
+      "doi": "10.1118/1.598647",
+      "type": "NPS Measurement Study"
+    },
+    {
+      "id": "monnin2016",
+      "citation": "Monnin P, et al. A comprehensive model for quantum noise characterization in digital mammography. Phys Med Biol. 2016;61(5):2083-2106",
+      "pmid": "26895467",
+      "doi": "10.1088/0031-9155/61/5/2083",
+      "type": "Quantum Noise Model"
+    },
+    {
+      "id": "mackenzie2014",
+      "citation": "Mackenzie A, et al. Image simulation and a model of noise power spectra across a range of mammographic beam qualities. Med Phys. 2014;41(12):121901",
+      "pmid": "25471961",
+      "doi": "10.1118/1.4901876",
+      "type": "NPS Modeling"
+    },
+    {
+      "id": "monnin2014",
+      "citation": "Monnin P, et al. Comparison of the polynomial model against explicit measurements of noise components for different mammography systems. Med Phys. 2014;41(10):101901",
+      "pmid": "25198143",
+      "doi": "10.1118/1.4894308",
+      "type": "Noise Component Analysis"
+    },
+    {
+      "id": "korner2023",
+      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "type": "Review Article"
+    }
+  ],
+  "content": {
+    "noise_components": {
+      "source_ref": "mackenzie2014, monnin2014",
+      "quantum_noise": {
+        "description": "X선 광자의 포아송 분포에 따른 통계적 변동",
+        "characteristic": "선량에 비례, 주파수 전 대역 균일(white noise)",
+        "formula": "σ_quantum ∝ √N (N: 검출 광자 수)"
+      },
+      "electronic_noise": {
+        "description": "검출기 전자 회로에서 발생하는 노이즈",
+        "characteristic": "선량과 무관, 저선량에서 지배적",
+        "source_ref": "monnin2016"
+      },
+      "structured_noise": {
+        "description": "고정 패턴 노이즈, flat field 보정 후 잔류 노이즈",
+        "characteristic": "선량에 선형 비례",
+        "source_ref": "mackenzie2014"
+      }
+    },
+    "NPS_measurement": {
+      "source_ref": "vedantham1999",
+      "methods": {
+        "1D_NPS": "1차원 노이즈 파워 스펙트럼 - DQE 계산에 유용",
+        "2D_NPS": "2차원 노이즈 파워 스펙트럼 - 방향별 비대칭 특성 확인"
+      },
+      "key_findings": {
+        "asymmetry": "두 검출기 시스템 모두 직교 주파수 축 간 현저한 비대칭 보임",
+        "periodic_components": "주요 주파수 축 상하에 주기적 노이즈 성분 존재",
+        "dark_noise": "두 검출기 간 암전류 노이즈 크기 현저히 다름"
+      }
+    },
+    "quantum_noise_model": {
+      "source_ref": "monnin2016",
+      "model_type": "cascaded systems analysis를 X선 검출기 양자 노이즈 전파 연구에 특화 개발",
+      "detectors_studied": {
+        "flat_panel_systems": 4,
+        "computed_radiography": 1,
+        "photon_counting": "1 (slot-scan silicon wafer based)"
+      },
+      "noise_decomposition": "균일 영상에서 검출기 공기 kerma 함수로 양자 NPS 확립, 상관/비상관 양자 성분으로 분해"
+    },
+    "polynomial_noise_model": {
+      "source_ref": "monnin2014, mackenzie2014",
+      "method": "픽셀 분산을 검출기 공기 kerma(DAK)의 2차 다항식으로 피팅",
+      "components_extracted": ["양자 노이즈", "전자 노이즈", "고정 패턴(FP) 노이즈"],
+      "european_guidelines": "European Guidelines에서 디지털 맘모그래피 QC에 채택"
+    },
+    "aliasing_effects": {
+      "source_ref": "vedantham1999",
+      "description": "앨리어싱이 측정된 노이즈 파워에 유의미하게 기여, 특히 Nyquist 주파수 근처에서",
+      "validation": "이론적 presampling NPS와 앨리어싱 노이즈 명시적 포함 시 측정값과 잘 일치"
+    },
+    "quantum_limited_operation": {
+      "source_ref": "vedantham1999, monnin2016",
+      "condition": "양자 노이즈가 전자 노이즈보다 지배적인 영역",
+      "low_dose_limitation": "저 X선 노출에서 양자 제한 동작은 저주파에서만 가능할 수 있음",
+      "clinical_dose_behavior": "임상 선량에서 대부분의 시스템이 양자 노이즈 제한 상태로 동작"
+    },
+    "noise_sources_comparison": {
+      "source_ref": "monnin2014",
+      "digital_mammography": "저 검출기 선량에서 전자 노이즈가 지배적",
+      "high_dose": "일부 디지털 방사선 시스템에서 고선량 시 구조적 노이즈가 총 노이즈의 거의 절반 차지"
+    }
+  },
+  "formulas": {
+    "NPS_definition": {
+      "formula": "NPS(f) = |FT{noise_image}|² / Area",
+      "description": "주파수 영역에서의 노이즈 분포",
+      "source_ref": "vedantham1999"
+    },
+    "polynomial_model": {
+      "formula": "σ² = a + b×DAK + c×DAK²",
+      "variables": {
+        "a": "전자 노이즈 (선량 무관)",
+        "b×DAK": "양자 노이즈 (선량에 선형)",
+        "c×DAK²": "구조적 노이즈 (선량 제곱에 비례)"
+      },
+      "source_ref": "mackenzie2014"
+    },
+    "quantum_noise_relationship": {
+      "formula": "σ_quantum = √N, SNR = √N",
+      "dose_relation": "NPS ∝ 1/Dose (양자 제한 영역)",
+      "source_ref": "korner2023"
+    }
+  },
+  "clinical_relevance": {
+    "microcalcification_detection": "고주파 영역 NPS 증가가 미세석회화 검출에 직접 영향",
+    "QC_application": "정기적 노이즈 평가로 검출기 성능 저하 모니터링",
+    "dose_optimization": "양자 제한 영역에서 동작 확인으로 선량 최적화",
+    "source_ref": "monnin2014, korner2023"
+  }
+}

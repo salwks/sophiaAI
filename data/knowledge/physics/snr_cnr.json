@@ -1,0 +1,263 @@
+{
+  "id": "snr_cnr",
+  "category": "Image Quality",
+  "keywords": ["SNR", "CNR", "noise", "contrast", "image quality", "quantum noise", "양자 노이즈", "신호대잡음비", "대조도", "노이즈", "선량", "dose", "절대 노이즈", "상대 노이즈", "absolute noise", "relative noise"],
+  "sources": [
+    {
+      "id": "marshall2007",
+      "citation": "Marshall NW, et al. A comparison of the performance of digital mammography systems. Phys Med Biol. 2007;52(9):2817-2839",
+      "pmid": "17441236",
+      "doi": "10.1088/0031-9155/52/10/012",
+      "type": "System Comparison"
+    },
+    {
+      "id": "rose1948",
+      "citation": "Rose A. The sensitivity performance of the human eye on an absolute scale. J Opt Soc Am. 1948;38(2):196-208",
+      "type": "Foundational Theory - Rose Criterion"
+    },
+    {
+      "id": "iec62220",
+      "citation": "IEC 62220-1-2:2007. Medical electrical equipment - Characteristics of digital X-ray imaging devices - Part 1-2: Determination of the detective quantum efficiency - Mammography detectors",
+      "type": "International Standard"
+    },
+    {
+      "id": "korner2023",
+      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "type": "Review Article"
+    }
+  ],
+  "definitions": {
+    "quantum_noise": {
+      "name": "양자 노이즈 (Quantum Noise)",
+      "description": "X선 광자의 포아송 분포에 따른 통계적 변동. 검출된 광자 수의 제곱근에 비례.",
+      "formula_latex": "\\sigma = \\sqrt{N}",
+      "formula_unicode": "σ = √N",
+      "variables": {
+        "σ": "표준 편차 (노이즈)",
+        "N": "검출된 광자 수"
+      }
+    },
+    "absolute_noise": {
+      "name": "절대 노이즈 (Absolute Noise)",
+      "description": "이미지 픽셀 값의 표준 편차. 검출 광자 수의 제곱근에 비례하므로, 선량 증가 시 절대 노이즈도 증가.",
+      "formula_latex": "\\sigma_{abs} = \\sqrt{N} \\propto \\sqrt{Dose}",
+      "formula_unicode": "σ_abs = √N ∝ √Dose",
+      "critical_note": "⚠️ 선량 감소 → 광자 수 감소 → 절대 노이즈 감소 (BUT 신호도 감소하므로 화질 저하)"
+    },
+    "relative_noise": {
+      "name": "상대 노이즈 (Relative Noise)",
+      "description": "신호 대비 노이즈 비율 (Noise/Signal). 선량 감소 시 상대 노이즈는 증가.",
+      "formula_latex": "\\sigma_{rel} = \\frac{\\sigma}{S} = \\frac{\\sqrt{N}}{N} = \\frac{1}{\\sqrt{N}} \\propto \\frac{1}{\\sqrt{Dose}}",
+      "formula_unicode": "σ_rel = σ/S = √N/N = 1/√N ∝ 1/√Dose",
+      "critical_note": "⚠️ 선량 감소 → 상대 노이즈 증가 → SNR 저하 → 화질 열화"
+    },
+    "SNR": {
+      "name": "신호대잡음비 (Signal-to-Noise Ratio)",
+      "description": "신호 크기와 노이즈의 비율. 양자 제한 시스템에서는 검출 광자 수의 제곱근에 비례.",
+      "formula_latex": "SNR = \\frac{S}{\\sigma} = \\frac{N}{\\sqrt{N}} = \\sqrt{N} \\propto \\sqrt{Dose}",
+      "formula_unicode": "SNR = S/σ = N/√N = √N ∝ √Dose",
+      "note": "선량 증가 → SNR 향상 | 선량 감소 → SNR 저하"
+    },
+    "CNR": {
+      "name": "대조도잡음비 (Contrast-to-Noise Ratio)",
+      "description": "관심 영역과 배경 간의 신호 차이를 노이즈로 나눈 값. 병변 검출능의 핵심 지표.",
+      "formula_latex": "CNR = \\frac{|S_{ROI} - S_{BG}|}{\\sigma_{BG}} \\propto \\sqrt{Dose}",
+      "formula_unicode": "CNR = |S_ROI - S_BG| / σ_BG ∝ √Dose",
+      "variables": {
+        "S_ROI": "관심 영역(ROI)의 신호 강도",
+        "S_BG": "배경(Background)의 신호 강도",
+        "σ_BG": "배경의 노이즈 (표준 편차)"
+      },
+      "note": "선량 증가 → CNR 향상 | 선량 감소 → CNR 저하"
+    },
+    "DQE": {
+      "name": "검출 양자 효율 (Detective Quantum Efficiency)",
+      "description": "검출기가 입사 X선 정보를 얼마나 효율적으로 전달하는지 나타내는 지표.",
+      "formula_latex": "DQE = \\frac{SNR_{out}^2}{SNR_{in}^2}",
+      "formula_unicode": "DQE = (SNR_out)² / (SNR_in)²",
+      "note": "이상적 검출기의 DQE = 1.0"
+    }
+  },
+  "formulas": {
+    "dose_snr_relation": {
+      "name": "선량-SNR 관계",
+      "formula_latex": "SNR \\propto \\sqrt{Dose}",
+      "formula_unicode": "SNR ∝ √Dose",
+      "description": "SNR을 2배로 높이려면 선량을 4배로 증가시켜야 함"
+    },
+    "snr_doubling": {
+      "name": "SNR 2배 증가 조건",
+      "formula_latex": "Dose_2 = 4 \\times Dose_1 \\Rightarrow SNR_2 = 2 \\times SNR_1",
+      "formula_unicode": "Dose₂ = 4 × Dose₁ → SNR₂ = 2 × SNR₁",
+      "description": "선량을 4배 증가시키면 SNR이 2배 증가"
+    },
+    "dose_noise_relation": {
+      "name": "선량-노이즈 관계 (절대 vs 상대)",
+      "absolute": {
+        "formula_unicode": "σ_abs ∝ √Dose",
+        "description": "절대 노이즈는 선량에 비례하여 증가 (광자 수 증가)"
+      },
+      "relative": {
+        "formula_unicode": "σ_rel ∝ 1/√Dose",
+        "description": "상대 노이즈는 선량에 반비례하여 감소 (SNR 향상)"
+      }
+    }
+  },
+  "tables": {
+    "dose_snr_noise_examples": {
+      "description": "선량 변화에 따른 SNR, 절대 노이즈, 상대 노이즈 변화",
+      "columns": ["dose_ratio", "snr_ratio", "absolute_noise_ratio", "relative_noise_ratio", "image_quality"],
+      "data": [
+        {"dose_ratio": "0.25x", "snr_ratio": "0.50x", "absolute_noise_ratio": "0.50x", "relative_noise_ratio": "2.00x", "image_quality": "❌ 매우 저하"},
+        {"dose_ratio": "0.5x", "snr_ratio": "0.71x", "absolute_noise_ratio": "0.71x", "relative_noise_ratio": "1.41x", "image_quality": "⚠️ 저하"},
+        {"dose_ratio": "0.6x (40% 감소)", "snr_ratio": "0.775x", "absolute_noise_ratio": "0.775x", "relative_noise_ratio": "1.291x (29.1% 증가)", "image_quality": "⚠️ 저하"},
+        {"dose_ratio": "1x", "snr_ratio": "1.00x", "absolute_noise_ratio": "1.00x", "relative_noise_ratio": "1.00x", "image_quality": "✅ 기준"},
+        {"dose_ratio": "2x", "snr_ratio": "1.41x", "absolute_noise_ratio": "1.41x", "relative_noise_ratio": "0.71x", "image_quality": "✅ 향상"},
+        {"dose_ratio": "4x", "snr_ratio": "2.00x", "absolute_noise_ratio": "2.00x", "relative_noise_ratio": "0.50x", "image_quality": "✅✅ 우수"}
+      ]
+    }
+  },
+  "critical_distinctions": {
+    "dose_decrease_effects": {
+      "title": "⚠️ 선량 감소 시 효과 (혼선 주의)",
+      "absolute_noise": "감소 (σ_abs ∝ √Dose → 선량↓ = 노이즈↓)",
+      "relative_noise": "증가 (σ_rel ∝ 1/√Dose → 선량↓ = 상대노이즈↑)",
+      "signal": "감소 (S ∝ Dose → 선량↓ = 신호↓)",
+      "snr": "감소 (SNR ∝ √Dose → 선량↓ = SNR↓)",
+      "cnr": "감소 (CNR ∝ √Dose → 선량↓ = CNR↓)",
+      "image_quality": "저하 (화질 열화)",
+      "summary": "선량 감소 시 '노이즈 감소'는 맞지만, 신호도 더 많이 감소하므로 상대 노이즈는 증가하고 화질은 저하됨"
+    },
+    "dose_increase_effects": {
+      "title": "선량 증가 시 효과",
+      "absolute_noise": "증가 (더 많은 광자 = 더 큰 변동)",
+      "relative_noise": "감소 (신호가 노이즈보다 빠르게 증가)",
+      "signal": "증가",
+      "snr": "증가",
+      "cnr": "증가",
+      "image_quality": "향상"
+    }
+  },
+  "constraints": [
+    "선량을 2배 높이면 SNR은 1.414배(√2) 증가",
+    "SNR을 2배로 높이려면 선량을 4배로 증가해야 함",
+    "상대 노이즈를 절반으로 줄이려면 선량을 4배로 증가해야 함",
+    "⚠️ '노이즈 감소'라고 할 때는 절대/상대 구분 필수",
+    "관전압(kVp) 증가는 투과력은 높이지만 대조도(Contrast)를 감소시킴",
+    "mAs 증가는 광자 수를 늘려 SNR을 향상시킴"
+  ],
+  "clinical_notes": [
+    "유방촬영에서 적정 SNR 유지와 선량 최소화 사이의 균형이 중요",
+    "미세석회화 검출에는 높은 CNR이 필수",
+    "디지털 검출기의 DQE가 높을수록 적은 선량으로 동일 화질 획득 가능",
+    "선량 감소 시 '노이즈가 줄었다'고 해석하지 말 것 - 상대 노이즈는 증가함"
+  ],
+  "common_questions": [
+    {
+      "question": "선량을 2배로 높이면 SNR은 얼마나 증가하는가?",
+      "answer": "SNR ∝ √Dose 관계에 의해, 선량을 2배로 높이면 SNR은 √2 ≈ 1.414배 (약 41%) 증가합니다."
+    },
+    {
+      "question": "SNR을 2배로 높이려면 선량을 얼마나 증가해야 하는가?",
+      "answer": "SNR ∝ √Dose 관계에 의해, SNR을 2배로 높이려면 선량을 4배로 증가시켜야 합니다."
+    },
+    {
+      "question": "선량 감소 시 노이즈는 증가하는가 감소하는가?",
+      "answer": "절대 노이즈(σ_abs)는 감소하지만, 상대 노이즈(σ_rel = σ/S)는 증가합니다. 신호(S)가 노이즈(σ)보다 더 빠르게 감소하기 때문입니다. 따라서 SNR과 CNR은 감소하고 화질은 저하됩니다."
+    },
+    {
+      "question": "양자 노이즈와 선량의 관계는?",
+      "answer": "양자 노이즈(σ)는 √N에 비례하고, SNR = N/√N = √N이므로, 선량 증가 → 광자 수 증가 → 상대 노이즈 감소 → SNR 향상입니다."
+    },
+    {
+      "question": "선량을 절반으로 줄이면 화질은 어떻게 되는가?",
+      "answer": "SNR ∝ √Dose이므로, 선량을 절반(0.5x)으로 줄이면 SNR은 √0.5 ≈ 0.71배로 감소합니다. 즉 화질이 약 29% 저하됩니다."
+    },
+    {
+      "question": "선량을 X% 감소시키면 상대 노이즈는 얼마나 증가하는가?",
+      "answer": "σ_rel ∝ 1/√Dose 공식 적용. 계산 방법: (1) 선량 비율 계산 (X% 감소 → (100-X)/100 배), (2) 상대 노이즈 배수 = 1/√(선량비율), (3) 증가율 = (배수 - 1) × 100%"
+    },
+    {
+      "question": "mAs를 줄이면 CNR과 미세석회화 검출 성능은?",
+      "answer": "CNR ∝ √Dose 공식 적용. mAs 감소 → CNR 감소 → 미세석회화 검출 성능 저하. 계산 방법: CNR 배수 = √(선량비율), 감소율 = (1 - CNR배수) × 100%"
+    }
+  ],
+  "expert_insight": {
+    "statistical_nuance": {
+      "title": "📊 통계적 미묘함: 표준편차 vs 분산",
+      "standard_deviation": {
+        "formula": "σ ∝ 1/√Dose",
+        "description": "시각적 '질감(Texture)'은 표준편차(σ)에 비례. 선량 40% 감소 시 σ는 29.1% 증가.",
+        "clinical_relevance": "영상의학과 전문의가 '노이즈가 많다'고 느끼는 정도"
+      },
+      "variance": {
+        "formula": "σ² ∝ 1/Dose",
+        "description": "물리적 잡음 에너지(Noise Power)는 분산(σ²)에 비례. 선량 40% 감소 시 σ²는 66.7% 증가.",
+        "clinical_relevance": "CAD 알고리즘의 검출 임계값에 영향",
+        "calculation": "분산 증가율 = 1/0.6 - 1 = 0.667 = 66.7%"
+      },
+      "summary": "동일한 선량 변화에서 분산(σ²)은 표준편차(σ)보다 2배 민감하게 반응함"
+    },
+    "clinical_impact_mechanism": {
+      "title": "🏥 임상적 영향 메커니즘",
+      "microcalcification": {
+        "characteristic": "미세석회화는 고주파(High-frequency) 신호 성분",
+        "size_range": "직경 0.1-0.5mm의 작은 고밀도 구조물",
+        "noise_vulnerability": "양자 노이즈는 전 주파수 대역에서 균일하게 분포(White Noise)하므로, 고주파 영역의 미세석회화 신호와 직접 경쟁",
+        "false_negative_mechanism": "노이즈 증가 → 작은 석회화 클러스터의 CNR 저하 → 배경에 묻혀 검출 실패 (위음성, FN)",
+        "false_positive_mechanism": "노이즈 스펙클(Speckle)이 석회화와 유사한 고주파 패턴 형성 → 정상 조직을 석회화로 오인 (위양성, FP)",
+        "clinical_consequence": "선별 검사의 민감도(Sensitivity)와 특이도(Specificity) 동시 저하"
+      },
+      "mass_detection": {
+        "characteristic": "종괴는 저주파(Low-frequency) 신호 성분",
+        "noise_impact": "미세석회화보다 노이즈에 덜 민감하나, 작은 종괴나 불명확 경계의 종괴는 CNR 저하로 검출 어려움",
+        "clinical_consequence": "조기 유방암의 놓침 위험 증가"
+      }
+    },
+    "advanced_metrics": {
+      "title": "📈 고급 검출 지표",
+      "d_prime": {
+        "name": "검출가능도 지수 (Detectability Index, d')",
+        "formula_latex": "d' = \\frac{\\Delta S}{\\sigma} \\propto \\sqrt{Dose}",
+        "formula_unicode": "d' = ΔS/σ ∝ √Dose",
+        "description": "신호 검출 이론(SDT)에서 관찰자가 신호를 노이즈로부터 구분할 수 있는 능력",
+        "dose_relation": "d' ∝ √Dose → 선량 40% 감소 시 d'는 √0.6 ≈ 0.775배 (22.5% 감소)",
+        "roc_impact": "d' 감소 → ROC 곡선이 왼쪽 아래로 이동 → AUC(정확도) 저하",
+        "clinical_threshold": "미세석회화 검출에 필요한 최소 d' ≈ 1.5-2.0"
+      },
+      "rose_criterion": {
+        "name": "Rose 기준 (Rose Criterion)",
+        "formula": "CNR ≥ 5 (또는 SNR ≥ 5)",
+        "description": "인간 관찰자가 95% 신뢰도로 병변을 검출하기 위한 최소 CNR",
+        "clinical_implication": "CNR < 5이면 검출 실패 확률이 급격히 증가"
+      },
+      "nps": {
+        "name": "노이즈 전력 스펙트럼 (Noise Power Spectrum, NPS)",
+        "description": "주파수 영역에서 노이즈 분포를 나타내는 지표. 양자 노이즈는 평탄한(White) NPS를 가짐",
+        "dose_relation": "NPS ∝ 1/Dose → 선량 40% 감소 시 NPS 66.7% 증가",
+        "clinical_relevance": "고주파 영역의 NPS 증가가 미세석회화 검출에 직접적 영향"
+      }
+    },
+    "dose_optimization_principles": {
+      "title": "⚖️ 선량 최적화 원칙",
+      "alara": {
+        "name": "ALARA 원칙",
+        "description": "As Low As Reasonably Achievable - 합리적으로 달성 가능한 최저 선량",
+        "trade_off": "선량 감소와 진단 정확도 사이의 균형점 탐색 필수"
+      },
+      "minimum_diagnostic_quality": {
+        "description": "임상적으로 허용 가능한 최소 화질 기준",
+        "microcalcification_cnr": "미세석회화 검출: CNR ≥ 3-4",
+        "mass_cnr": "종괴 검출: CNR ≥ 2-3"
+      },
+      "practical_guidance": [
+        "선량 10-15% 감소: 일반적으로 임상적 영향 미미",
+        "선량 20-30% 감소: 미세석회화 검출능 저하 가능, 고위험군에서 주의",
+        "선량 40%+ 감소: 진단 성능 유의미한 저하, 권장하지 않음"
+      ]
+    }
+  }
+}

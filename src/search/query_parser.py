@@ -848,6 +848,129 @@ class SmartQueryParser:
             self._llm_parser.close()
 
 
+# =============================================================================
+# Enhanced Query Parser with Medical-Logic-CoT
+# =============================================================================
+
+class EnhancedQueryParser:
+    """
+    Phase 1 고도화: Medical-Logic-CoT 쿼리 확장 통합 파서
+
+    1. 기존 LLM 파서로 기본 파싱
+    2. DeepSeek-R1 CoT로 의학 키워드 확장
+    3. 확장된 키워드를 SearchQuery에 추가
+    """
+
+    def __init__(
+        self,
+        ollama_url: str = "http://localhost:11434",
+        llm_model: str = "llama3.2",
+        cot_model: str = "glm4:9b",  # Phase 7.7: 경량 모델
+        enable_cot: bool = True,
+    ):
+        """
+        Args:
+            ollama_url: Ollama 서버 URL
+            llm_model: 기본 파싱용 LLM 모델
+            cot_model: CoT 확장용 DeepSeek-R1 모델
+            enable_cot: CoT 확장 활성화 여부
+        """
+        self.ollama_url = ollama_url
+        self.enable_cot = enable_cot
+
+        # 기본 파서
+        self._base_parser = SmartQueryParser(
+            prefer_llm=True,
+            ollama_url=ollama_url,
+            model=llm_model,
+        )
+
+        # CoT 확장기 (lazy loading)
+        self._cot_expander = None
+        self._cot_model = cot_model
+
+    def _get_cot_expander(self):
+        """CoT 확장기 lazy loading"""
+        if self._cot_expander is None and self.enable_cot:
+            try:
+                from src.search.query_expander import MedicalCoTQueryExpander
+                self._cot_expander = MedicalCoTQueryExpander(
+                    ollama_url=self.ollama_url,
+                    model=self._cot_model,
+                )
+            except ImportError as e:
+                logger.warning(f"Could not import MedicalCoTQueryExpander: {e}")
+            except Exception as e:
+                logger.warning(f"Failed to initialize CoT expander: {e}")
+
+        return self._cot_expander
+
+    def parse(self, query: str) -> SearchQuery:
+        """
+        쿼리 파싱 + CoT 확장
+
+        Args:
+            query: 원본 검색 쿼리
+
+        Returns:
+            확장된 키워드가 포함된 SearchQuery
+        """
+        # 1. 기본 파싱
+        search_query = self._base_parser.parse(query)
+
+        # 2. CoT 확장 (활성화된 경우)
+        if self.enable_cot:
+            expander = self._get_cot_expander()
+            if expander:
+                try:
+                    expansion = expander.expand(
+                        query,
+                        existing_keywords=search_query.keywords,
+                    )
+
+                    # SearchQuery에 확장 결과 추가
+                    search_query.expanded_keywords = expansion.expanded_keywords
+                    search_query.semantic_variations = expansion.semantic_variations
+                    search_query.reasoning_trace = expansion.reasoning_trace
+
+                    # MeSH 용어도 확장
+                    if expansion.mesh_expansions:
+                        existing_mesh = set(search_query.mesh_terms)
+                        new_mesh = [m for m in expansion.mesh_expansions if m not in existing_mesh]
+                        search_query.mesh_terms.extend(new_mesh)
+
+                    logger.info(
+                        f"CoT expansion: +{len(expansion.expanded_keywords)} keywords, "
+                        f"+{len(expansion.semantic_variations)} variations"
+                    )
+
+                except Exception as e:
+                    logger.warning(f"CoT expansion failed, using base parse only: {e}")
+
+        return search_query
+
+    def parse_without_cot(self, query: str) -> SearchQuery:
+        """CoT 없이 기본 파싱만"""
+        return self._base_parser.parse(query)
+
+    @property
+    def using_llm(self) -> bool:
+        """LLM 사용 중인지"""
+        return self._base_parser.using_llm
+
+    @property
+    def using_cot(self) -> bool:
+        """CoT 사용 중인지"""
+        expander = self._get_cot_expander()
+        return expander is not None and expander.using_cot
+
+    def close(self):
+        """리소스 정리"""
+        self._base_parser.close()
+        if self._cot_expander:
+            self._cot_expander.close()
+
+
 # 테스트
 if __name__ == "__main__":
     import sys

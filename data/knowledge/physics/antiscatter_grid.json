@@ -1,0 +1,181 @@
+{
+  "id": "antiscatter_grid",
+  "category": "Anti-scatter Grid Physics",
+  "keywords": [
+    "grid", "그리드", "anti-scatter grid", "산란선 제거 그리드",
+    "Bucky", "버키", "Bucky factor", "버키 팩터", "버키 인자",
+    "grid ratio", "그리드 비", "grid frequency", "그리드 빈도",
+    "contrast improvement", "대조도 개선", "CIF",
+    "contrast improvement factor", "대조도 개선 계수",
+    "selectivity", "선택성", "grid selectivity",
+    "primary transmission", "일차선 투과율", "Tp",
+    "scatter transmission", "산란선 투과율", "Ts",
+    "cellular grid", "셀룰러 그리드", "linear grid", "선형 그리드"
+  ],
+  "sources": [
+    {
+      "id": "rezentes1999",
+      "citation": "Rezentes PS, de Almeida A, Barnes GT. Mammography grid performance. Radiology. 1999;210(1):227-232",
+      "pmid": "9885613",
+      "doi": "10.1148/radiology.210.1.r99ja48227",
+      "type": "Experimental Study"
+    },
+    {
+      "id": "sechopoulos2002",
+      "citation": "Sechopoulos I, Suryanarayanan S, Vedantham S, et al. Grid and slot scan scatter reduction in mammography: comparison by using Monte Carlo techniques. Radiology. 2002;222(3):853-858",
+      "pmid": "11818623",
+      "doi": "10.1148/radiol.2222010491",
+      "type": "Monte Carlo Comparison"
+    },
+    {
+      "id": "niklason1986",
+      "citation": "Niklason LT, Chan HP, Cascade PN, et al. Ultra-high-strip-density radiographic grids: a new antiscatter technique for mammography. Radiology. 1986;158(1):247-249",
+      "pmid": "3969487",
+      "type": "Technical Development"
+    },
+    {
+      "id": "fahrig2003",
+      "citation": "Fahrig R, Rowlands JA, Yaffe MJ. Development and Monte Carlo analysis of antiscatter grids for mammography. Med Phys. 2003;30(3):314-327",
+      "pmid": "12625771",
+      "doi": "10.1118/1.1538233",
+      "type": "Monte Carlo Analysis"
+    },
+    {
+      "id": "korner2023",
+      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "type": "Review Article"
+    }
+  ],
+  "content": {
+    "principles": [
+      "그리드는 일차선은 통과시키고 경사진 산란선을 납 스트립으로 흡수",
+      "그리드 비(ratio)가 높을수록 산란선 제거 효과↑, 환자 선량↑",
+      "맘모그래피에서는 4:1 ~ 5:1 비율의 그리드가 일반적"
+    ],
+    "source_ref": "korner2023",
+    "grid_parameters": {
+      "source_ref": "korner2023, rezentes1999",
+      "grid_ratio": {
+        "definition": "납 스트립 높이 / 스트립 간격 (h/D)",
+        "mammography_typical": "4:1 to 5:1",
+        "general_radiography": "8:1 to 12:1",
+        "effect": "비율↑ → 산란 제거↑, 선량↑"
+      },
+      "grid_frequency": {
+        "definition": "단위 길이당 납 스트립 수",
+        "mammography_typical_lp_cm": "30-50 (이동 그리드)",
+        "fixed_grid_lp_cm": "최대 80",
+        "UHSD_grid_lp_cm": "70-100",
+        "source_ref": "korner2023, niklason1986"
+      }
+    },
+    "performance_measurements": {
+      "source_ref": "rezentes1999",
+      "study_conditions": {
+        "kVp_tested": [25, 30, 35],
+        "phantom_thickness_cm": [2, 4, 8],
+        "grid_types_tested": "linear grids (3), cellular grid (1)"
+      },
+      "key_findings": {
+        "CIF_vs_thickness": "CIF는 팬텀 두께 증가에 따라 증가",
+        "CIF_vs_kVp": "8cm 팬텀에서 kVp 증가에 따라 CIF 증가, 2-4cm에서는 kVp 변화에 둔감",
+        "BF_vs_thickness": "Bucky factor는 팬텀 두께 증가에 따라 증가",
+        "BF_vs_kVp": "Bucky factor는 관전압 증가에 따라 감소",
+        "cellular_vs_linear": "25-30 kVp에서 cellular 그리드가 CIF 5-10% 우수, 일부 linear 그리드가 BF 성능 우수"
+      }
+    },
+    "monte_carlo_comparison": {
+      "source_ref": "sechopoulos2002",
+      "conditions": "28 kVp Mo 스펙트럼, 6cm 유방 팬텀",
+      "findings": {
+        "cellular_vs_linear": "cellular 그리드가 linear 그리드보다 현저히 우수한 성능",
+        "selectivity_improvement": "honeycomb 그리드의 선택성이 linear 그리드 대비 약 3.9배 개선 (grid ratio 5.0)",
+        "optimal_grid": "텅스텐 중격(tungsten-septa) 공기간격(air-interspaced) cellular 그리드 4:1 비율이 BF와 CIF 모두에서 high-transmission cellular 그리드 능가",
+        "slot_scan_comparison": "slot scan 기법은 ideal BF 달성, 4mm 이상 슬롯 너비에서 CIF는 cellular 그리드보다 낮음"
+      }
+    },
+    "UHSD_grids": {
+      "source_ref": "niklason1986",
+      "definition": "Ultra-High-Strip-Density grids (70-100 lines/cm)",
+      "performance": {
+        "contrast_increase_percent": "40-90%",
+        "bucky_factor_range": "2.0-3.5"
+      },
+      "comparison": "기존 그리드 기법과 유사한 성능"
+    },
+    "gold_septa_grids": {
+      "source_ref": "fahrig2003",
+      "findings": "금 중격(gold septa) 사용 시 높은 kVp 및 높은 산란 조건에서 CIF와 BF 성능 향상"
+    },
+    "bucky_factor": {
+      "source_ref": "rezentes1999, korner2023",
+      "definition": "그리드 사용 시 필요한 노출 증가 비율",
+      "formula": "B = mAs_with_grid / mAs_without_grid",
+      "mammography_typical": "2.0-3.0",
+      "relationship_with_parameters": {
+        "thickness": "두께↑ → BF↑",
+        "kVp": "kVp↑ → BF↓"
+      }
+    },
+    "contrast_improvement_factor": {
+      "source_ref": "rezentes1999, sechopoulos2002",
+      "definition": "그리드 사용으로 인한 대조도 향상 비율",
+      "formula": "CIF = (1 + SPR_without) / (1 + SPR_with)",
+      "mammography_typical": "1.3-1.6 (grid ratio 4:1-5:1)",
+      "clinical_meaning": "CIF 1.5 = 대조도 50% 향상"
+    },
+    "grid_types_comparison": {
+      "source_ref": "sechopoulos2002, fahrig2003",
+      "linear": {
+        "description": "평행한 납 스트립, 한 방향으로만 산란 제거",
+        "advantage": "제작 용이, 비용↓",
+        "disadvantage": "수직 방향 산란 제거 불가"
+      },
+      "cellular_honeycomb": {
+        "description": "벌집 구조로 두 방향 산란 제거",
+        "advantage": "선택성 ~3.9배 개선 (fahrig2003)",
+        "disadvantage": "BF 약간 높음, 제작 복잡"
+      }
+    }
+  },
+  "formulas": {
+    "grid_ratio": {
+      "formula": "r = h / D",
+      "variables": {
+        "h": "스트립 높이",
+        "D": "스트립 간격"
+      },
+      "source_ref": "korner2023"
+    },
+    "bucky_factor": {
+      "formula": "B = mAs_with_grid / mAs_without_grid ≈ 1/Tp",
+      "variables": {
+        "Tp": "일차선 투과율"
+      },
+      "source_ref": "rezentes1999"
+    },
+    "contrast_improvement_factor": {
+      "formula": "CIF = (1 + SPR_without) / (1 + SPR_with)",
+      "alternative": "CIF = (1 + SPR) / (1 + SPR × Ts/Tp)",
+      "source_ref": "sechopoulos2002"
+    },
+    "selectivity": {
+      "formula": "Σ = Tp / Ts",
+      "variables": {
+        "Tp": "일차선 투과율",
+        "Ts": "산란선 투과율"
+      },
+      "source_ref": "fahrig2003"
+    }
+  },
+  "clinical_relevance": {
+    "when_to_use": "유방 두께 > 4-5 cm에서 그리드 사용 권장",
+    "dose_tradeoff": "대조도 향상 vs 선량 증가 (2-3배) 균형 필요",
+    "grid_selection": "맘모그래피: 4:1-5:1 비율 권장",
+    "cellular_advantage": "가능하면 cellular 그리드가 선택성 면에서 우수",
+    "source_ref": "rezentes1999, sechopoulos2002, korner2023"
+  }
+}

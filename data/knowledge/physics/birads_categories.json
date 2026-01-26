@@ -1,0 +1,147 @@
+{
+  "id": "birads_categories",
+  "category": "BI-RADS",
+  "keywords": ["BI-RADS", "BIRADS", "category", "카테고리", "분류", "악성", "양성", "PPV", "malignancy", "assessment", "판정", "ACR"],
+  "sources": [
+    {
+      "id": "acr_birads_5th",
+      "citation": "ACR BI-RADS Atlas, 5th Edition. American College of Radiology, 2013",
+      "type": "Clinical Standard"
+    },
+    {
+      "id": "sickles2013",
+      "citation": "Sickles EA, D'Orsi CJ, Bassett LW, et al. ACR BI-RADS Mammography. In: ACR BI-RADS Atlas 5th ed. Reston, VA: ACR, 2013",
+      "type": "Atlas Chapter"
+    },
+    {
+      "id": "liberman2005",
+      "citation": "Liberman L, Menell JH. Breast imaging reporting and data system (BI-RADS). Radiol Clin North Am. 2002;40(3):409-430",
+      "pmid": "12117184",
+      "doi": "10.1016/S0033-8389(01)00017-3",
+      "type": "Review"
+    },
+    {
+      "id": "orel1999",
+      "citation": "Orel SG, Kay N, Reynolds C, Sullivan DC. BI-RADS categorization as a predictor of malignancy. Radiology. 1999;211(3):845-850",
+      "pmid": "10352613",
+      "doi": "10.1148/radiology.211.3.r99jn31845",
+      "type": "Malignancy Rate Study"
+    }
+  ],
+  "definitions": {
+    "BI-RADS": {
+      "name": "Breast Imaging Reporting and Data System",
+      "description": "유방영상 보고 및 데이터 시스템. 유방촬영, 초음파, MRI 판독 결과를 표준화된 카테고리로 분류하는 ACR 지침.",
+      "purpose": "판독의 일관성 확보, 추적 관찰 및 조직검사 권고의 표준화"
+    }
+  },
+  "categories": {
+    "category_0": {
+      "name": "Category 0: Incomplete",
+      "description": "추가 영상 검사 필요 (불완전 평가)",
+      "action": "추가 영상 검사 또는 이전 영상과의 비교 필요",
+      "malignancy_rate": "N/A",
+      "korean": "추가검사 필요"
+    },
+    "category_1": {
+      "name": "Category 1: Negative",
+      "description": "정상 소견, 이상 없음",
+      "action": "정기 검진 권고",
+      "malignancy_rate": "0%",
+      "follow_up": "1년 후 정기 검진",
+      "korean": "정상"
+    },
+    "category_2": {
+      "name": "Category 2: Benign",
+      "description": "양성 소견 (석회화된 섬유선종, 지방 함유 병변, 단순 낭종 등)",
+      "action": "정기 검진 권고",
+      "malignancy_rate": "0%",
+      "follow_up": "1년 후 정기 검진",
+      "korean": "양성"
+    },
+    "category_3": {
+      "name": "Category 3: Probably Benign",
+      "description": "양성 가능성 높음 (악성 확률 ≤2%)",
+      "action": "단기 추적 검사 권고",
+      "malignancy_rate": "≤2% (0-2%)",
+      "follow_up": "6개월 후 추적 검사",
+      "korean": "양성 의심",
+      "note": "6개월 추적 후 12개월, 24개월 추적. 2년간 안정 시 Category 2로 하향"
+    },
+    "category_4": {
+      "name": "Category 4: Suspicious",
+      "description": "악성 의심 (조직검사 권고)",
+      "action": "조직검사 권고",
+      "malignancy_rate": "3-94%",
+      "korean": "악성 의심",
+      "subcategories": {
+        "4A": {
+          "name": "Category 4A: Low Suspicion",
+          "description": "낮은 악성 의심",
+          "malignancy_rate": "3-10%"
+        },
+        "4B": {
+          "name": "Category 4B: Moderate Suspicion",
+          "description": "중등도 악성 의심",
+          "malignancy_rate": "10-50%"
+        },
+        "4C": {
+          "name": "Category 4C: High Suspicion",
+          "description": "높은 악성 의심",
+          "malignancy_rate": "50-94%"
+        }
+      }
+    },
+    "category_5": {
+      "name": "Category 5: Highly Suggestive of Malignancy",
+      "description": "악성 강력 시사 (조직검사 필수)",
+      "action": "조직검사 필수, 적절한 치료 계획 수립",
+      "malignancy_rate": "≥95%",
+      "korean": "악성 강력 시사"
+    },
+    "category_6": {
+      "name": "Category 6: Known Biopsy-Proven Malignancy",
+      "description": "조직검사로 확인된 악성 (치료 전 평가)",
+      "action": "치료 반응 평가 또는 수술 전 평가",
+      "malignancy_rate": "100% (이미 확진)",
+      "korean": "확진된 악성"
+    }
+  },
+  "tables": {
+    "ppv_summary": {
+      "description": "BI-RADS 카테고리별 악성 확률 (PPV) 요약",
+      "columns": ["category", "malignancy_rate", "action"],
+      "data": [
+        {"category": "0", "malignancy_rate": "N/A", "action": "추가 검사"},
+        {"category": "1", "malignancy_rate": "0%", "action": "정기 검진"},
+        {"category": "2", "malignancy_rate": "0%", "action": "정기 검진"},
+        {"category": "3", "malignancy_rate": "≤2%", "action": "6개월 추적"},
+        {"category": "4A", "malignancy_rate": "3-10%", "action": "조직검사"},
+        {"category": "4B", "malignancy_rate": "10-50%", "action": "조직검사"},
+        {"category": "4C", "malignancy_rate": "50-94%", "action": "조직검사"},
+        {"category": "5", "malignancy_rate": "≥95%", "action": "조직검사 필수"},
+        {"category": "6", "malignancy_rate": "100%", "action": "치료"}
+      ]
+    }
+  },
+  "constraints": [
+    "Category 3은 악성 확률이 2% 이하인 경우에만 부여",
+    "Category 4는 조직검사 권고의 근거가 됨",
+    "Category 5는 악성 확률 95% 이상에서만 부여",
+    "Category 0은 최종 판정이 아니며 반드시 추가 검사 후 재분류"
+  ],
+  "common_questions": [
+    {
+      "question": "BI-RADS Category 3의 악성 확률은?",
+      "answer": "Category 3 (Probably Benign)의 악성 확률은 2% 이하입니다. 6개월 후 추적 검사를 권고합니다."
+    },
+    {
+      "question": "BI-RADS Category 4A, 4B, 4C의 차이는?",
+      "answer": "4A: 3-10% 악성 확률 (낮은 의심), 4B: 10-50% (중등도 의심), 4C: 50-94% (높은 의심). 모두 조직검사 권고."
+    },
+    {
+      "question": "언제 조직검사를 권고하는가?",
+      "answer": "BI-RADS Category 4 이상 (4A, 4B, 4C, 5)에서 조직검사를 권고합니다. Category 3은 추적 관찰."
+    }
+  ]
+}

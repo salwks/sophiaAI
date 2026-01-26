@@ -1,0 +1,173 @@
+{
+  "id": "filtration_hvl",
+  "category": "Filtration & Beam Quality",
+  "keywords": [
+    "filter", "필터", "filtration", "여과", "추가필터",
+    "molybdenum filter", "Mo filter", "몰리브덴 필터",
+    "rhodium filter", "Rh filter", "로듐 필터",
+    "aluminum filter", "Al filter", "알루미늄 필터",
+    "HVL", "hvl", "half value layer", "반가층",
+    "beam quality", "빔 품질", "beam hardening", "빔 경화",
+    "K-edge", "K edge", "케이엣지", "K흡수단",
+    "spectral shaping", "스펙트럼 정형",
+    "target filter combination", "타겟 필터 조합"
+  ],
+  "sources": [
+    {
+      "id": "geraldes2003",
+      "citation": "Geraldes ML, DeWerd LA, Micka JA, et al. Computation of beam quality parameters for Mo/Mo, Mo/Rh, Rh/Rh, and W/Al target/filter combinations in mammography. Med Phys. 2003;30(11):2920-2929",
+      "pmid": "14596300",
+      "doi": "10.1118/1.1617391",
+      "type": "Computational Study"
+    },
+    {
+      "id": "dance1995",
+      "citation": "Dance DR, Skinner CL, Carlsson GA. Breast dosimetry. Appl Radiat Isot. 1999;50(1):185-203",
+      "pmid": "10028634",
+      "type": "Dosimetry Review"
+    },
+    {
+      "id": "young1995",
+      "citation": "Young KC, Ramsdale ML, Bignell F. Contrast and dose with Mo-Mo, Mo-Rh, and Rh-Rh target-filter combinations in mammography. Radiology. 1996;201(2):533-539",
+      "pmid": "7753987",
+      "type": "Experimental Study"
+    },
+    {
+      "id": "korner2023",
+      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "type": "Review Article"
+    },
+    {
+      "id": "vieira2015",
+      "citation": "Vieira MA, et al. Solid-state dosimeters: a new approach for mammography measurements. Radiat Meas. 2015;71:413-417",
+      "pmid": "25652475",
+      "type": "Measurement Study"
+    }
+  ],
+  "content": {
+    "principles": [
+      "필터는 저에너지 광자를 제거하여 환자 선량 감소 및 영상 대조도 최적화",
+      "K-edge 필터링: 필터 물질의 K-edge 바로 위 에너지의 광자를 선택적 흡수",
+      "빔 경화: 저에너지 제거로 평균 에너지 증가, HVL 증가"
+    ],
+    "source_ref": "korner2023",
+    "filter_materials": {
+      "source_ref": "korner2023",
+      "Mo": {
+        "k_edge_keV": 20.0,
+        "thickness_mm": 0.03,
+        "optimal_target": "Mo",
+        "effect": "20 keV 이상 광자 급격 감쇠, 17.5 keV 특성선 투과"
+      },
+      "Rh": {
+        "k_edge_keV": 23.3,
+        "thickness_mm": 0.025,
+        "optimal_target": "Mo, Rh, W",
+        "effect": "더 높은 에너지 통과, 두꺼운 유방에 적합"
+      },
+      "Al": {
+        "k_edge_keV": 1.56,
+        "thickness_mm": 0.5,
+        "optimal_target": "W",
+        "effect": "저에너지 전반적 감쇠, K-edge 효과 미미"
+      }
+    },
+    "hvl_measurements": {
+      "source_ref": "geraldes2003, vieira2015",
+      "measurement_standard": "순수 Al 사용",
+      "kVp_range_tested": "23-40 kVp",
+      "measured_range_mmAl": "0.36-0.46",
+      "accuracy": "예측값과 측정값 간 평균 편차 3.3% (geraldes2003)",
+      "validation": "NIST, IAEA, Netherlands Metrology Institute 데이터와 비교 검증됨"
+    },
+    "target_filter_combinations": {
+      "source_ref": "young1995, geraldes2003, korner2023",
+      "MoMo": {
+        "target": "Mo",
+        "filter": "Mo 0.03mm",
+        "hvl_range_mmAl": "0.30-0.35",
+        "contrast": "가장 높음 (29 kVp 미만에서)",
+        "dose": "가장 높음 (모든 두께/조성에서)",
+        "application": "얇은 지방성 유방",
+        "source_ref": "young1995"
+      },
+      "MoRh": {
+        "target": "Mo",
+        "filter": "Rh 0.025mm",
+        "hvl_range_mmAl": "0.35-0.40",
+        "contrast": "중간",
+        "dose": "Mo/Mo 대비 감소",
+        "application": "중간 두께 유방",
+        "source_ref": "young1995, korner2023"
+      },
+      "RhRh": {
+        "target": "Rh",
+        "filter": "Rh 0.025mm",
+        "hvl_range_mmAl": "0.38-0.42",
+        "contrast": "가장 낮음 (저 kVp에서)",
+        "dose": "가장 낮음",
+        "application": "두꺼운 유방",
+        "note": "두꺼운/치밀 유방에서 Mo/Mo와 유사한 대조도를 낮은 선량으로 달성 가능",
+        "source_ref": "young1995"
+      },
+      "WAl": {
+        "target": "W",
+        "filter": "Al 0.5mm",
+        "hvl_range_mmAl": "0.45-0.55",
+        "application": "디지털 시스템, 두꺼운 유방",
+        "source_ref": "geraldes2003"
+      },
+      "WRh": {
+        "target": "W",
+        "filter": "Rh 0.05mm",
+        "hvl_range_mmAl": "0.45-0.55",
+        "application": "현대 디지털 시스템",
+        "source_ref": "korner2023"
+      }
+    },
+    "contrast_dose_relationship": {
+      "source_ref": "young1995",
+      "key_finding": "대조도는 Mo-Mo에서 가장 높고 Rh-Rh에서 가장 낮음 (29 kVp 미만)",
+      "dose_finding": "평균 유선량(MGD)은 Mo-Mo에서 가장 높고 Rh-Rh에서 가장 낮음",
+      "clinical_implication": "두꺼운/치밀 유방에서 대체 target-filter 선택이 더 낮은 선량으로 유사한 대조도 달성 가능"
+    },
+    "beam_quality_parameters": {
+      "source_ref": "geraldes2003",
+      "parameters_computed": ["HVL", "Homogeneity Coefficient (HC)", "Average Photon Energy"],
+      "validation_accuracy": {
+        "HVL_mean_deviation_percent": 3.3,
+        "HC_mean_deviation_percent": 3.7,
+        "average_energy_mean_deviation_percent": 1.5
+      }
+    }
+  },
+  "formulas": {
+    "hvl_attenuation": {
+      "formula": "I = I₀ × (1/2)^(x/HVL)",
+      "variables": {
+        "I": "투과 후 강도",
+        "I₀": "초기 강도",
+        "x": "물질 두께",
+        "HVL": "반가층"
+      },
+      "source_ref": "korner2023"
+    },
+    "linear_attenuation": {
+      "formula": "I = I₀ × e^(-μx)",
+      "variables": {
+        "μ": "선형 감쇠 계수"
+      },
+      "source_ref": "korner2023"
+    }
+  },
+  "clinical_relevance": {
+    "dose_reduction": "적절한 target/filter 조합 선택으로 MGD 유의미한 감소 가능",
+    "contrast_optimization": "K-edge 필터로 특성선 강조, 연조직 대조도 향상",
+    "penetration_vs_contrast": "HVL 증가 → 투과력↑, 대조도↓ (trade-off)",
+    "aec_integration": "AEC가 유방 두께에 따라 target/filter 자동 선택",
+    "source_ref": "young1995, korner2023"
+  }
+}

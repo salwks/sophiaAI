@@ -1,0 +1,158 @@
+{
+  "id": "dbt_acquisition",
+  "category": "Digital Breast Tomosynthesis Acquisition",
+  "keywords": [
+    "DBT", "digital breast tomosynthesis", "토모합성",
+    "acquisition geometry", "획득 기하학", "angular range", "각도 범위",
+    "projection", "투영", "sweep angle", "스윕 각도",
+    "Hologic", "Siemens", "GE", "Fujifilm",
+    "step and shoot", "continuous", "pulsed",
+    "tube motion", "튜브 이동"
+  ],
+  "sources": [
+    {
+      "id": "sechopoulos2013a",
+      "citation": "Sechopoulos I. A review of breast tomosynthesis. Part I. The image acquisition process. Med Phys. 2013;40(1):014301",
+      "pmid": "23298126",
+      "doi": "10.1118/1.4770279",
+      "type": "Comprehensive Review - Acquisition"
+    },
+    {
+      "id": "michell2018",
+      "citation": "Michell MJ, et al. Digital breast tomosynthesis: State of the Art. Radiology. 2015;277(3):663-684",
+      "pmid": "26599926",
+      "doi": "10.1148/radiol.2015141303",
+      "type": "State of the Art Review"
+    },
+    {
+      "id": "rodriguez2016",
+      "citation": "Rodriguez-Ruiz A, et al. Evaluation of the technical performance of three different commercial digital breast tomosynthesis systems in the clinical environment. Phys Med. 2016;32(6):767-777",
+      "pmid": "27180118",
+      "doi": "10.1016/j.ejmp.2016.05.001",
+      "type": "Multi-System Comparison"
+    },
+    {
+      "id": "feng2007",
+      "citation": "Feng SS, Sechopoulos I. Clinical digital breast tomosynthesis system: dosimetric characterization. Radiology. 2012;263(1):35-42",
+      "pmid": "22332070",
+      "doi": "10.1148/radiol.11111789",
+      "type": "Dosimetric Characterization"
+    },
+    {
+      "id": "baker2011",
+      "citation": "Baker JA, Lo JY. Breast tomosynthesis: state-of-the-art and review of the literature. Acad Radiol. 2011;18(10):1298-1310",
+      "pmid": "21893294",
+      "doi": "10.1016/j.acra.2011.06.011",
+      "type": "Literature Review"
+    }
+  ],
+  "content": {
+    "acquisition_principles": {
+      "source_ref": "sechopoulos2013a",
+      "description": "DBT는 제한된 각도 토모그래피로, X선 튜브가 유방 주위를 호를 따라 이동하며 여러 저선량 투영 영상을 획득",
+      "key_parameters": [
+        "Angular range (총 스윕 각도)",
+        "Number of projections (투영 수)",
+        "Tube motion type (이동 방식)",
+        "Detector readout mode (검출기 판독 모드)"
+      ]
+    },
+    "system_comparison": {
+      "source_ref": "rodriguez2016, michell2018",
+      "systems": {
+        "hologic_dimensions": {
+          "angular_range_deg": 15,
+          "projections": 15,
+          "tube_motion": "continuous",
+          "detector_motion": "stationary",
+          "sid_cm": 70,
+          "pixel_pitch_um": 70,
+          "note": "좁은 각도, 높은 in-plane 분해능"
+        },
+        "siemens_inspiration": {
+          "angular_range_deg": 50,
+          "projections": 25,
+          "tube_motion": "continuous",
+          "detector_motion": "stationary",
+          "sid_cm": 65.5,
+          "pixel_pitch_um": 85,
+          "note": "넓은 각도, 우수한 depth discrimination"
+        },
+        "ge_senoclaire": {
+          "angular_range_deg": 25,
+          "projections": 9,
+          "tube_motion": "step_and_shoot",
+          "detector_motion": "stationary",
+          "sid_cm": 66,
+          "pixel_pitch_um": 100,
+          "note": "step-and-shoot로 motion blur 최소화"
+        },
+        "fujifilm_amulet": {
+          "angular_range_deg": 15,
+          "projections": 15,
+          "tube_motion": "continuous",
+          "detector_motion": "stationary",
+          "sid_cm": 65,
+          "pixel_pitch_um": 50,
+          "note": "직접 변환 검출기, 높은 해상도"
+        }
+      }
+    },
+    "tube_motion_types": {
+      "source_ref": "sechopoulos2013a, baker2011",
+      "continuous": {
+        "description": "튜브가 연속적으로 이동하며 노출",
+        "advantages": "빠른 스캔 시간, 적은 기계적 스트레스",
+        "disadvantages": "motion blur 가능성",
+        "systems": ["Hologic", "Siemens", "Philips", "Fujifilm"]
+      },
+      "step_and_shoot": {
+        "description": "튜브가 정지 후 노출, 다음 위치로 이동",
+        "advantages": "motion blur 없음, 높은 공간 분해능",
+        "disadvantages": "긴 스캔 시간, 기계적 마모",
+        "systems": ["GE", "IMS Giotto"]
+      }
+    },
+    "angular_range_impact": {
+      "source_ref": "sechopoulos2013a, rodriguez2016",
+      "narrow_angle_15deg": {
+        "depth_resolution_mm": "5-10",
+        "in_plane_resolution": "우수",
+        "artifact_spread_fwhm_mm": "~10",
+        "clinical_strength": "미세석회화 검출"
+      },
+      "wide_angle_50deg": {
+        "depth_resolution_mm": "1-2",
+        "in_plane_resolution": "보통",
+        "artifact_spread_fwhm_mm": "~4.5",
+        "clinical_strength": "종괴 및 구조적 왜곡 검출, 깊이 분별"
+      }
+    },
+    "projection_count_impact": {
+      "source_ref": "sechopoulos2013a",
+      "fewer_projections_9_15": {
+        "advantages": "낮은 선량, 빠른 스캔",
+        "disadvantages": "in-plane aliasing 가능성"
+      },
+      "more_projections_25_plus": {
+        "advantages": "우수한 in-plane 분해능, 적은 aliasing",
+        "disadvantages": "높은 선량, 긴 스캔 시간"
+      }
+    },
+    "mtf_anisotropy": {
+      "source_ref": "rodriguez2016",
+      "finding": "DBT 투영 영상의 MTF는 튜브 이동 방향에서 30-40% 낮음",
+      "cause": "연속 이동 시스템에서 튜브 이동 중 노출로 인한 blur",
+      "mtf0_5_values": {
+        "perpendicular_to_tube_travel": "3.5-5.0 lp/mm",
+        "parallel_to_tube_travel": "2.5-3.5 lp/mm"
+      }
+    }
+  },
+  "clinical_relevance": {
+    "system_selection": "임상 목적(석회화 vs 종괴)에 따라 적합한 시스템 geometry 선택 필요",
+    "dose_consideration": "넓은 각도 + 많은 투영 = 높은 선량. 선량-영상품질 트레이드오프 고려",
+    "workflow": "step-and-shoot는 motion-free 영상, continuous는 빠른 처리량",
+    "source_ref": "sechopoulos2013a, rodriguez2016"
+  }
+}

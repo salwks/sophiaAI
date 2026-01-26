@@ -1,0 +1,221 @@
+{
+  "id": "mgd_dosimetry",
+  "category": "Mean Glandular Dose Dosimetry",
+  "keywords": [
+    "MGD", "mean glandular dose", "평균유선선량",
+    "T-factor", "t-factor", "g-factor", "c-factor", "s-factor",
+    "Dance", "DBT", "tomosynthesis", "선량", "유선선량",
+    "dosimetry", "선량측정", "conversion factor", "변환계수",
+    "air kerma", "공기커마", "breast dose", "유방선량"
+  ],
+  "sources": [
+    {
+      "id": "dance1990",
+      "citation": "Dance DR. Monte Carlo calculation of conversion factors for the estimation of mean glandular breast dose. Phys Med Biol. 1990;35(9):1211-1219",
+      "pmid": "2236205",
+      "doi": "10.1088/0031-9155/35/9/002",
+      "type": "Original Monte Carlo Calculation"
+    },
+    {
+      "id": "dance2000",
+      "citation": "Dance DR, Skinner CL, Young KC, Beckett JR, Kotre CJ. Additional factors for the estimation of mean glandular breast dose using the UK mammography dosimetry protocol. Phys Med Biol. 2000;45(11):3225-3240",
+      "pmid": "11098900",
+      "doi": "10.1088/0031-9155/45/11/308",
+      "type": "g, c, s Factor Extension"
+    },
+    {
+      "id": "dance2009",
+      "citation": "Dance DR, Young KC, van Engen RE. Further factors for the estimation of mean glandular dose using the United Kingdom, European and IAEA breast dosimetry protocols. Phys Med Biol. 2009;54(14):4361-4372",
+      "pmid": "19550001",
+      "doi": "10.1088/0031-9155/54/14/002",
+      "type": "Tungsten/Silver Filter Extension"
+    },
+    {
+      "id": "dance2011",
+      "citation": "Dance DR, Young KC, van Engen RE. Estimation of mean glandular dose for breast tomosynthesis: factors for use with the UK, European and IAEA breast dosimetry protocols. Phys Med Biol. 2011;56(2):453-471",
+      "pmid": "21191150",
+      "doi": "10.1088/0031-9155/56/2/011",
+      "type": "DBT T-factor Extension"
+    },
+    {
+      "id": "sechopoulos2014",
+      "citation": "Sechopoulos I, Suryanarayanan S, Vedantham S, D'Orsi CJ, Karellas A. Computation of the glandular radiation dose in digital tomosynthesis of the breast. Med Phys. 2007;34(1):221-232",
+      "pmid": "17278508",
+      "doi": "10.1118/1.2400836",
+      "type": "DBT Dose Methodology"
+    },
+    {
+      "id": "hernandez2017",
+      "citation": "Hernandez AM, Seibert JA, Boone JM. Breast dose in mammography is about 30% lower when realistic heterogeneous glandular distributions are considered. Med Phys. 2015;42(11):6337-6348",
+      "pmid": "26520727",
+      "doi": "10.1118/1.4931966",
+      "type": "Heterogeneous Glandularity Study"
+    }
+  ],
+  "content": {
+    "mgd_formula": {
+      "source_ref": "dance2000",
+      "basic_formula": "MGD = K × g × c × s",
+      "variables": {
+        "K": "유방 표면 입사 공기 kerma (mGy)",
+        "g": "50% glandularity 기준 MGD 변환 계수 (Monte Carlo 계산)",
+        "c": "glandularity 보정 계수 (유방 조성 차이 반영)",
+        "s": "스펙트럼 보정 계수 (target/filter 조합별)"
+      },
+      "note": "UK, European, IAEA 프로토콜과 호환되는 표준 공식"
+    },
+    "g_factor": {
+      "source_ref": "dance1990, dance2000",
+      "description": "유방 두께에 따른 MGD 변환 계수 (50% glandularity 기준)",
+      "calculation_method": "Monte Carlo simulation으로 계산",
+      "typical_values": {
+        "2cm_thickness": 0.390,
+        "3cm_thickness": 0.274,
+        "4cm_thickness": 0.207,
+        "5cm_thickness": 0.164,
+        "6cm_thickness": 0.135,
+        "7cm_thickness": 0.114
+      },
+      "hvl_note": "HVL 0.30-0.60 mm Al 범위에서 테이블 제공"
+    },
+    "c_factor": {
+      "source_ref": "dance2000",
+      "description": "실제 glandularity에 따른 보정 계수",
+      "formula_basis": "Monte Carlo 재계산으로 50% 기준에서 편차 보정",
+      "age_glandularity_relationship": {
+        "40_49_years": "더 높은 glandularity (평균 ~35-45%)",
+        "50_64_years": "더 낮은 glandularity (평균 ~25-35%)",
+        "source_ref": "dance2000"
+      }
+    },
+    "s_factor": {
+      "source_ref": "dance2000, dance2009",
+      "description": "target/filter 조합에 따른 스펙트럼 보정 계수",
+      "typical_values": {
+        "Mo_Mo": 1.000,
+        "Mo_Rh": 1.017,
+        "Rh_Rh": 1.061,
+        "W_Rh": 1.042,
+        "W_Ag": 1.044
+      },
+      "note": "Dance 2009에서 텅스텐 양극 + 은 필터 조합 추가"
+    }
+  },
+  "definitions": {
+    "t_factor": {
+      "source_ref": "dance2011",
+      "name": "t-factor (소문자)",
+      "description": "0도(직사) 대비 특정 각도(θ)에서의 선량 비율. 단일 투영 인자.",
+      "formula_latex": "t(\\theta) = D(\\theta) / D(0)",
+      "formula_unicode": "t(θ) = D(θ) / D(0)",
+      "note": "t(0°) = 1.0 by definition"
+    },
+    "T_factor": {
+      "source_ref": "dance2011",
+      "name": "T-factor (대문자)",
+      "description": "전체 노출 시리즈의 통합 선량 보정 계수. 모든 투영 각도의 t-factor를 mAs 비율로 가중 합산한 값.",
+      "formula_latex": "T = \\sum_{i=1}^{N} \\alpha_i \\cdot t(\\theta_i)",
+      "formula_unicode": "T = Σ αᵢ × t(θᵢ)",
+      "variables": {
+        "α_i": "전체 tube loading(mAs) 중 i번째 각도에 할당된 비율",
+        "t(θ_i)": "i번째 각도의 t-factor",
+        "N": "총 projection 수"
+      },
+      "note": "균등 mAs 배분 시: T = (1/N) × Σ t(θᵢ)"
+    }
+  },
+  "formulas": {
+    "MGD_2D": {
+      "source_ref": "dance2000",
+      "name": "2D Mammography MGD",
+      "formula_latex": "MGD = K \\cdot g \\cdot c \\cdot s",
+      "formula_unicode": "MGD = K × g × c × s",
+      "variables": {
+        "K": "유방 표면 입사 공기 kerma (mGy)",
+        "g": "유방 두께에 따른 변환 계수",
+        "c": "glandularity 보정 계수",
+        "s": "스펙트럼 보정 계수 (target/filter)"
+      }
+    },
+    "MGD_DBT": {
+      "source_ref": "dance2011",
+      "name": "DBT MGD (T-factor 사용)",
+      "formula_latex": "MGD_{total} = K_{total} \\cdot g \\cdot c \\cdot s \\cdot T",
+      "formula_unicode": "MGD_total = K_total × g × c × s × T",
+      "variables": {
+        "K_total": "총 입사 공기 kerma (mGy)",
+        "g": "유방 두께에 따른 변환 계수",
+        "c": "glandularity 보정 계수",
+        "s": "스펙트럼 보정 계수",
+        "T": "T-factor (통합 선량 보정 계수)"
+      }
+    },
+    "MGD_DBT_individual": {
+      "source_ref": "dance2011",
+      "name": "개별 투영 MGD",
+      "formula_latex": "MGD_i = K_i \\cdot g \\cdot c \\cdot s \\cdot t(\\theta_i)",
+      "formula_unicode": "MGD_i = K_i × g × c × s × t(θ_i)"
+    }
+  },
+  "tables": {
+    "t_factor_by_thickness": {
+      "source_ref": "dance2011",
+      "description": "유방 두께별 t-factor (Table 6, 50% glandularity, W/Al)",
+      "columns": ["thickness_cm", "t_0deg", "t_10deg", "t_20deg", "t_30deg"],
+      "data": [
+        {"thickness_cm": 3.0, "t_0deg": 1.000, "t_10deg": 0.975, "t_20deg": 0.906, "t_30deg": 0.803},
+        {"thickness_cm": 4.0, "t_0deg": 1.000, "t_10deg": 0.977, "t_20deg": 0.913, "t_30deg": 0.818},
+        {"thickness_cm": 5.0, "t_0deg": 1.000, "t_10deg": 0.978, "t_20deg": 0.919, "t_30deg": 0.832},
+        {"thickness_cm": 6.0, "t_0deg": 1.000, "t_10deg": 0.979, "t_20deg": 0.924, "t_30deg": 0.843},
+        {"thickness_cm": 6.5, "t_0deg": 1.000, "t_10deg": 0.980, "t_20deg": 0.929, "t_30deg": 0.852},
+        {"thickness_cm": 7.0, "t_0deg": 1.000, "t_10deg": 0.981, "t_20deg": 0.933, "t_30deg": 0.860},
+        {"thickness_cm": 8.0, "t_0deg": 1.000, "t_10deg": 0.982, "t_20deg": 0.937, "t_30deg": 0.868}
+      ]
+    },
+    "T_factor_typical": {
+      "source_ref": "dance2011",
+      "description": "장비 geometry별 표준 T값",
+      "data": [
+        {"geometry": "Full-field irradiation", "T_range": "0.93-1.00"},
+        {"geometry": "Sectra (narrow-beam)", "T_range": "0.76-0.98"},
+        {"geometry": "Typical 15-projection ±25°", "T_approx": 0.94}
+      ]
+    },
+    "g_factor_table": {
+      "source_ref": "dance2000",
+      "description": "유방 두께별 g-factor (HVL 0.35 mm Al 기준)",
+      "data": [
+        {"thickness_cm": 2.0, "g_factor": 0.390},
+        {"thickness_cm": 3.0, "g_factor": 0.274},
+        {"thickness_cm": 4.0, "g_factor": 0.207},
+        {"thickness_cm": 4.5, "g_factor": 0.183},
+        {"thickness_cm": 5.0, "g_factor": 0.164},
+        {"thickness_cm": 6.0, "g_factor": 0.135},
+        {"thickness_cm": 7.0, "g_factor": 0.114},
+        {"thickness_cm": 8.0, "g_factor": 0.098}
+      ]
+    }
+  },
+  "clinical_notes": [
+    "T-factor는 DBT가 2D 대비 어느 정도 추가 선량이 필요한지 정량화",
+    "UK, European, IAEA 프로토콜과 호환",
+    "AEC 알고리즘 설계 시 각도별 mAs 배분 전략 수립에 사용"
+  ],
+  "common_questions": [
+    {
+      "question": "5cm 유방의 표준 T값은?",
+      "answer": "Full-field geometry에서 T ≈ 0.93-0.95. t-factor 테이블에서 t(0°)=1.000, t(10°)=0.978, t(20°)=0.919, t(30°)=0.832를 사용하여 계산."
+    },
+    {
+      "question": "T-factor와 t-factor의 차이는?",
+      "answer": "t-factor는 개별 각도의 선량 비율, T-factor는 전체 시리즈의 통합값. T = Σ αᵢ × t(θᵢ)"
+    }
+  ],
+  "clinical_relevance": {
+    "regulatory_compliance": "UK, European, IAEA 프로토콜과 호환되는 국제 표준 선량 산출 방법",
+    "dbt_dosimetry": "T-factor를 통해 DBT의 추가 선량을 정량적으로 평가 가능",
+    "optimization": "AEC 알고리즘 설계 시 각도별 mAs 배분 전략 수립에 활용",
+    "heterogeneous_consideration": "실제 유방 glandularity가 균일하지 않음; 최근 연구에서 약 30% 낮은 MGD 보고됨 (Hernandez 2015)",
+    "source_ref": "dance2000, dance2011, hernandez2017"
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "id": "exposure_factors",
+  "category": "Exposure Parameters & AEC",
+  "keywords": [
+    "exposure", "노출", "exposure time", "노출시간",
+    "kVp", "kvp", "관전압", "kilovoltage",
+    "mA", "tube current", "관전류",
+    "mAs", "mas", "밀리암페어초",
+    "AEC", "aec", "automatic exposure control", "자동노출제어",
+    "exposure index", "노출지수", "EI",
+    "FOM", "figure of merit",
+    "CNR", "contrast to noise ratio"
+  ],
+  "sources": [
+    {
+      "id": "williams2008",
+      "citation": "Williams MB, Yaffe MJ, Pina DR, et al. Optimization of exposure parameters in full field digital mammography. Med Phys. 2008;35(6):2414-2423",
+      "pmid": "18649474",
+      "pmc": "PMC2809723",
+      "doi": "10.1118/1.2889723",
+      "type": "Optimization Study"
+    },
+    {
+      "id": "baldelli2010",
+      "citation": "Baldelli P, Phelan N, Egan G. Evaluation of automatic exposure control options in digital mammography. Phys Med. 2010;26(3):172-178",
+      "pmid": "24865213",
+      "type": "AEC Evaluation"
+    },
+    {
+      "id": "samei2025",
+      "citation": "Samei E, et al. The Impact of Automatic Exposure Control Technology on the In Vivo Radiation Dose in Digital Mammography. Diagnostics. 2025;15(10):1185",
+      "doi": "10.3390/diagnostics15101185",
+      "type": "Large-Scale Clinical Study"
+    },
+    {
+      "id": "korner2023",
+      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "type": "Review Article"
+    },
+    {
+      "id": "iec62494",
+      "citation": "IEC 62494-1:2008. Medical electrical equipment - Exposure index of digital X-ray imaging systems - Part 1: Definitions and requirements for general radiography",
+      "type": "International Standard"
+    }
+  ],
+  "content": {
+    "principles": [
+      "맘모그래피 노출은 충분한 CNR을 확보하면서 환자 선량을 최소화해야 함",
+      "AEC는 유방 두께와 밀도에 따라 최적 노출 조건을 자동 결정",
+      "디지털 시스템에서는 Exposure Index로 적정 노출 확인"
+    ],
+    "source_ref": "korner2023",
+    "figure_of_merit": {
+      "source_ref": "williams2008",
+      "formula": "FOM = SNR² / MGD",
+      "description": "영상 품질과 환자 선량의 균형을 평가하는 지표",
+      "application": "AEC 성능 평가 및 최적화에 매우 유용"
+    },
+    "aec_performance_study": {
+      "source_ref": "williams2008",
+      "systems_tested": ["GE Senographe 2000D", "Siemens Mammomat Novation DR", "Hologic Selenia", "Fischer Senoscan", "Fuji 5000MA"],
+      "key_findings": {
+        "fom_vs_kvp": "FOM은 kVp에 대해 천천히 변화하며, target/filter 조합 선택에 더 강하게 의존",
+        "aec_success": "대부분의 경우 AEC가 최대 FOM에 근접한 파라미터 선택에 성공",
+        "improvement_areas": {
+          "hologic_selenia": "AEC가 3-5cm 유방에 Mo/Mo 선택하나, Mo/Rh가 모든 두께에서 일관되게 우수",
+          "ge_senographe": "3cm 팬텀에서 최적 FOM은 Mo/Rh이나 AEC는 모든 모드에서 Mo/Mo 선택"
+        }
+      },
+      "optimal_parameters_by_thickness": {
+        "source_ref": "williams2008",
+        "3cm": {
+          "GE": "Mo/Rh/27kVp",
+          "Siemens": "W/Rh/27kVp",
+          "Hologic": "Mo/Rh/27kVp"
+        },
+        "5cm": {
+          "GE": "Mo/Rh/27kVp",
+          "Siemens": "W/Rh/27kVp",
+          "Hologic": "Mo/Rh/27kVp"
+        },
+        "7cm": {
+          "GE": "Rh/Rh/31-33kVp",
+          "Siemens": "W/Rh/27-29kVp",
+          "Hologic": "Mo/Rh/28kVp"
+        }
+      }
+    },
+    "aec_variability_clinical": {
+      "source_ref": "samei2025",
+      "sample_size": 194608,
+      "key_finding": "디지털 맘모그래피 시스템 간 MGD에 상당한 변동성 존재, 주로 AEC 동작 및 anode/filter 선택 차이에 기인",
+      "clinical_implication": "각 제조사의 AEC 알고리즘이 유방 압박 두께 증가에 따라 다르게 노출 파라미터(kVp, mAs) 조정"
+    },
+    "aec_table_comparison": {
+      "source_ref": "baldelli2010",
+      "system": "Hologic Selenia",
+      "finding": "AEC table 1이 4.5-6cm 유방 두께에서 저대조 FOM을 11-20% 개선"
+    },
+    "kvp_parameters": {
+      "source_ref": "williams2008, korner2023",
+      "range_kVp": "23-39",
+      "effect": {
+        "increase": "투과력↑, 대조도↓, 선량↓",
+        "decrease": "투과력↓, 대조도↑, 선량↑"
+      },
+      "optimization_note": "FOM은 kVp 범위 상단에서 감소 경향"
+    },
+    "snr_relationship": {
+      "source_ref": "williams2008",
+      "finding": "정규화된 노이즈와 FOM 간 역상관 관계",
+      "a_Se_detectors": "7cm 유방에서 SNR이 26-29 kVp 주변에서 피크 (단조 감소가 아님)"
+    }
+  },
+  "formulas": {
+    "figure_of_merit": {
+      "formula": "FOM = SNR² / MGD",
+      "description": "영상 품질/선량 비율 지표",
+      "source_ref": "williams2008"
+    },
+    "snr_relationship": {
+      "formula": "SNR ∝ √(mAs)",
+      "source_ref": "korner2023"
+    },
+    "deviation_index": {
+      "formula": "DI = 10 × log₁₀(EI / EI_target)",
+      "interpretation": {
+        "DI_positive_1": "과다노출",
+        "DI_negative_1": "저노출",
+        "DI_0": "목표 노출"
+      },
+      "source_ref": "iec62494"
+    }
+  },
+  "clinical_relevance": {
+    "dose_optimization": "AEC 올바른 설정으로 MGD 유의미한 차이 발생 가능",
+    "target_filter_importance": "kVp보다 target/filter 조합 선택이 FOM에 더 큰 영향",
+    "system_specific": "최적 노출 파라미터는 시스템별로 상이 - 개별 최적화 필요",
+    "source_ref": "williams2008, samei2025"
+  }
+}

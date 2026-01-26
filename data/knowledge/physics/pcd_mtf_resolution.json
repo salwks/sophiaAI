@@ -1,0 +1,292 @@
+{
+  "id": "pcd_mtf_resolution",
+  "category": "Detector Physics - MTF / Spatial Resolution / DQE(f)",
+  "keywords": ["MTF", "modulation transfer function", "spatial resolution", "nyquist", "pixel size", "pixel pitch", "charge sharing", "dqe frequency", "dqe(f)", "sinc", "aperture", "scintillator blur", "direct conversion", "indirect conversion", "anti-charge sharing", "acs", "resolution limit", "lp/mm", "line pairs", "공간 해상도", "전하 공유", "섬광체", "직접 변환", "간접변환", "해상도 한계"],
+  "sources": [
+    {
+      "id": "heismann2025",
+      "citation": "Heismann BJ, et al. Photon counting CT vs energy-integrating CT: resolution, noise, dose efficiency. Med Phys. 2025;52(3):1526-1535",
+      "pmid": "39700348",
+      "doi": "10.1002/mp.17591",
+      "type": "Experimental"
+    },
+    {
+      "id": "kuttig2015",
+      "citation": "Kuttig JD, et al. Comparative DQE investigation of direct and indirect conversion detectors in breast CT. Phys Med. 2015;31(4):406-413",
+      "pmid": "25841299",
+      "doi": "10.1016/j.ejmp.2015.03.007",
+      "type": "Experimental"
+    },
+    {
+      "id": "aslund2007",
+      "citation": "Aslund M, et al. Physical characterization of scanning photon counting digital mammography with Si-strip detectors. Med Phys. 2007;34(6):1918-1925",
+      "pmid": "17654894",
+      "doi": "10.1118/1.2731032",
+      "type": "Experimental"
+    },
+    {
+      "id": "cho2014",
+      "citation": "Cho HM, et al. Performance evaluation of photon counting Si strip detector for breast CT. Med Phys. 2014;41(9):091903",
+      "pmid": "25186390",
+      "doi": "10.1118/1.4892174",
+      "type": "Experimental"
+    },
+    {
+      "id": "tanguay2018",
+      "citation": "Tanguay J, Cunningham IA. Cascaded systems analysis of charge sharing in CdTe PCDs. Med Phys. 2018;45(5):1926-1941",
+      "pmid": "29526029",
+      "doi": "10.1002/mp.12853",
+      "type": "Analytical Model"
+    },
+    {
+      "id": "ji2018",
+      "citation": "Ji X, et al. Impact of anti-charge sharing on DQE of CdTe PCDs. Phys Med Biol. 2018;63(9):095003",
+      "pmid": "29582785",
+      "doi": "10.1088/1361-6560/aab9c9",
+      "type": "Analytical + Experimental"
+    },
+    {
+      "id": "day2022",
+      "citation": "Day JA, Tanguay J. DQE of CdTe PCDs in breast imaging. Med Phys. 2022;49(3):1481-1494",
+      "pmid": "34905627",
+      "doi": "10.1002/mp.15411",
+      "type": "Simulation"
+    },
+    {
+      "id": "persson2020",
+      "citation": "Persson M, et al. DQE of photon-counting CdTe and Si detectors for CT. J Med Imaging. 2020;7(4):043501",
+      "pmid": "32715022",
+      "doi": "10.1117/1.JMI.7.4.043501",
+      "type": "Simulation"
+    }
+  ],
+  "_legacy_source": {
+    "xu2014": {
+      "citation": "Xu J, Zbijewski W, Gang G, et al. Cascaded systems analysis of photon counting detectors. Med Phys. 2014;41(10):101907",
+      "pmid": "25281959"
+    },
+    "acciavatti2010": {
+      "citation": "Acciavatti RJ, Maidment ADA. A comparative analysis of OTF, NPS, and DQE in energy integrating and photon counting digital x-ray detectors. Med Phys. 2010;37(12):6480-6495",
+      "pmid": "21302803"
+    }
+  },
+  "core_physics": {
+    "constitutional_axioms": {
+      "law10": {
+        "law": "Law 10: MTF_direct(f) = sinc(pi*f*a)",
+        "description": "직접 변환 검출기의 이상적 aperture 응답. PCD(CdTe)는 pixel pitch a에 의해서만 결정.",
+        "implication": "EID는 MTF_scint(f) 추가 곱으로 해상도 저하 불가피"
+      },
+      "law11": {
+        "law": "Law 11: DQE(f) = MTF^2(f) / [q0 * NNPS(f)]",
+        "description": "주파수별 정보 전달 효율. DQE(0)은 Phase 3과 일치.",
+        "implication": "고주파에서 PCD 우위: MTF 유지 + 전자노이즈 NPS 없음"
+      },
+      "law12": {
+        "law": "Law 12: Charge Sharing Trade-off",
+        "description": "CdTe 두께 증가 시 QDE 향상되나 charge sharing으로 MTF 저하 (10-25%)",
+        "implication": "ACS로 DQE(0) 회복 가능하나 고주파 MTF 완전 복원은 불가"
+      }
+    },
+    "mtf_models": {
+      "pcd_direct_conversion": {
+        "formula": "MTF_PCD(f) = |sinc(pi*f*a)| * CS_factor(f)",
+        "cs_factor": "1 - delta*(f/f_ny)^2, delta=0.10-0.25",
+        "ideal_at_nyquist": "sinc(pi/2) = 0.637 (without charge sharing)",
+        "material": "CdTe (Z=48/52), direct charge collection"
+      },
+      "eid_indirect_conversion": {
+        "formula": "MTF_EID(f) = |sinc(pi*f*a)| * exp(-(f/f_c)^2)",
+        "scintillator_models": {
+          "CsI_150um": {"f_c": "10 lp/mm", "structure": "columnar, needle-like"},
+          "GOS_208um": {"f_c": "4 lp/mm", "structure": "powder phosphor, random diffusion"}
+        },
+        "limitation": "scintillator blur always degrades MTF beyond aperture limit"
+      }
+    },
+    "dqe_frequency": {
+      "pcd_model": "DQE_PCD(f) = eta_abs * MTF^2_PCD / (MTF^2_PCD + NPS_cs_norm)",
+      "eid_model": "DQE_EID(f) = eta_abs * MTF^2_EID / (MTF^2_EID + alpha)",
+      "phase3_crosscheck": "DQE(f->0) = Phase 3 DQE(0) (MTF(0)=1)",
+      "pcd_advantage": "PCD maintains DQE at high frequencies where EID collapses"
+    },
+    "resolution_metrics": {
+      "f10": "frequency where MTF = 10% (resolution limit)",
+      "f50": "frequency where MTF = 50% (characteristic resolution)",
+      "nyquist": "f_ny = 1/(2*pixel_pitch), maximum resolvable frequency",
+      "typical_values": {
+        "CdTe_100um_pixel": "f10 = 8.5 lp/mm (Kuttig 2015, PMID:25841299)",
+        "Si_strip_50um": "spatial resolution ~5 lp/mm (Cho 2014, PMID:25186390)"
+      }
+    }
+  },
+  "evidence_database": {
+    "content_verification_note": "아래 모든 인용은 PubMed abstract 원문에서 직접 확인된 내용만 포함. 추정/해석 시 verification_level로 구분.",
+    "mtf_direct_conversion": {
+      "summary": "직접 변환 PCD의 이상적 sinc MTF 응답과 EID 대비 해상도 우위",
+      "key_evidence": [
+        {
+          "source": "Heismann 2025 (PMID:39700348)",
+          "finding": "PCCT detector MTF는 EICT 대비 3배 높은 angular resolution limits 달성, 반도체 검출기의 전자기적 pixel 형성으로 이상적 sinc에 근접",
+          "abstract_quote": "The PCCT detector MTF exhibited 3x higher angular resolution limits in comparison to EICT and close to ideal sinc behavior due to the electromagnetic formation of pixels in the PCCT semiconductor detector",
+          "verification_level": "abstract_exact_quote",
+          "solver_connection": "MTF_PCD(f) = sinc(pi*f*a) × CS_factor(f)"
+        },
+        {
+          "source": "Kuttig 2015 (PMID:25841299)",
+          "finding": "CdTe 직접변환 검출기의 10% pre-sampled MTF = 8.5 mm⁻¹, DQE(0) = 85%",
+          "abstract_quote": "the CdTe sensor reached a 10% pre-sampled MTF value of 8.5 mm(-1) and a DQE(0) value of 85%",
+          "verification_level": "abstract_exact_quote",
+          "solver_connection": "f10_PCD = 8.5 lp/mm, DQE_PCD(0) = 0.85"
+        }
+      ]
+    },
+    "charge_sharing": {
+      "summary": "CdTe 두께 증가에 따른 charge sharing MTF 저하와 ACS 보상",
+      "key_evidence": [
+        {
+          "source": "Tanguay 2018 (PMID:29526029)",
+          "finding": "일반적 조건에서 charge sharing에 의한 MTF 저하는 Nyquist에서 ~10%이며, 두꺼운 converter (1000um)에서는 최대 25%까지 저하",
+          "abstract_quote": "In most cases, this degradation is modest (i.e., ~10% at the Nyquist frequency). However, for thicker converters, the SPC MTF can be degraded by up to 25% at the Nyquist frequency relative to EI systems",
+          "verification_level": "abstract_exact_quote",
+          "solver_connection": "CS_factor(f) = 1 - delta*(f/f_ny)^2, delta=0.10-0.25"
+        },
+        {
+          "source": "Ji 2018 (PMID:29582785)",
+          "finding": "Anti-charge sharing (ACS)은 모든 에너지/threshold 수준에서 DQE(0)을 향상시킴",
+          "abstract_quote": "ACS always improved DQE(0) at all energy and threshold levels tested",
+          "verification_level": "abstract_exact_quote",
+          "solver_connection": "ACS: DQE(0) recovery confirmed"
+        },
+        {
+          "source": "Day 2022 (PMID:34905627)",
+          "finding": "유방촬영에서 CdTe PCD의 DQE는 charge sharing, electronic noise, summation logic에 의해 결정되며, 85um pixel에서 DQE(0)=0.74-0.78 달성",
+          "abstract_quote": "optimal DQE(0) of 0.74 without charge summing, improving to approximately 0.78 with reduced electronic noise at 85 um pixels",
+          "verification_level": "abstract_paraphrase",
+          "solver_connection": "DQE_PCD depends on pixel size and charge sharing parameters"
+        }
+      ]
+    },
+    "dqe_frequency_dependence": {
+      "summary": "DQE(f) 비교 프레임워크: PCD는 고주파에서도 DQE 유지",
+      "key_evidence": [
+        {
+          "source": "Persson 2020 (PMID:32715022)",
+          "finding": "CdTe 0.5mm pixel은 detection task에서 60mm Si 대비 28-41% 높은 DQE 달성 (CT용 시뮬레이션)",
+          "abstract_quote": "the 0.5- and 0.225-mm pixel CdTe systems have 28% to 41% and 5% to 29% higher detective quantum efficiency (DQE), respectively, than the 60-mm Si system with tungsten",
+          "verification_level": "abstract_exact_quote",
+          "solver_connection": "CdTe DQE advantage in detection tasks",
+          "context_note": "이 논문은 CT용 시뮬레이션이며, mammography 직접 적용에는 주의 필요"
+        },
+        {
+          "source": "Acciavatti 2010 (PMID:21302803)",
+          "finding": "동일 PSF의 EI/PC 검출기는 동일 OTF를 가지나, NPS는 모든 주파수에서 상이. PC는 binary PSF 조건에서 NPS 우위",
+          "abstract_quote": "both detector types with equivalent point spread functions share identical OTF values... their NPS differs at all frequencies, with photon counters showing superior or equal noise characteristics only when possessing binary point spread functions",
+          "verification_level": "abstract_paraphrase",
+          "solver_connection": "DQE(f) = MTF^2(f) / NNPS(f) framework"
+        },
+        {
+          "source": "Xu 2014 (PMID:25281959)",
+          "finding": "Cascaded systems analysis로 PCD의 signal, MTF, NPS, DQE 모델링. 저선량/고잡음 조건에서 PCD가 본질적으로 높은 DQE",
+          "abstract_quote": "PCDs yield intrinsically higher DQE under conditions of very low-dose, high additive noise, and high fidelity rejection of coincident photons",
+          "verification_level": "abstract_exact_quote",
+          "solver_connection": "PCD DQE advantage increases at low dose (electronic noise dominates in EID)"
+        }
+      ]
+    },
+    "si_strip_mammography": {
+      "summary": "Si-strip PCD의 유방촬영 특화 성능 (스캐닝 방식)",
+      "key_evidence": [
+        {
+          "source": "Aslund 2007 (PMID:17654894)",
+          "finding": "Si-strip 50um 스캐닝 PCD의 peak DQE = 72-73%, 선량 독립적 성능 (7.6-206 uGy 범위)",
+          "abstract_quote": "The DQE of the photon counting system was found to be independent of the dose level to the detector in the 7.6-206 microGy range. The peak DQE was 72% and 73% in the scan and slit direction, respectively",
+          "verification_level": "abstract_exact_quote"
+        },
+        {
+          "source": "Cho 2014 (PMID:25186390)",
+          "finding": "Si-strip PCD의 spatial resolution ~5 lp/mm, 100 Mcps/mm² count rate, energy resolution <9% at 22 keV",
+          "abstract_quote": "maximum output count rate of 100 million counts per second per square millimeter, energy resolution below 9% at 22 keV, and spatial resolution of approximately 5 line pairs per millimeter",
+          "verification_level": "abstract_paraphrase",
+          "context_note": "이 논문은 breast CT 검출기 특성 평가이며, mammography 전용 시스템과 다름"
+        }
+      ]
+    }
+  },
+  "solver_prediction_vs_literature": {
+    "mtf_pcd_nyquist": {
+      "solver_parameter": "MTF_PCD(f_ny) = sinc(pi/2) * (1-delta) = 0.573 (delta=0.10)",
+      "literature_value": "3x higher MTF limits vs EID (Heismann 2025), f10=8.5 mm-1 for 100um CdTe (Kuttig 2015)",
+      "agreement": "consistent"
+    },
+    "resolution_gain": {
+      "solver_parameter": "f10_PCD / f10_EID = 2.5-3.5x (scintillator dependent)",
+      "literature_value": "3x angular resolution limit (Heismann 2025, PMID:39700348 abstract)",
+      "agreement": "consistent"
+    },
+    "charge_sharing_degradation": {
+      "solver_parameter": "delta = 0.10-0.25 (10-25% MTF loss at Nyquist)",
+      "literature_value": "~10% modest, up to 25% for thick converters (Tanguay 2018, PMID:29526029 abstract)",
+      "agreement": "exact match"
+    },
+    "dqe_f_zero_crosscheck": {
+      "solver_parameter": "DQE_PCD(0) = 0.850, DQE_EID(0) = 0.700",
+      "literature_value": "CdTe DQE(0)=85% (Kuttig 2015), CdTe DQE(0)=0.74-0.78 at 85um (Day 2022)",
+      "agreement": "consistent (pixel size dependent)"
+    }
+  },
+  "common_misconceptions": {
+    "misconception_1": {
+      "wrong": "EID의 MTF가 PCD보다 높을 수 있다 (동일 pixel pitch에서)",
+      "correct": "직접 변환(PCD)은 scintillator blur가 없으므로 항상 MTF_PCD >= MTF_EID (f>0)"
+    },
+    "misconception_2": {
+      "wrong": "Charge sharing은 PCD의 장점을 완전히 상쇄한다",
+      "correct": "Charge sharing은 10-25% MTF 저하만 유발하며, 여전히 EID scintillator blur보다 적은 MTF 손실 (Tanguay 2018)"
+    },
+    "misconception_3": {
+      "wrong": "DQE(f)와 DQE(0)은 별개의 독립적 지표이다",
+      "correct": "DQE(f->0) = DQE(0) 이어야 하며, Phase 3의 DQE(0)과 교차 검증 필수"
+    },
+    "misconception_4": {
+      "wrong": "Nyquist 주파수에서 MTF = 0 이다",
+      "correct": "sinc(pi/2) = 0.637, Nyquist에서도 상당한 MTF가 남아있음 (단, sampling 이론적 한계)"
+    }
+  },
+  "warning_constraints": {
+    "physical_impossibility": [
+      "MTF_PCD(f) < MTF_EID(f) at f > 0 (동일 pixel pitch) -> 불가능",
+      "DQE(f->0) != Phase 3 DQE(0) -> 모델 오류",
+      "DQE_PCD(f) < DQE_EID(f) (동일 조건) -> 불가능",
+      "MTF가 주파수 증가에 따라 증가 -> 물리적 불가능"
+    ],
+    "solver_verified_values": {
+      "mtf_reference": {
+        "sinc_pi_over_2": 0.6366,
+        "mtf_pcd_nyquist_delta010": 0.5730,
+        "mtf_pcd_nyquist_delta025": 0.4775
+      },
+      "dqe_crosscheck": {
+        "dqe_pcd_zero": 0.850,
+        "dqe_eid_zero": 0.700,
+        "phase3_match": true
+      }
+    }
+  },
+  "clinical_significance": {
+    "resolution_advantage": "PCD는 EID 대비 3배 높은 공간 해상도 한계 제공 (Heismann 2025)",
+    "dose_reduction_pathway": "높은 DQE(f)는 동일 해상도에서 선량 감소를 가능하게 함",
+    "practical_implication": "CdTe PCD는 DQE(0)=85%와 f10=8.5 mm-1로 간접변환 대비 유의한 dose reduction 가능 (Kuttig 2015)",
+    "charge_sharing_management": "ACS 알고리즘으로 DQE(0) 향상 확인 (Ji 2018), charge sharing MTF 저하는 10-25% 수준 (Tanguay 2018)"
+  },
+  "response_template": {
+    "citation_format": "[저자 연도, PMID:xxxxxxxx]",
+    "example_usage": "직접 변환 PCD의 MTF는 이상적 sinc 응답에 근접하며 3배 높은 angular resolution limits를 달성합니다 (Heismann 2025, PMID:39700348). CdTe 검출기의 f10은 8.5 mm-1으로 보고되었습니다 (Kuttig 2015, PMID:25841299).",
+    "mandatory_citations": [
+      "Heismann 2025 (PMID:39700348) - 3x resolution, ideal sinc",
+      "Kuttig 2015 (PMID:25841299) - f10=8.5 mm-1, DQE(0)=85%",
+      "Tanguay 2018 (PMID:29526029) - charge sharing 10-25% MTF degradation"
+    ],
+    "warning": "Phase 4 수치는 Deterministic Solver로 검증됩니다. MTF_PCD > MTF_EID 관계를 항상 유지하세요."
+  }
+}

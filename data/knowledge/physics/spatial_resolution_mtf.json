@@ -1,0 +1,123 @@
+{
+  "id": "spatial_resolution_mtf",
+  "category": "Spatial Resolution & MTF",
+  "keywords": [
+    "spatial resolution", "공간 해상도", "MTF", "modulation transfer function",
+    "변조전달함수", "lp/mm", "line pairs", "라인쌍",
+    "Nyquist frequency", "나이퀴스트 주파수",
+    "slanted edge", "edge method", "presampling MTF",
+    "limiting resolution", "제한 해상도"
+  ],
+  "sources": [
+    {
+      "id": "alsager2021",
+      "citation": "Alsager A, et al. On the relevance of modulation transfer function measurements in digital mammography quality control. Phys Med. 2021;84:204-210",
+      "pmid": "33937435",
+      "pmc": "PMC8076849",
+      "doi": "10.1016/j.ejmp.2021.04.013",
+      "type": "QC Methodology Study"
+    },
+    {
+      "id": "samei2005",
+      "citation": "Samei E, Ranger NT, Dobbins JT, Chen Y. Validation of MTF measurement for digital mammography quality control. Med Phys. 2005;32(6):2225-2234",
+      "pmid": "16013727",
+      "doi": "10.1118/1.1899402",
+      "type": "Validation Study"
+    },
+    {
+      "id": "marshall2007",
+      "citation": "Marshall NW, et al. A comparison of the performance of digital mammography systems. Phys Med Biol. 2007;52(9):2817-2839",
+      "pmid": "17441236",
+      "doi": "10.1088/0031-9155/52/10/012",
+      "type": "System Comparison"
+    },
+    {
+      "id": "korner2023",
+      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "type": "Review Article"
+    }
+  ],
+  "content": {
+    "definition": {
+      "MTF": "시스템이 다양한 공간 주파수에서 정보를 재현하는 능력을 나타내는 함수",
+      "interpretation": "주어진 공간 주파수에서 MTF 값은 0~1 사이. 완벽한 시스템은 MTF=1로 모든 정보 재현",
+      "measurement_unit": "cycles/mm 또는 lp/mm (line pairs per millimeter)",
+      "source_ref": "alsager2021, korner2023"
+    },
+    "measurement_methods": {
+      "source_ref": "samei2005, alsager2021",
+      "slanted_edge_method": {
+        "description": "의료 X선 영상에서 MTF 측정의 가장 일반적인 방법",
+        "procedure": "스테인리스 스틸 에지를 약 3도 기울여 배치, 검출기 응답 선형화, 좌우 및 전후 양방향 분석",
+        "standard": "IEC 62220-1"
+      },
+      "presampling_MTF": {
+        "description": "샘플링 전 시스템의 MTF를 측정하여 앨리어싱 영향 배제",
+        "clinical_relevance": "디지털 맘모그래피 QC에서 표준으로 사용"
+      }
+    },
+    "measured_values_by_system": {
+      "source_ref": "alsager2021",
+      "fMTF_0_5_cycles_per_mm": {
+        "description": "MTF가 50%가 되는 주파수 (해상도 특성화 지표)",
+        "values": {
+          "Fuji_Amulet": "3.52 [3.30-3.75]",
+          "Fuji_Amulet_Innovality": "6.09 [6.02-6.16]",
+          "GE_Senographe_Essential": "2.51 [2.32-2.69]",
+          "Hologic_Selenia_Dimensions": "5.63 [5.20-6.05]",
+          "Siemens_Mammomat_Inspiration": "5.20 [5.11-5.30]"
+        }
+      },
+      "MTF_at_5_cycles_per_mm": {
+        "description": "5 lp/mm에서의 MTF 값 (미세석회화 검출 관련)",
+        "values": {
+          "Fuji_Amulet": "0.38 [0.37-0.40]",
+          "GE_Senographe_Essential": "0.17 [0.14-0.20]",
+          "Hologic_Selenia": "0.52 [0.50-0.54]"
+        }
+      }
+    },
+    "system_comparison": {
+      "source_ref": "marshall2007",
+      "finding": "Flat-panel 시스템이 표준 CR 시스템보다 중-고주파 범위에서 더 높은 MTF와 DQE를 보임"
+    },
+    "quality_control": {
+      "source_ref": "alsager2021",
+      "action_level": "연속 반기 측정 간 10% 변화 시 조사 필요",
+      "reproducibility": "55개 시스템에서 연속 테스트 간 평균 3% 변화 (2.5%-3.4%)",
+      "baseline_changes_observed": "-15% (CsI 기반 시스템) ~ +7.7% (IMS Giotto)"
+    },
+    "clinical_thresholds": {
+      "source_ref": "korner2023",
+      "microcalcification_detection": "MTF(5 lp/mm) ≥ 0.30 권장",
+      "mass_detection": "MTF(2 lp/mm) ≥ 0.50 권장"
+    },
+    "factors_affecting_MTF": {
+      "source_ref": "korner2023",
+      "detector_pixel_size": "픽셀 크기 ↓ → MTF ↑",
+      "scintillator_thickness": "두께 ↑ → 흡수 ↑, MTF ↓ (trade-off)",
+      "focal_spot_size": "초점 크기 ↑ → geometric unsharpness ↑ → MTF ↓"
+    }
+  },
+  "formulas": {
+    "MTF_definition": {
+      "formula": "MTF(f) = |FT{LSF(x)}|",
+      "alternative": "MTF(f) = Contrast_output(f) / Contrast_input(f)",
+      "source_ref": "samei2005"
+    },
+    "Nyquist_frequency": {
+      "formula": "f_Nyquist = 1 / (2 × pixel_size)",
+      "example": "100μm 픽셀 → Nyquist = 5 lp/mm",
+      "source_ref": "korner2023"
+    }
+  },
+  "clinical_relevance": {
+    "microcalcification": "미세석회화(0.1-0.5mm) 검출에 고주파 MTF 중요",
+    "mass_margin": "종괴 경계 평가에 중주파 MTF 중요",
+    "QC_importance": "정기적 MTF 모니터링으로 검출기 성능 저하 조기 발견",
+    "source_ref": "alsager2021, korner2023"
+  }
+}

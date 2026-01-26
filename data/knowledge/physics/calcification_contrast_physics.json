@@ -1,0 +1,207 @@
+{
+  "id": "calcification_contrast_physics",
+  "title": "Microcalcification Contrast Physics (Calcium vs Tissue)",
+  "domain": "lesion_calcium",
+  "keywords": [
+    "석회화", "calcification", "microcalcification", "미세석회화",
+    "calcium", "칼슘", "hydroxyapatite", "수산화인회석",
+    "석회화 대조도", "calcification contrast", "BI-RADS 4",
+    "fine linear", "amorphous", "pleomorphic", "coarse"
+  ],
+  "disambiguation": {
+    "context": "lesion_calcium",
+    "not_context": ["iodine contrast", "CESM", "조영제"],
+    "note": "석회화는 칼슘(Ca) 기반 병변이며, 조영제(Iodine)와 무관. CsI 검출기의 Iodine과도 구분 필요"
+  },
+  "content": {
+    "physical_properties": {
+      "composition": "Hydroxyapatite Ca₁₀(PO₄)₆(OH)₂",
+      "effective_Z": "~14 (Ca dominant)",
+      "calcium_k_edge": "4.04 keV (맘모그래피 에너지 범위 외)",
+      "density": "~3.0 g/cm³ (calcium phosphate)"
+    },
+    "contrast_mechanism": {
+      "principle": "칼슘의 높은 원자번호 → 광전효과 우세 → 주변 조직 대비 높은 감쇠",
+      "energy_dependence": {
+        "low_energy_20keV": {
+          "mu_calcium": "~4.5 cm⁻¹",
+          "mu_tissue": "~0.8 cm⁻¹",
+          "delta_mu": "3.7 cm⁻¹ (높은 대조도)"
+        },
+        "medium_energy_30keV": {
+          "mu_calcium": "~1.2 cm⁻¹",
+          "mu_tissue": "~0.35 cm⁻¹",
+          "delta_mu": "0.85 cm⁻¹ (중간 대조도)"
+        },
+        "high_energy_50keV": {
+          "mu_calcium": "~0.45 cm⁻¹",
+          "mu_tissue": "~0.21 cm⁻¹",
+          "delta_mu": "0.24 cm⁻¹ (71% 대조도 손실)"
+        }
+      },
+      "formula": "Δμ ∝ Z³ × ρ / E³ (광전효과 영역)"
+    },
+    "beam_hardening_impact": {
+      "mechanism": "두꺼운 유방 통과 → 저에너지 광자 흡수 → 평균 에너지 상승",
+      "6cm_breast": {
+        "incident_mean": "~28 keV (W/Ag target/filter)",
+        "exit_mean": "~42-50 keV (hardened)",
+        "contrast_loss": "Δμ 감소로 석회화 대조도 50-70% 손실"
+      },
+      "consequence": "Fine Linear 석회화의 얇은 선상 구조가 저대조로 인해 불명확해짐"
+    },
+    "birads_morphology": {
+      "fine_linear": {
+        "description": "얇고 불규칙한 선상 (< 0.5mm width)",
+        "spatial_frequency": "고주파 성분 (> 2-5 lp/mm 필요)",
+        "vulnerability": "MTF 저하 시 형태 손실 심함",
+        "mtf_requirement": "MTF(5 lp/mm) > 0.3 필요하여 선상 구조 분해"
+      },
+      "amorphous": {
+        "description": "둥글고 경계 불명확, 크기 작음",
+        "spatial_frequency": "저주파 성분 우세 (< 2 lp/mm)",
+        "confusion": "Fine Linear의 고주파 손실 시 Amorphous로 오인"
+      },
+      "mtf_morphology_degradation": {
+        "principle": "고주파 MTF 손실 → 날카로운 선 정보가 뭉개짐 → 선형(Linear)이 점형(Amorphous)으로 보임",
+        "mechanism": "Fine Linear의 얇은 선(<0.5mm)은 2-5 lp/mm 해상 필요. MTF 저하 시 이 정보가 손실되어 둥근 점으로 보임",
+        "clinical_consequence": "BI-RADS 4C(Fine Linear, 높은 악성 의심) → 4B(Amorphous, 낮은 악성 의심)로 오분류",
+        "dose_cannot_fix": "선량 증가는 노이즈만 감소시키고, MTF(공간 해상도)는 개선하지 못함",
+        "root_cause_chain": "6cm 유방 → 빔 경화 + 확대 촬영 penumbra → MTF_system 저하 → 고주파 손실 → Fine Linear가 Amorphous로 보임"
+      }
+    },
+    "dose_cannot_recover_contrast": {
+      "principle": "Dose ↑ → Photon count N ↑ → Noise σ ↓ (σ ∝ √N, Poisson)",
+      "but": "Δμ는 스펙트럼 함수 → Dose와 무관",
+      "conclusion": "경화된 빔에서 Δμ 손실은 선량 증가로 회복 불가",
+      "key_insight": "CNR ∝ Δμ × √Dose 이므로, Δμ가 37% 감소하면 Dose를 2.5배 증가시켜야 CNR 유지"
+    },
+    "beam_hardening_quantitative_example": {
+      "scenario": "6cm 두꺼운 유방, W/Ag 필터 사용",
+      "energy_shift": {
+        "incident_mean_keV": 28,
+        "exit_mean_keV": 35,
+        "note": "두께 6cm 통과 시 저에너지 광자 흡수로 평균 에너지 상승"
+      },
+      "mu_pe_ratio_calculation": {
+        "formula": "μ_pe(E₂)/μ_pe(E₁) = (E₁/E₂)³",
+        "calculation": "(28/35)³ = (0.80)³ = 0.512",
+        "result": "광전흡수계수 48.8% 감소 → Δμ 약 50% 손실",
+        "note": "실제로는 스펙트럼 분포에 따라 37-50% 범위"
+      },
+      "cnr_impact": {
+        "delta_mu_loss_percent": 40,
+        "dose_increase_to_maintain_cnr": "Dose × 2.78배 필요 (1/0.6² = 2.78)",
+        "practical_limit": "환자 선량 한계로 불가능"
+      },
+      "source_ref": "korner2023"
+    }
+  },
+  "formulas": {
+    "photoelectric_attenuation": {
+      "formula": "μ_pe ∝ ρ × Z³ / E³",
+      "source": "Radiopaedia, NIST",
+      "note": "일부 문헌에서 Z^4-4.5, E^3-3.5 사용"
+    },
+    "contrast_ideal": {
+      "formula": "C₀ = (μ_calc - μ_tissue) × t_calc = Δμ × t",
+      "source": "Johns1987"
+    },
+    "contrast_with_scatter": {
+      "formula": "Cs = C₀ / (1 + SPR)",
+      "variables": {
+        "C₀": "이상적 대조도 (산란 없음)",
+        "SPR": "Scatter-to-Primary Ratio",
+        "Cs": "실제 측정 대조도"
+      },
+      "source": "korner2023 (PMC10606465)"
+    },
+    "cnr_definition": {
+      "formula": "CNR = |S₁ - S₂| / σ_noise",
+      "derivation": "CNR = Δμ × t × √(N × DQE)",
+      "note": "N = 입사 광자수 ∝ Dose"
+    },
+    "cnr_dose_relationship": {
+      "formula": "CNR ∝ Δμ × t × √Dose",
+      "implication": "Dose 2배 → CNR 1.41배 (√2), Dose 4배 → CNR 2배",
+      "example": "Dose 20% 증가 → CNR 9.5% 증가 (√1.2 ≈ 1.095)"
+    },
+    "rose_criterion": {
+      "formula": "CNR ≥ 5 (또는 3-5)",
+      "meaning": "병변 검출 가능 최소 CNR",
+      "source": "Rose 1948, 의료영상 표준"
+    },
+    "beam_hardening_shift": "E_mean_exit ≈ E_mean_incident × (1 + 0.25 × t_cm) (근사)"
+  },
+  "common_misconceptions": {
+    "WARNING": "다음은 LLM이 자주 잘못 설명하는 내용입니다. 반드시 올바른 물리로 답변하세요.",
+    "misconception_1_beam_hardening_improves_contrast": {
+      "WRONG": "빔 경화(beam hardening)가 K-edge 흡수 효율을 높여 대조도/CNR/DQE를 향상시킨다",
+      "CORRECT": "빔 경화는 대조도를 감소시킨다. μ_pe ∝ 1/E³ 이므로 에너지가 높아지면 광전흡수계수가 급격히 감소하고, Δμ가 줄어들어 대조도가 손실된다",
+      "physics_proof": "28→35 keV 에너지 상승 시: (28/35)³ = 0.512 → 광전흡수 48.8% 감소",
+      "consequence": "두꺼운 유방에서 석회화 검출 어려움 증가"
+    },
+    "misconception_2_scatter_formula": {
+      "WRONG": "Cs = C₀ × (1 - SPR)",
+      "CORRECT": "Cs = C₀ / (1 + SPR)",
+      "physics_proof": "SPR=0.7일 때: 올바른 공식 Cs = C₀/1.7 = 0.59×C₀ (41% 감소), 틀린 공식은 Cs = 0.3×C₀ (70% 감소로 과대평가)",
+      "source": "korner2023 (PMC10606465)"
+    },
+    "misconception_3_dose_recovers_contrast": {
+      "WRONG": "선량을 증가시키면 빔 경화로 인한 대조도 손실을 회복할 수 있다",
+      "CORRECT": "Dose 증가는 노이즈(σ)만 감소시키고, Δμ(대조도 차이)는 회복 불가",
+      "physics_proof": "CNR ∝ Δμ × √Dose 이므로, Δμ 40% 손실을 보상하려면 Dose 2.78배 필요 → 환자 선량 한계 초과"
+    },
+    "misconception_4_thick_breast_better_dqe": {
+      "WRONG": "두꺼운 유방에서 경화된 빔이 DQE를 향상시킨다",
+      "CORRECT": "DQE는 검출기 고유 특성이며 빔 경화와 무관. 오히려 산란선 증가(SPR 상승)로 인해 유효 DQE가 감소한다",
+      "physics_proof": "6cm 유방: SPR ≈ 0.7-0.9, 산란선이 신호 품질 저하"
+    },
+    "misconception_5_csi_kedge_compensates_beam_hardening": {
+      "WRONG": "CsI 검출기의 K-edge(33keV)가 빔 경화로 인한 대조도 손실을 보상한다",
+      "CORRECT": "K-edge는 검출기의 X선 흡수 효율에만 영향. 석회화-조직 간 대조도(Δμ)는 피사체 물리이며 검출기가 보상 불가",
+      "physics_proof": "대조도 = Δμ × t (피사체 특성). CsI K-edge는 검출기 DQE에 영향을 주지만, 이미 손실된 Δμ를 복원하지 못함",
+      "key_distinction": "K-edge 흡수 증가 → 검출 효율 향상 (DQE) ≠ 피사체 대조도 회복 (Δμ)",
+      "analogy": "마이크 감도를 높여도(DQE↑) 원래 소리가 작으면(Δμ↓) 신호는 여전히 작음"
+    },
+    "misconception_6_kedge_improves_calcification_contrast": {
+      "WRONG": "CsI K-edge가 석회화 대조도(Δμ)를 향상시킨다",
+      "CORRECT": "석회화 대조도는 μ_calc - μ_tissue로 결정되며, 이는 피사체와 X선 에너지의 함수. 검출기 K-edge는 무관",
+      "physics_proof": "칼슘 K-edge = 4.04 keV (맘모그래피 범위 외), 요오드 K-edge = 33 keV (CsI 검출기). 두 K-edge는 서로 다른 물리적 현상",
+      "conclusion": "CsI 검출기의 요오드 K-edge는 검출기 효율만 변경, 석회화 대조도와 무관"
+    }
+  },
+  "clinical_relevance": {
+    "thick_dense_breast": "6cm 이상 치밀유방에서 석회화 대조도 급감",
+    "biopsy_targeting": "대조도 손실 + MTF 저하 → 타겟팅 오차 증가",
+    "birads_misclassification": "Fine Linear(4C) → Amorphous(4B) 오분류 위험"
+  },
+  "sources": [
+    {
+      "id": "Johns1987",
+      "citation": "Johns PC, Yaffe MJ. X-ray characterisation of normal and neoplastic breast tissues. Phys Med Biol. 1987;32(6):675-695.",
+      "pmid": "3039544",
+      "type": "primary"
+    },
+    {
+      "id": "Fandos2016",
+      "citation": "Fandos-Morera A, et al. Influence of beam quality on microcalcification imaging. Br J Radiol. 2016;89(1060):20150757.",
+      "pmid": "26849038",
+      "type": "primary"
+    },
+    {
+      "id": "korner2023",
+      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "type": "review",
+      "key_formulas": ["Cs = C₀/(1+SPR)", "SPR scatter contrast degradation"]
+    },
+    {
+      "id": "BIRADS_Atlas",
+      "citation": "ACR BI-RADS Atlas 5th Edition. Mammography - Calcification Morphology. 2013.",
+      "type": "guideline"
+    }
+  ]
+}

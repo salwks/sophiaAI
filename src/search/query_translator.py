@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 class QueryTranslator:
     """LLM 기반 의학 쿼리 번역기"""
 
-    def __init__(self, ollama_url: str = "http://localhost:11434", model: str = "qwen2.5:14b"):
+    def __init__(self, ollama_url: str = "http://localhost:11434", model: str = "gpt-oss:20b"):
+        """Phase 7.7: GPT-OSS 20B (번역 + 답변 모두)"""
         self.ollama_url = ollama_url
         self.model = model
 
@@ -60,47 +61,38 @@ class QueryTranslator:
             return query
 
     def _translate_with_llm(self, query: str) -> Optional[str]:
-        """LLM을 사용한 쿼리 번역"""
+        """LLM을 사용한 쿼리 번역 (DeepSeek-R1 3단계 사고 모드)"""
 
-        system_prompt = """You are a medical terminology translator specializing in breast imaging.
+        # 3단계 사고 과정: 의도분석 → 개념확장 → 표준용어매핑
+        system_prompt = """# Role
+You are a Mammography & Medical Physics specialist librarian and search strategist.
+Analyze user questions to generate English queries optimized for ACR BI-RADS guidelines and research papers.
 
-Your task: Convert Korean medical questions into English technical search keywords.
+# Mission
+1. Distinguish if the question is 'Clinical guideline' or 'Physics principle'
+2. Recognize that terms may be expressed differently in guidelines - derive synonyms and technical parent concepts
+3. For physics topics like 'K-edge', expand to filter materials (Mo, Rh, Ag), Energy Spectrum, Dose Optimization
 
-Rules:
-1. Extract medical concepts and translate to English medical terms
-2. Include relevant technical keywords (kVp, mAs, BI-RADS, etc.)
-3. Keep it concise - only essential search keywords
-4. DO NOT include explanations, just keywords
-5. Remove question words (what, how, when, etc.)
-6. **CRITICAL: ALWAYS preserve numbers from the original query**
-   - "4가지" → "4"
-   - "3개" → "3"
-   - "2가지 차이" → "2 differences"
+# Operational Logic (Inside <think>)
+1. **Analyze Intent**: What is the core intent? (specific value, physics mechanism, patient management)
+2. **Concept Mapping**:
+   - If abstract (e.g., K-edge) → convert to technical terms (Filtration, Characteristic X-ray, Attenuation)
+   - Consider both guideline keywords (standardized) AND paper keywords (technical/academic)
+3. **Redundancy Check**: Build 3-5 keyword combinations for high recall
 
-Examples:
-Input: "유방촬영 노출 기법을 설명해줘"
-Output: mammography exposure technique kVp mAs radiation dose
+# Constraints
+- Final output MUST be comma-separated English keywords ONLY
+- NO explanations outside <think> block
+- Do NOT force-match concepts that don't exist in guidelines (honest search)
 
-Input: "BI-RADS 카테고리 5는 무엇인가요?"
-Output: BI-RADS Category 5 definition malignancy
+# Examples
+- "K-edge 필터링이 대조도에 미치는 영향"
+  → K-edge filtration, Contrast-to-noise ratio CNR, X-ray energy spectrum, Molybdenum Rhodium filter, mammography image quality
 
-Input: "맘모그래피 포지셔닝 방법"
-Output: mammography positioning technique procedure
+- "7cm 두께 유방의 MGD 효율"
+  → breast thickness 7cm, mean glandular dose MGD, Tungsten Silver target filter, dose efficiency, extremely dense breast"""
 
-Input: "DBT와 일반 맘모그래피 차이"
-Output: DBT digital breast tomosynthesis mammography difference comparison
-
-Input: "mass의 margin 분류 4가지는 무엇인가요?"
-Output: mass margin 4 classifications
-
-Input: "석회화의 3가지 형태는?"
-Output: calcification 3 types morphology"""
-
-        user_prompt = f"""Convert this Korean medical question to English search keywords:
-
-Question: {query}
-
-Search keywords:"""
+        user_prompt = f"Convert to search keywords: {query}"
 
         try:
             response = requests.post(
@@ -113,11 +105,12 @@ Search keywords:"""
                     ],
                     "stream": False,
                     "options": {
-                        "temperature": 0.1,  # 낮은 온도로 일관된 번역
-                        "num_predict": 50,   # 짧은 키워드만 생성
+                        "num_predict": 800,   # 사고 과정 충분히 + 간결한 출력
+                        "temperature": 0.15,  # 창의적 보수성 (0.0은 경직, 0.3은 과다)
+                        "top_p": 0.3,         # 동의어 후보군 적절히 확보
                     }
                 },
-                timeout=15
+                timeout=45
             )
 
             response.raise_for_status()
@@ -178,21 +171,27 @@ Search keywords:"""
         return translated
 
     def _clean_translation(self, text: str) -> str:
-        """번역 결과 정리"""
-        # 줄바꿈 제거
-        text = text.replace('\n', ' ')
+        """번역 결과 정리 (DeepSeek-R1 최적화)"""
+        # 1. DeepSeek-R1 <think> 태그와 내용 완전 제거
+        text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
 
-        # 여러 공백을 하나로
-        text = re.sub(r'\s+', ' ', text)
+        # 2. 마지막 줄만 추출 (DeepSeek-R1은 마지막에 결과 출력)
+        lines = [line.strip() for line in text.strip().split('\n') if line.strip()]
+        if lines:
+            # 마지막 비어있지 않은 줄 사용
+            text = lines[-1]
 
-        # "Output:", "Keywords:" 등 제거
-        text = re.sub(r'^(Output|Keywords|Search keywords|Result):\s*', '', text, flags=re.IGNORECASE)
+        # 3. "Output:", "Keywords:", "Search keywords:" 등 레이블 제거
+        text = re.sub(r'^(Output|Keywords|Search keywords?|Result|English keywords?|Translation):\s*', '', text, flags=re.IGNORECASE)
 
-        # 따옴표 제거
-        text = text.strip('"\'')
+        # 4. 따옴표 제거
+        text = text.strip('"\'`')
 
-        # 문장 부호 정리
+        # 5. 문장 부호 정리
         text = re.sub(r'[.!?]+$', '', text)
+
+        # 6. 여러 공백을 하나로
+        text = re.sub(r'\s+', ' ', text)
 
         return text.strip()
 

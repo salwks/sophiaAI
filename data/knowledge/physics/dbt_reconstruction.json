@@ -1,0 +1,154 @@
+{
+  "id": "dbt_reconstruction",
+  "category": "Digital Breast Tomosynthesis Reconstruction",
+  "keywords": [
+    "reconstruction", "재구성", "영상 재구성",
+    "FBP", "filtered back projection", "필터 역투영",
+    "iterative", "반복 재구성", "SART", "MLEM", "ART",
+    "shift-and-add", "backprojection",
+    "slice thickness", "슬라이스 두께",
+    "z-resolution", "깊이 분해능",
+    "artifact", "아티팩트", "out-of-plane blur"
+  ],
+  "sources": [
+    {
+      "id": "sechopoulos2013b",
+      "citation": "Sechopoulos I. A review of breast tomosynthesis. Part II. Image reconstruction, processing and analysis, and advanced applications. Med Phys. 2013;40(1):014302",
+      "pmid": "23298127",
+      "doi": "10.1118/1.4770281",
+      "type": "Comprehensive Review - Reconstruction"
+    },
+    {
+      "id": "erhard2017",
+      "citation": "Erhard K, et al. New reconstruction algorithm for digital breast tomosynthesis: better image quality for humans and computers. Acta Radiol. 2018;59(9):1051-1059",
+      "pmid": "29254355",
+      "doi": "10.1177/0284185117752101",
+      "type": "FBP vs Iterative Comparison"
+    },
+    {
+      "id": "zheng2019",
+      "citation": "Zheng J, et al. Evaluation of a new image reconstruction method for digital breast tomosynthesis: effects on the visibility of breast lesions and breast density. Eur Radiol. 2020;30(2):915-923",
+      "pmid": "31453718",
+      "doi": "10.1007/s00330-019-06423-3",
+      "type": "Clinical Reconstruction Comparison"
+    },
+    {
+      "id": "wu2004",
+      "citation": "Wu T, Stewart A, Stanton M, et al. Tomographic mammography using a limited number of low-dose cone-beam projection images. Med Phys. 2003;30(3):365-380",
+      "pmid": "12674237",
+      "doi": "10.1118/1.1543934",
+      "type": "Early Reconstruction Methods"
+    },
+    {
+      "id": "das2011",
+      "citation": "Das M, et al. Penalized maximum likelihood reconstruction for improved microcalcification detection in breast tomosynthesis. IEEE Trans Med Imaging. 2011;30(4):904-914",
+      "pmid": "21118769",
+      "doi": "10.1109/TMI.2010.2089694",
+      "type": "PML Reconstruction"
+    },
+    {
+      "id": "abreu2021",
+      "citation": "Abreu E, et al. A Realistic Breast Phantom Proposal for 3D Image Reconstruction in Digital Breast Tomosynthesis. Diagnostics. 2022;12(9):2167",
+      "pmid": "36071652",
+      "doi": "10.3390/diagnostics12092167",
+      "type": "SART vs FBP Comparison"
+    }
+  ],
+  "content": {
+    "reconstruction_principles": {
+      "source_ref": "sechopoulos2013b",
+      "description": "DBT 재구성은 제한된 각도 데이터로부터 3D 볼륨 생성. 불완전한 샘플링으로 인해 CT와 달리 정확한 재구성 불가",
+      "challenges": [
+        "제한된 각도 (15-50° vs CT 360°)",
+        "불완전한 주파수 영역 샘플링 (missing cone)",
+        "out-of-plane blur와 아티팩트",
+        "depth resolution vs in-plane resolution 트레이드오프"
+      ]
+    },
+    "algorithm_types": {
+      "source_ref": "sechopoulos2013b, erhard2017",
+      "shift_and_add": {
+        "description": "가장 단순한 역투영. 투영 영상을 슬라이스 깊이에 맞게 shift하여 합산",
+        "advantages": "계산 간단, 빠름",
+        "disadvantages": "낮은 대조도, 심한 blur",
+        "clinical_use": "거의 사용 안 함"
+      },
+      "filtered_back_projection": {
+        "description": "주파수 영역에서 필터링 후 역투영. ramp filter로 blur 보정",
+        "advantages": "해석적 방법, 계산 비교적 빠름",
+        "disadvantages": "노이즈 증폭, 제한 각도에서 아티팩트",
+        "clinical_use": "일부 시스템의 기본 알고리즘"
+      },
+      "iterative_reconstruction": {
+        "description": "반복적으로 추정 영상을 개선. SART, MLEM, ART, CGLS 등",
+        "advantages": "노이즈 억제, 아티팩트 감소, 대조도 향상",
+        "disadvantages": "계산 시간 길음, 파라미터 튜닝 필요",
+        "clinical_use": "대부분 최신 시스템의 기본 또는 옵션"
+      }
+    },
+    "fbp_vs_iterative": {
+      "source_ref": "erhard2017, zheng2019, abreu2021",
+      "image_quality_comparison": {
+        "cnr_improvement": "반복 재구성이 FBP 대비 CNR 2-6배 향상 (SART CNR=2.87 vs FBP CNR=0.50)",
+        "noise": "반복 재구성이 노이즈 현저히 감소",
+        "lesion_visibility": "유방암 가시성 향상, 특히 저대조도 종괴"
+      },
+      "clinical_findings": {
+        "source_ref": "zheng2019",
+        "finding": "Heuristic Bayesian Inference(HBI) 재구성이 FBP 대비 유방암 가시성 향상 및 perceived breast density 감소",
+        "density_impact": "평균 밀도 카테고리 0.5-1 등급 감소"
+      },
+      "phantom_study": {
+        "source_ref": "abreu2021",
+        "finding": "SART(2-4 iterations)가 FBP보다 미세석회화 검출 우수",
+        "quantitative": "23 projections에서 SART(2 iter) CNR=2.871 vs FBP CNR=0.497"
+      }
+    },
+    "depth_resolution": {
+      "source_ref": "sechopoulos2013b",
+      "formula": "Δz_FWHM ≈ K / sin(α/2)",
+      "K_values": {
+        "iterative": "0.42 mm (최적화된 반복 재구성)",
+        "default": "0.50 mm (중간)",
+        "fbp": "1.0 mm (필터 역투영)"
+      },
+      "examples": {
+        "50deg_iterative": "Δz = 0.42/sin(25°) = 0.99 mm",
+        "25deg_default": "Δz = 0.50/sin(12.5°) = 2.31 mm",
+        "15deg_fbp": "Δz = 1.0/sin(7.5°) = 7.66 mm"
+      },
+      "clinical_implication": "넓은 각도 + 반복 재구성 = 최적 깊이 분해능"
+    },
+    "artifact_types": {
+      "source_ref": "sechopoulos2013b",
+      "out_of_plane_blur": {
+        "description": "초점면 외부 구조물의 흐림",
+        "cause": "제한 각도로 인한 불완전 재구성",
+        "mitigation": "넓은 각도, 반복 재구성"
+      },
+      "ripple_artifact": {
+        "description": "고대조도 구조 주변의 물결 패턴",
+        "cause": "ramp 필터의 negative sidelobe",
+        "mitigation": "apodization 필터, 반복 재구성"
+      },
+      "truncation_artifact": {
+        "description": "유방 가장자리 잘림으로 인한 아티팩트",
+        "cause": "검출기보다 큰 유방",
+        "mitigation": "diffusion-based 또는 extrapolation 보정"
+      }
+    },
+    "vendor_algorithms": {
+      "source_ref": "erhard2017, sechopoulos2013b",
+      "hologic": "Proprietary FBP variant",
+      "siemens": "FBP + iterative optimizations (EMPIRE)",
+      "ge": "Adaptive Statistical Iterative Reconstruction (ASiR) 기반",
+      "fujifilm": "Iterative reconstruction with various modes"
+    }
+  },
+  "clinical_relevance": {
+    "algorithm_selection": "반복 재구성이 대조도와 노이즈 면에서 우수하나 계산 시간 고려 필요",
+    "density_perception": "재구성 알고리즘이 perceived breast density에 영향 → BI-RADS 분류 일관성 주의",
+    "microcalcification": "미세석회화 검출은 반복 재구성(CNR 향상)과 넓은 각도(아티팩트 감소) 조합 시 최적",
+    "source_ref": "sechopoulos2013b, zheng2019, abreu2021"
+  }
+}

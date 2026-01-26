@@ -1,0 +1,161 @@
+{
+  "id": "iec_mammography_standards",
+  "title": "IEC Mammography Equipment Standards",
+  "domain": "regulatory_standards",
+  "keywords": [
+    "IEC", "IEC 60601", "IEC 60601-2-45", "IEC 61223", "IEC 62220",
+    "국제 표준", "international standard", "안전 표준", "safety standard",
+    "DQE 측정", "DQE measurement", "수락 시험", "acceptance test",
+    "필수 성능", "essential performance", "기본 안전", "basic safety",
+    "CE 마크", "CE marking", "유럽 인증", "European certification"
+  ],
+  "content": {
+    "iec_60601_2_45": {
+      "title": "Medical electrical equipment - Part 2-45",
+      "full_title": "Particular requirements for the basic safety and essential performance of mammographic X-ray equipment and mammographic stereotactic devices",
+      "current_version": "IEC 60601-2-45 Ed. 3.2 b:2022",
+      "third_edition": "2011-02",
+      "scope": {
+        "included": [
+          "유방촬영용 X선 장비의 기본 안전 및 필수 성능",
+          "유방 단층합성(tomosynthesis) 장비",
+          "유방 정위 장치(stereotactic devices)",
+          "통합 디지털 X선 영상 수용체",
+          "통합 저장형 형광체(storage phosphor) 시스템"
+        ],
+        "excluded": [
+          "재구성 단층촬영 모드 (reconstructive tomography)",
+          "진단용 콘솔 (diagnostic consoles)",
+          "PACS (Picture Archiving and Communication Systems)",
+          "비통합형 저장 형광체 리더",
+          "하드카피 카메라",
+          "필름, 스크린, 카세트",
+          "CAD (Computer Aided Detection)",
+          "코어 생검 장치 및 기타 생검 기구",
+          "조영증강 디지털 맘모그래피(CEDM/CEM)"
+        ]
+      },
+      "key_requirements": {
+        "radiation_output": {
+          "accuracy": "표시값 대비 ±20% 이내",
+          "reproducibility": "변동계수 5% 이하"
+        },
+        "compression": {
+          "force_range": "40-200 N 조절 가능",
+          "max_force": "300 N 이하",
+          "force_indication": "±20 N 정확도"
+        },
+        "automatic_exposure_control": {
+          "density_steps": "최소 3단계",
+          "reproducibility": "동일 조건에서 5% 이내"
+        },
+        "geometric_accuracy": {
+          "focal_spot_to_image": "표시값 대비 ±5%",
+          "beam_alignment": "X선 필드 정렬 오차 허용"
+        }
+      },
+      "relationship": "IEC 60601-1 (일반 요구사항)과 함께 사용"
+    },
+    "iec_61223_3_2": {
+      "title": "Evaluation and routine testing in medical imaging departments",
+      "full_title": "Part 3-2: Acceptance and constancy tests - Imaging performance of mammographic X-ray equipment",
+      "purpose": "유방촬영 장비의 영상 성능 수락 시험 및 항상성 시험",
+      "test_categories": {
+        "acceptance_tests": [
+          "공간 해상도 (spatial resolution)",
+          "저대조도 검출능 (low contrast detectability)",
+          "유방선량 (mean glandular dose)",
+          "AEC 성능",
+          "압박력 및 두께 표시 정확도",
+          "아티팩트 검사"
+        ],
+        "constancy_tests": [
+          "일일/주간/월간 품질관리 항목",
+          "영상 균일성",
+          "AEC 재현성",
+          "대조도 변화 모니터링"
+        ]
+      },
+      "phantom_requirements": {
+        "standard_phantom": "PMMA (아크릴) 등가 팬텀",
+        "thickness": "4.5 cm PMMA ≈ 5.3 cm 표준 유방",
+        "test_objects": "해상도 패턴, 저대조도 디스크, 섬유/석회화 모의체"
+      }
+    },
+    "iec_62220_1_2": {
+      "title": "Characteristics of digital X-ray imaging devices",
+      "full_title": "Part 1-2: Determination of the detective quantum efficiency - Detectors used in mammography",
+      "version": "IEC 62220-1-2:2007",
+      "purpose": "유방촬영용 디지털 디텍터의 DQE 측정 표준화",
+      "scope": {
+        "included": [
+          "CR 시스템",
+          "직접 변환 평판 검출기 (a-Se)",
+          "간접 변환 평판 검출기 (CsI)",
+          "스캐닝 시스템 (CCD 기반)",
+          "광자 계수형 검출기"
+        ],
+        "excluded": [
+          "일반 X선 촬영용 검출기",
+          "치과용 검출기",
+          "CT용 검출기",
+          "동적 영상용 검출기 (fluoroscopy, cardiac)"
+        ]
+      },
+      "measurement_parameters": {
+        "mtf": {
+          "method": "슬릿 또는 에지 방법",
+          "sampling": "Nyquist 주파수의 2배 이상",
+          "accuracy": "5% 이내"
+        },
+        "nps": {
+          "method": "2D Fourier 변환",
+          "roi_size": "최소 256×256 픽셀",
+          "averaging": "최소 4개 영상 평균"
+        },
+        "dqe_calculation": {
+          "formula": "DQE(f) = MTF²(f) / [NPS(f) × q × SNR²_in]",
+          "q": "입사 광자수/mm² (air kerma로부터 계산)",
+          "frequency_range": "0 ~ Nyquist"
+        }
+      },
+      "beam_quality": {
+        "target_filter": "Mo/Mo or W/Rh (제조사 권장)",
+        "kvp": "28 kVp (표준)",
+        "hvl": "0.30-0.40 mmAl",
+        "filtration": "4.5 cm PMMA"
+      },
+      "software_tools": {
+        "python_implementations": "IEC 62220-1-2 준수 DQE 계산 소프트웨어 존재",
+        "validated_systems": ["Siemens Mammomat Inspiration", "Hologic Selenia", "GE Senographe Pristina"],
+        "source": "PMC9582097"
+      }
+    }
+  },
+  "clinical_relevance": {
+    "manufacturer_compliance": "CE 마킹 및 글로벌 시장 진입을 위한 필수 인증",
+    "detector_comparison": "IEC 62220-1-2 DQE 측정으로 객관적 성능 비교 가능",
+    "quality_assurance": "IEC 61223-3-2 기반 수락/항상성 시험으로 지속적 품질 보증"
+  },
+  "sources": [
+    {
+      "id": "IEC_60601_2_45",
+      "citation": "IEC 60601-2-45 Ed. 3.2 b:2022. Medical electrical equipment - Part 2-45: Particular requirements for mammographic X-ray equipment.",
+      "url": "https://webstore.iec.ch/en/publication/6598",
+      "type": "standard"
+    },
+    {
+      "id": "IEC_62220_1_2",
+      "citation": "IEC 62220-1-2:2007. Medical electrical equipment - Characteristics of digital X-ray imaging devices - Part 1-2: DQE for mammography.",
+      "url": "https://webstore.iec.ch/en/publication/6598",
+      "type": "standard"
+    },
+    {
+      "id": "DQE_Software_PMC",
+      "citation": "Mazzilli A, et al. New Software for DQE Calculation in Digital Mammography Compliant with IEC 62220-1-2. J Digit Imaging. 2022.",
+      "pmid": "36104636",
+      "pmc": "PMC9582097",
+      "type": "validation"
+    }
+  ]
+}

@@ -1,0 +1,201 @@
+{
+  "id": "mfds_guidelines",
+  "title": "식약처(MFDS) 의료기기 허가 가이드라인",
+  "domain": "regulatory_standards",
+  "keywords": [
+    "식약처", "MFDS", "KFDA", "의료기기", "허가", "인허가",
+    "기술문서", "GMP", "품목허가", "2등급", "3등급",
+    "디지털진단용", "엑스선촬영장치", "유방촬영장치",
+    "한국 규제", "Korean regulation", "CE 마크", "510k 대응"
+  ],
+  "content": {
+    "overview": {
+      "authority": "식품의약품안전처 (MFDS, Ministry of Food and Drug Safety)",
+      "legal_basis": "의료기기법, 의료기기 기술문서 심사에 관한 규정",
+      "classification": {
+        "class_2": "중등도 위해 의료기기 (유방촬영장치 해당)",
+        "class_3": "고위해 의료기기",
+        "class_4": "최고위해 의료기기"
+      }
+    },
+    "mammography_device_classification": {
+      "product_code": "A30070.01 (디지털진단용엑스선촬영장치)",
+      "risk_class": "2등급",
+      "regulatory_pathway": "기술문서 심사",
+      "review_period": "15일 (변경심사), 30일 (신규심사)"
+    },
+    "technical_document_requirements": {
+      "general_requirements": {
+        "device_overview": {
+          "items": [
+            "품목명 및 모델명",
+            "사용목적",
+            "작용원리",
+            "원재료",
+            "구성품 및 부속품"
+          ]
+        },
+        "performance_data": {
+          "items": [
+            "전기적 안전성 시험 (IEC 60601-1)",
+            "전자파 적합성 시험 (IEC 60601-1-2)",
+            "성능 시험 (IEC 60601-2-45 준용)",
+            "생물학적 안전성 (해당 시)"
+          ]
+        },
+        "labeling": {
+          "items": [
+            "사용설명서",
+            "라벨링",
+            "경고문구"
+          ]
+        }
+      },
+      "mammography_specific": {
+        "radiation_safety": [
+          "X선 관전압/관전류 범위",
+          "초점 크기 (대/소 초점)",
+          "HVL (반가층) 측정값",
+          "선량 출력 특성"
+        ],
+        "image_quality": [
+          "공간 해상도 (lp/mm)",
+          "저대조도 검출능",
+          "DQE (제조사 데이터)",
+          "MTF (제조사 데이터)"
+        ],
+        "mechanical_safety": [
+          "압박력 범위 및 표시 정확도",
+          "기하학적 정확도 (SID, 정렬)",
+          "안전 장치 (비상 해제 등)"
+        ],
+        "software_validation": {
+          "applicable_if": "영상 처리 소프트웨어 포함 시",
+          "requirements": [
+            "소프트웨어 수명주기 문서 (IEC 62304)",
+            "사이버보안 요구사항",
+            "임상 평가 (필요 시)"
+          ]
+        }
+      }
+    },
+    "gmp_requirements": {
+      "title": "의료기기 제조 및 품질관리 기준",
+      "legal_basis": "의료기기법 제6조",
+      "certification_body": "한국의료기기안전정보원 (NIDS) 또는 인증기관",
+      "key_elements": {
+        "quality_management_system": {
+          "standard": "ISO 13485:2016 기반",
+          "documentation": [
+            "품질 매뉴얼",
+            "설계 관리 절차",
+            "생산 공정 관리",
+            "부적합품 관리",
+            "시정 및 예방 조치 (CAPA)"
+          ]
+        },
+        "design_control": {
+          "requirements": [
+            "설계 입력/출력",
+            "설계 검증 (Verification)",
+            "설계 유효성 확인 (Validation)",
+            "설계 변경 관리"
+          ]
+        },
+        "production_control": {
+          "requirements": [
+            "공정 유효성 확인",
+            "추적성 (Traceability)",
+            "멸균 관리 (해당 시)"
+          ]
+        }
+      },
+      "audit_frequency": "3년 주기 정기 심사"
+    },
+    "performance_testing_standards": {
+      "electrical_safety": {
+        "standard": "IEC 60601-1:2005+A1+A2",
+        "korean_adoption": "KS C IEC 60601-1",
+        "test_items": [
+          "접지 연속성",
+          "절연 저항",
+          "누설 전류",
+          "내전압"
+        ]
+      },
+      "emc": {
+        "standard": "IEC 60601-1-2:2014+A1",
+        "test_items": [
+          "방출 (Emission): 전도/복사",
+          "내성 (Immunity): ESD, RF, 서지"
+        ]
+      },
+      "particular_standard": {
+        "standard": "IEC 60601-2-45",
+        "korean_adoption": "KS C IEC 60601-2-45",
+        "key_tests": [
+          "방사선 출력 정확도/재현성",
+          "AEC 성능",
+          "압박 시스템",
+          "기하학적 정확도"
+        ]
+      }
+    },
+    "clinical_trial_requirements": {
+      "exemption_conditions": [
+        "동등 제품 존재 시 임상시험 면제 가능",
+        "문헌 기반 임상 평가로 대체 가능",
+        "FDA 510(k) 또는 CE 인증 제품 참조"
+      ],
+      "required_cases": [
+        "신개발 기술 적용 시",
+        "사용목적 확대 시",
+        "식약처장 판단에 따른 요청 시"
+      ]
+    },
+    "post_market_surveillance": {
+      "adverse_event_reporting": {
+        "serious_ae": "15일 이내 보고",
+        "non_serious_ae": "분기별 보고"
+      },
+      "periodic_safety_update": "매년 제출 (3등급 이상)",
+      "recall_management": "리콜 발생 시 식약처 보고 및 조치"
+    },
+    "comparison_with_global": {
+      "fda_510k": {
+        "similarity": "기술문서 심사와 유사한 실질적 동등성 경로",
+        "difference": "한국은 GMP 별도 심사, FDA는 QSR 통합"
+      },
+      "ce_marking": {
+        "similarity": "IEC 표준 채택으로 시험 데이터 상호 활용 가능",
+        "difference": "한국은 국문 라벨링 필수"
+      }
+    }
+  },
+  "formulas": {},
+  "clinical_relevance": {
+    "market_entry": "한국 시장 진입을 위한 필수 인허가 절차",
+    "timeline": "신규 2등급: 약 2-3개월 (GMP 포함 시 6개월+)",
+    "manufacturer_tip": "CE 또는 FDA 인증 보유 시 시험 데이터 활용으로 기간 단축 가능"
+  },
+  "sources": [
+    {
+      "id": "MFDS_Technical_Document_Guide",
+      "citation": "식품의약품안전처. 의료기기 기술문서 심사 이해하기 가이드라인 (민원인 안내서). 2024.",
+      "url": "https://www.mfds.go.kr/brd/m_1060/view.do?seq=14698",
+      "type": "guidance"
+    },
+    {
+      "id": "MFDS_GMP_Regulation",
+      "citation": "식품의약품안전처. 의료기기 제조 및 품질관리 기준 (GMP).",
+      "url": "https://www.mfds.go.kr",
+      "type": "regulation"
+    },
+    {
+      "id": "NIDS_Certification",
+      "citation": "한국의료기기안전정보원. 의료기기 GMP 인증 안내.",
+      "url": "https://www.nids.or.kr",
+      "type": "guidance"
+    }
+  ]
+}

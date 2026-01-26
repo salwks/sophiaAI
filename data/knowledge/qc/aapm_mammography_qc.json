@@ -1,0 +1,287 @@
+{
+  "id": "aapm_mammography_qc",
+  "title": "AAPM Mammography Quality Control Standards",
+  "domain": "quality_control",
+  "keywords": [
+    "AAPM", "TG-18", "TG18", "Report 29", "Report 270", "MPPG 17",
+    "품질 관리", "quality control", "QC", "QA", "quality assurance",
+    "디스플레이", "display", "monitor", "모니터", "워크스테이션",
+    "의학물리사", "medical physicist", "physicist survey", "연간 서베이",
+    "luminance", "휘도", "contrast", "GSDF", "grayscale",
+    "ACR", "팬텀", "phantom", "수락 시험", "acceptance test",
+    "annual survey", "daily QC", "weekly QC", "monthly QC"
+  ],
+  "content": {
+    "overview": {
+      "organization": "American Association of Physicists in Medicine (AAPM)",
+      "purpose": "맘모그래피 장비 및 디스플레이 품질관리 표준 제공",
+      "key_reports": {
+        "report_29": "Equipment Requirements and Quality Control for Mammography",
+        "tg_18": "Assessment of Display Performance for Medical Imaging Systems",
+        "report_270": "Display Quality Assurance (최신 디스플레이 표준)",
+        "mppg_17a": "Quality Management for Mammography Review Workstation Displays"
+      }
+    },
+    "aapm_report_29": {
+      "title": "Equipment Requirements and Quality Control for Mammography",
+      "purpose": "맘모그래피 장비의 성능 요구사항 및 품질관리 지침",
+      "medical_physicist_responsibilities": {
+        "annual_survey": {
+          "description": "연간 전체 서베이 수행",
+          "requirements": [
+            "디지털 맘모그래피 유닛 테스트",
+            "디스플레이 장치 테스트",
+            "팬텀 영상 품질 평가",
+            "시설별 QC 프로그램 수립 및 감독"
+          ],
+          "timing": "같은 지리적 위치의 장비는 동일일 테스트 권장"
+        },
+        "oversight": "QC 기술자 교육 및 데이터 분석 감독",
+        "documentation": "테스트 결과 문서화 및 기록 유지"
+      },
+      "equipment_tests": {
+        "radiation_output": {
+          "items": ["관전압 정확도", "출력 재현성", "HVL 측정"],
+          "frequency": "연간"
+        },
+        "aec_performance": {
+          "items": ["AEC 재현성", "밀도 컨트롤", "두께 보상"],
+          "frequency": "연간 + 주간 점검"
+        },
+        "image_quality": {
+          "items": ["팬텀 영상 점수", "대조도 검출능", "공간 해상도"],
+          "frequency": "연간 + 주간/월간"
+        },
+        "compression": {
+          "items": ["압박력 표시 정확도", "최대 압박력"],
+          "frequency": "연간"
+        },
+        "geometry": {
+          "items": ["SID 정확도", "X선 필드 정렬", "체스트월 정렬"],
+          "frequency": "연간"
+        }
+      },
+      "qc_frequency_chart": {
+        "daily": [
+          "평판 검출기 균일성 (Flat Field)",
+          "아티팩트 점검",
+          "디스플레이 청결도"
+        ],
+        "weekly": [
+          "팬텀 영상 품질 (섬유, 석회화, 종괴 점수)",
+          "AEC 재현성 점검",
+          "대조도 및 CNR 확인"
+        ],
+        "monthly": [
+          "압박 두께 표시 정확도",
+          "시각적 체크리스트",
+          "반복 분석 (Repeat Analysis)"
+        ],
+        "quarterly": [
+          "어둠 노이즈 측정",
+          "디스플레이 휘도 균일성"
+        ],
+        "semiannual": [
+          "디스플레이 GSDF 적합성 (TG-18)"
+        ],
+        "annual": [
+          "의학물리사 전체 서베이",
+          "MGD 측정",
+          "모든 성능 지표 종합 평가"
+        ]
+      }
+    },
+    "aapm_tg18": {
+      "title": "Assessment of Display Performance for Medical Imaging Systems",
+      "purpose": "의료 영상 디스플레이 품질 평가 표준",
+      "test_patterns": {
+        "tg18_qc": "종합 테스트 패턴 (기하 왜곡, 해상도, 균일성)",
+        "tg18_ln": "휘도 응답 (18단계 그레이스케일)",
+        "tg18_unl": "휘도 균일성 패턴",
+        "tg18_cx": "해상도 테스트 (Cx 타겟)",
+        "tg18_afc": "노이즈/저대조도 테스트",
+        "tg18_gv": "글레어(Glare) 테스트",
+        "tg18_ct": "대비 임계값 테스트"
+      },
+      "display_classes": {
+        "primary": {
+          "description": "진단용 디스플레이 (판독용)",
+          "mammography_lmax": "≥ 420 cd/m²",
+          "general_lmax": "≥ 350 cd/m²",
+          "lmin": "≥ 1.2 cd/m² (맘모그래피)",
+          "luminance_ratio": "> 250"
+        },
+        "secondary": {
+          "description": "참조용 디스플레이",
+          "lmax": "≥ 100 cd/m²",
+          "luminance_ratio": "> 100"
+        }
+      },
+      "acceptance_criteria": {
+        "luminance": {
+          "mammography_lmax": "420 cd/m² (측정값 ±10% 이내)",
+          "luminance_ratio": "LR > 250 (primary), > 100 (secondary)",
+          "source": "AAPM TG-18, ACR-AAPM Technical Standard"
+        },
+        "gsdf_conformance": {
+          "primary": "10% 이내",
+          "secondary": "20% 이내",
+          "formula": "JND(L) = GSDF 기반 Just Noticeable Difference"
+        },
+        "geometric_distortion": {
+          "primary": "< 2%",
+          "secondary": "< 5%"
+        },
+        "luminance_uniformity": {
+          "criterion": "불균일도 < 30%",
+          "test_pattern": "TG18-UNL"
+        },
+        "resolution": {
+          "cx_score_primary": "> 4",
+          "cx_score_secondary": "> 6",
+          "note": "숫자가 높을수록 더 미세한 패턴 식별"
+        },
+        "noise": {
+          "afc_primary": "최소 3개 타겟 식별",
+          "afc_secondary": "최소 2개 타겟 식별"
+        },
+        "glare": {
+          "gv_score_primary": "> 3",
+          "glare_ratio_primary": "> 400",
+          "gv_score_secondary": "> 1",
+          "glare_ratio_secondary": "> 150"
+        },
+        "chromaticity": {
+          "u_v_separation": "< 0.01 (primary displays)",
+          "note": "동일 시설 내 디스플레이 간 색상 일관성"
+        },
+        "angular_response": {
+          "contrast_conformance_primary": "< 30%",
+          "contrast_conformance_secondary": "< 60%",
+          "viewing_cone": "정상 시청 각도 내 LR 유지"
+        },
+        "reflection": {
+          "ambient_light": "대조도 저하 20% 미만 유지",
+          "measurement": "확산 및 정반사 계수 측정"
+        }
+      }
+    },
+    "aapm_report_270": {
+      "title": "Display Quality Assurance",
+      "status": "TG-18 이후 최신 디스플레이 QA 표준",
+      "updates_from_tg18": [
+        "평판 디스플레이(LCD) 특성 반영",
+        "새로운 디스플레이 유형 정의",
+        "업데이트된 테스트 패턴",
+        "개정된 성능 표준"
+      ],
+      "focus": "일관된 영상 품질 및 외관 보장"
+    },
+    "aapm_mppg_17a": {
+      "title": "Quality Management for Mammography Review Workstation Displays",
+      "purpose": "맘모그래피 원격 판독 워크스테이션(RWS) 디스플레이 품질관리",
+      "scope": {
+        "target": "원격 판독 환경의 디스플레이",
+        "challenges": ["원격 환경 관리", "MQSA 규정 준수", "기술 발전 대응"]
+      },
+      "medical_physicist_role": {
+        "responsibilities": [
+          "시설별 QM 프로그램 수립",
+          "데이터 수집/분석/해석 감독",
+          "적합한 인력에게 일부 업무 위임 가능"
+        ],
+        "mqsa_requirement": "판독 워크스테이션 사용 전 의학물리사 테스트 필수"
+      },
+      "qa_qc_procedures": {
+        "acceptance_testing": "신규 디스플레이 설치 시 초기 테스트",
+        "routine_qc": "정기적 품질관리 테스트",
+        "performance_monitoring": "지속적 성능 모니터링"
+      }
+    },
+    "acr_phantom_scoring": {
+      "phantom_type": "ACR Mammography Accreditation Phantom",
+      "test_objects": {
+        "fibers": {
+          "count": 6,
+          "sizes_mm": [1.56, 1.12, 0.89, 0.75, 0.54, 0.40],
+          "minimum_visible": "≥ 4개"
+        },
+        "specks": {
+          "groups": 5,
+          "sizes_mm": [0.54, 0.40, 0.32, 0.24, 0.16],
+          "minimum_visible": "≥ 3그룹"
+        },
+        "masses": {
+          "count": 5,
+          "sizes_mm": [2.00, 1.00, 0.75, 0.50, 0.25],
+          "minimum_visible": "≥ 3개"
+        }
+      },
+      "scoring_criteria": {
+        "fiber_score": "1점/개 (반쪽 0.5점)",
+        "speck_score": "1점/그룹 (반쪽 0.5점)",
+        "mass_score": "1점/개 (반쪽 0.5점)",
+        "minimum_total": "섬유 ≥4, 석회화군 ≥3, 종괴 ≥3"
+      }
+    }
+  },
+  "formulas": {
+    "luminance_ratio": {
+      "formula": "LR = L_max / L_min",
+      "example": "420 / 1.2 = 350",
+      "requirement": "> 250 for mammography primary displays"
+    },
+    "gsdf_jnd": {
+      "formula": "JND(L) = a + b × log10(L) + c × [log10(L)]² + d × [log10(L)]³ + e × [log10(L)]⁴",
+      "purpose": "그레이스케일 표준 표시 함수 (DICOM Part 14)"
+    },
+    "uniformity": {
+      "formula": "Uniformity = (L_max - L_min) / (L_max + L_min) × 200%",
+      "criterion": "< 30%"
+    },
+    "geometric_distortion": {
+      "formula": "Distortion = |measured - expected| / expected × 100%",
+      "criterion_primary": "< 2%",
+      "criterion_secondary": "< 5%"
+    }
+  },
+  "clinical_relevance": {
+    "diagnostic_accuracy": "디스플레이 품질이 미세석회화 검출능에 직접 영향",
+    "consistency": "시설 간, 디스플레이 간 일관된 영상 표현 보장",
+    "regulatory_compliance": "FDA MQSA 요구사항 충족",
+    "remote_reading": "원격 판독 환경에서도 진단 품질 유지"
+  },
+  "sources": [
+    {
+      "id": "AAPM_Report_29",
+      "citation": "AAPM Report No. 29. Equipment Requirements and Quality Control for Mammography. American Association of Physicists in Medicine. 1990.",
+      "url": "https://www.aapm.org/pubs/reports/rpt_29.pdf",
+      "type": "report"
+    },
+    {
+      "id": "AAPM_TG18",
+      "citation": "Samei E, et al. Assessment of display performance for medical imaging systems: Executive summary of AAPM TG18 report. Med Phys. 2005;32(4):1205-1225.",
+      "pmid": "15895604",
+      "url": "https://ils.unc.edu/bmh/pubs/AAPM-2005-TG18.pdf",
+      "type": "task_group_report"
+    },
+    {
+      "id": "AAPM_Report_270",
+      "citation": "AAPM Report No. 270. Display Quality Assurance. American Association of Physicists in Medicine.",
+      "url": "https://www.aapm.org/pubs/reports/",
+      "type": "report"
+    },
+    {
+      "id": "AAPM_MPPG_17a",
+      "citation": "Milman I, et al. AAPM Medical Physics Practice Guideline MPPG 17.a: Quality management for mammography review workstation displays. J Appl Clin Med Phys. 2025.",
+      "pmc": "PMC11969075",
+      "type": "practice_guideline"
+    },
+    {
+      "id": "ACR_AAPM_Display_Standard",
+      "citation": "ACR-AAPM Technical Standard for Diagnostic Interpretation Displays.",
+      "url": "https://www.acr.org",
+      "type": "technical_standard"
+    }
+  ]
+}

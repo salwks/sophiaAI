@@ -1,0 +1,211 @@
+{
+  "id": "xray_tube_physics",
+  "category": "X-ray Tube Physics for Mammography",
+  "keywords": [
+    "X-ray tube", "엑스선관", "anode", "양극", "target",
+    "molybdenum", "Mo", "몰리브덴",
+    "rhodium", "Rh", "로듐",
+    "tungsten", "W", "텅스텐",
+    "focal spot", "초점", "초점 크기",
+    "characteristic radiation", "특성방사선", "K-edge",
+    "tube current", "관전류", "mA",
+    "MASMIP", "RASMIP", "TASMIP",
+    "bremsstrahlung", "제동방사선"
+  ],
+  "sources": [
+    {
+      "id": "boone1997",
+      "citation": "Boone JM, Fewell TR, Jennings RJ. Molybdenum, rhodium, and tungsten anode spectral models using interpolating polynomials with application to mammography. Med Phys. 1997;24(12):1863-1874",
+      "pmid": "9434969",
+      "doi": "10.1118/1.598100",
+      "type": "Spectral Model Development"
+    },
+    {
+      "id": "thilander1997",
+      "citation": "Thilander-Klang A, Leitz W, Faulkner K, et al. Influence of anode/filter material and tube potential on contrast, signal-to-noise ratio and average absorbed dose in mammography: a Monte Carlo study. Br J Radiol. 1997;70(839):1049-1055",
+      "pmid": "9536897",
+      "type": "Monte Carlo Study"
+    },
+    {
+      "id": "korner2023",
+      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "type": "Review Article"
+    },
+    {
+      "id": "yaffe2000",
+      "citation": "Yaffe MJ, Rowlands JA. X-ray detectors for digital radiography. Phys Med Biol. 1997;42(1):1-39",
+      "pmid": "9015816",
+      "type": "Technical Review"
+    },
+    {
+      "id": "behling2021",
+      "citation": "Behling R, Grüner F. Diagnostic X-ray sources—present and future. Nucl Instrum Methods Phys Res A. 2018;878:50-57",
+      "doi": "10.1016/j.nima.2017.05.036",
+      "type": "Technical Review"
+    }
+  ],
+  "content": {
+    "target_materials": {
+      "description": "맘모그래피 시스템은 회전 양극을 사용하며 일반적으로 몰리브덴, 로듐, 또는 텅스텐으로 제작됨",
+      "source_ref": "korner2023",
+      "materials": {
+        "molybdenum": {
+          "symbol": "Mo",
+          "atomic_number": 42,
+          "characteristic_energies_keV": {
+            "K_alpha": 17.5,
+            "K_beta": 19.6
+          },
+          "optimal_use": "얇은 유방, 지방 조직 우세",
+          "source_ref": "korner2023, boone1997"
+        },
+        "rhodium": {
+          "symbol": "Rh",
+          "atomic_number": 45,
+          "characteristic_energies_keV": {
+            "K_alpha": 20.2,
+            "K_beta": 22.7
+          },
+          "K_edge_keV": 23.3,
+          "optimal_use": "중간 두께 유방, Mo보다 높은 투과력 필요 시",
+          "source_ref": "korner2023, boone1997"
+        },
+        "tungsten": {
+          "symbol": "W",
+          "atomic_number": 74,
+          "note": "특성 X선(59.3/67.2 keV)은 맘모그래피 에너지 범위 밖 - 제동복사 스펙트럼 사용",
+          "optimal_use": "두꺼운 유방, 디지털 맘모그래피에서 주로 사용",
+          "source_ref": "korner2023, thilander1997"
+        }
+      }
+    },
+    "spectral_models": {
+      "description": "Boone et al.이 개발한 맘모그래피 스펙트럼 모델 (실험적으로 측정된 스펙트럼 기반)",
+      "source_ref": "boone1997",
+      "models": {
+        "MASMIP": {
+          "full_name": "Molybdenum Anode Spectral Model using Interpolating Polynomials",
+          "energy_range_kV": "18-40",
+          "mean_fluence_error_percent": -0.073,
+          "std_deviation_percent": 1.58
+        },
+        "RASMIP": {
+          "full_name": "Rhodium Anode Spectral Model using Interpolating Polynomials",
+          "energy_range_kV": "18-40",
+          "mean_fluence_error_percent": -0.145,
+          "std_deviation_percent": 1.263
+        },
+        "TASMIP": {
+          "full_name": "Tungsten Anode Spectral Model using Interpolating Polynomials",
+          "energy_range_kV": "18-40",
+          "mean_fluence_error_percent": 0.611,
+          "std_deviation_percent": 2.07
+        }
+      },
+      "measurement_details": {
+        "kV_settings": "13 different kVs (18, 20, 22, ..., 42 kV)",
+        "energy_intervals_keV": 0.5,
+        "polynomial_terms": "2, 3, or 4 term polynomials at each energy level"
+      }
+    },
+    "optimal_energy_range": {
+      "range_keV": "15-25",
+      "description": "환자 해부학적 구조에 따라 가변적. 저에너지는 선량에 기여하나 영상 품질 기여 낮음, 고에너지는 선량↓ 대조도↓",
+      "source_ref": "korner2023"
+    },
+    "focal_spot": {
+      "description": "맘모그래피에서 높은 공간해상도 요구 - 작은 초점과 작은 양극 각도 사용",
+      "source_ref": "korner2023",
+      "sizes": {
+        "contact_mammography": {
+          "nominal_mm": "0.3-0.4",
+          "NEMA_tolerance": {
+            "width_mm": 0.45,
+            "length_mm": 0.65,
+            "for_nominal_mm": 0.3
+          }
+        },
+        "magnification_mammography": {
+          "nominal_mm": "0.1-0.15",
+          "NEMA_tolerance": {
+            "width_mm": 0.15,
+            "length_mm": 0.15,
+            "for_nominal_mm": 0.1
+          }
+        }
+      },
+      "tube_current_typical": {
+        "large_focal_spot": {
+          "size_mm": 0.3,
+          "current_mA": "100±25"
+        },
+        "small_focal_spot": {
+          "size_mm": 0.1,
+          "current_mA": "25±10"
+        },
+        "source_ref": "korner2023"
+      }
+    },
+    "target_filter_recommendations": {
+      "source_ref": "thilander1997",
+      "combinations": {
+        "Mo_Mo": {
+          "target": "Mo",
+          "filter": "Mo",
+          "filter_thickness_mm": 0.03,
+          "optimal_for": "얇은 유방 (screen-film 및 digital)",
+          "note": "thilander1997 결론: 대부분의 유방에서 최적 대조도"
+        },
+        "Mo_Rh": {
+          "target": "Mo",
+          "filter": "Rh",
+          "filter_thickness_mm": 0.025,
+          "optimal_for": "중간 두께 유방",
+          "note": "Rh K-edge(23.3 keV)가 20-23.3 keV 범위 X선 증가"
+        },
+        "W_Rh": {
+          "target": "W",
+          "filter": "Rh",
+          "optimal_for": "두꺼운 유방",
+          "note": "thilander1997: 두꺼운 유방에서 선량 효율적"
+        },
+        "W_Al": {
+          "target": "W",
+          "filter": "Al",
+          "optimal_for": "두꺼운 유방, 디지털 시스템",
+          "note": "현대 디지털 시스템에서 널리 사용"
+        }
+      }
+    },
+    "inherent_filtration": {
+      "beryllium_window_mm": 1.0,
+      "description": "맘모그래피 튜브는 유리 대신 베릴륨 창 사용 - 저에너지 X선 투과 허용",
+      "source_ref": "korner2023"
+    }
+  },
+  "formulas": {
+    "characteristic_xray_energy": {
+      "description": "특성 X선 에너지는 타겟 물질의 원자 구조에 의해 결정됨",
+      "principle": "K-shell 전자가 방출되고 L-shell 전자가 전이할 때 Kα 방출",
+      "source_ref": "boone1997"
+    },
+    "geometric_unsharpness": {
+      "formula": "Ug = f × (OID / SOD)",
+      "variables": {
+        "Ug": "기하학적 불선예도 (mm)",
+        "f": "초점 크기 (mm)",
+        "OID": "물체-영상 거리 (mm)",
+        "SOD": "선원-물체 거리 (mm)"
+      },
+      "source_ref": "korner2023"
+    }
+  },
+  "clinical_relevance": {
+    "target_filter_selection": "유방 두께와 밀도에 따른 최적 조합 선택이 영상 품질과 선량 최적화의 핵심",
+    "digital_vs_film": "디지털 시스템에서 W 타겟 사용 증가 - 넓은 동적 범위 활용",
+    "source_ref": "korner2023, thilander1997"
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "id": "compression_physics",
+  "category": "Breast Compression Physics",
+  "keywords": [
+    "compression", "압박", "compression force", "압박력",
+    "compression pressure", "압박 압력", "kPa",
+    "breast thickness", "유방 두께",
+    "dose reduction", "선량 감소",
+    "image quality", "영상 품질",
+    "patient comfort", "환자 편안함", "pain", "통증"
+  ],
+  "sources": [
+    {
+      "id": "broeders2017",
+      "citation": "Broeders MJ, et al. Can Breast Compression Be Reduced in Digital Mammography and Breast Tomosynthesis? AJR Am J Roentgenol. 2017;209(5):W322-W332",
+      "pmid": "28929809",
+      "pmc": "PMC5751437",
+      "doi": "10.2214/AJR.16.17615",
+      "type": "Force Reduction Study"
+    },
+    {
+      "id": "branderhorst2012",
+      "citation": "Branderhorst W, et al. Breast compression in mammography: pressure distribution patterns. Phys Med Biol. 2012;57(19):6259-6276",
+      "pmid": "22949732",
+      "doi": "10.1088/0031-9155/57/19/6259",
+      "type": "Pressure Distribution Study"
+    },
+    {
+      "id": "de_groot2015",
+      "citation": "de Groot JE, et al. A novel approach to mammographic breast compression: Improved standardization and reduced discomfort by controlling pressure instead of force. Med Phys. 2013;40(8):081901",
+      "pmid": "23927315",
+      "doi": "10.1118/1.4812418",
+      "type": "Pressure-Controlled Protocol"
+    },
+    {
+      "id": "korner2023",
+      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "type": "Review Article"
+    },
+    {
+      "id": "poulos2003",
+      "citation": "Poulos A, et al. Breast compression in mammography: how much is enough? Australas Radiol. 2003;47(2):121-126",
+      "pmid": "12780439",
+      "doi": "10.1046/j.0004-8461.2003.01139.x",
+      "type": "Clinical Study"
+    }
+  ],
+  "content": {
+    "principles": {
+      "source_ref": "korner2023",
+      "dose_reduction_mechanism": "유방 압박으로 두께 감소 → 투과 광자 증가 → 동일 광자 수를 위한 입사 선량 감소",
+      "Lambert_Beer_law": "두께 감소 시 광자 투과율 증가로 조직 내 에너지 침착 감소",
+      "compression_range_N": "10-30 (일반적으로 10-20 N)",
+      "thickness_reduction_example": "9cm → 2cm로 감소 가능"
+    },
+    "force_reduction_study": {
+      "source_ref": "broeders2017",
+      "findings": {
+        "force_reduction_percent": {
+          "CC_view": 48,
+          "MLO_view": 47
+        },
+        "thickness_increase": {
+          "CC_view_cm": 0.02,
+          "MLO_view_cm": "0.09-0.38"
+        },
+        "pain_reduction": "유의미한 통증 감소",
+        "tissue_coverage": "변화 없음",
+        "motion_blur": "증가 없음"
+      },
+      "conclusion": "현재 사용되는 압박력의 절반으로 맘모그래피 및 DBT 촬영 가능할 수 있음"
+    },
+    "pressure_distribution_patterns": {
+      "source_ref": "branderhorst2012",
+      "method": "압박된 유방 전체의 압력 분포 측정 및 시각화 방법 개발",
+      "two_groups_identified": {
+        "group_description": "43개 유방 중 흉곽인접부(juxtathoracic) 위주 압력 분포 그룹",
+        "characteristics": "유의미하게 더 두꺼운 유방, 치밀 조직 위 평균 압력 낮음"
+      },
+      "force_reduction_effect": "압박력 감소 시 평균 유방 두께 1.8mm 증가"
+    },
+    "pressure_controlled_protocol": {
+      "source_ref": "de_groot2015",
+      "problem_with_force": "현재 맘모그래피 압박 지침은 표준화된 힘 적용 기반이나, 유방 크기 고려 없어 압력 변동 큼",
+      "pressure_protocol_result": {
+        "thickness_difference_percent": 16.5,
+        "image_quality": "차이 없음",
+        "AGD": "차이 없음"
+      },
+      "recommendation": "압력 제어 프로토콜이 표준화 개선 및 불편감 감소 가능"
+    },
+    "recommended_pressure": {
+      "source_ref": "de_groot2015",
+      "value_kPa": 10,
+      "benefits": [
+        "여성 간 및 내 영상 획득 재현성 향상",
+        "통증 수준 감소",
+        "유방 두께, AGD, 영상 품질 변화 최소"
+      ]
+    },
+    "dose_force_relationship": {
+      "source_ref": "poulos2003",
+      "force_15daN_vs_10daN": "15 daN 압박력이 10 daN 대비 AGD 17% 추가 감소",
+      "tolerance_observation": "증가된 압박력 내성은 유방 표면적과 관련"
+    },
+    "reduced_compression_effects": {
+      "source_ref": "broeders2017",
+      "90N_compression": {
+        "thickness_increase_mm": 3,
+        "dose_increase_percent": 20,
+        "image_quality": "표준 압박과 동일"
+      }
+    }
+  },
+  "formulas": {
+    "pressure_calculation": {
+      "formula": "Pressure (kPa) = Force (N) / Area (cm²) × 10",
+      "source_ref": "de_groot2015"
+    },
+    "dose_thickness_relationship": {
+      "formula": "Dose ∝ exp(μ × thickness)",
+      "description": "Lambert-Beer 법칙에 따라 두께 감소 시 선량 지수적 감소",
+      "source_ref": "korner2023"
+    }
+  },
+  "clinical_relevance": {
+    "dose_reduction": "적절한 압박으로 유의미한 선량 감소 달성",
+    "image_quality": "산란 감소, 움직임 아티팩트 감소, 해부학적 구조 분리 개선",
+    "patient_compliance": "과도한 압박은 통증으로 인한 검사 기피 유발 가능",
+    "standardization": "압력 기반 프로토콜이 힘 기반보다 재현성 우수",
+    "source_ref": "broeders2017, de_groot2015"
+  }
+}

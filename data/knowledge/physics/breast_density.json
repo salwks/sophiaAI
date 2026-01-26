@@ -1,0 +1,158 @@
+{
+  "id": "breast_density",
+  "category": "Mammographic Breast Density",
+  "keywords": [
+    "breast density", "유방 밀도", "치밀유방",
+    "BI-RADS density", "밀도 분류",
+    "glandularity", "glandular", "유선조직",
+    "percent density", "percent mammographic density",
+    "volumetric density", "볼륨 밀도",
+    "cancer risk", "암 위험", "masking",
+    "dense breast", "fatty breast"
+  ],
+  "sources": [
+    {
+      "id": "boyd2007",
+      "citation": "Boyd NF, Guo H, Martin LJ, et al. Mammographic density and the risk and detection of breast cancer. N Engl J Med. 2007;356(3):227-236",
+      "pmid": "17229950",
+      "doi": "10.1056/NEJMoa062790",
+      "type": "Landmark Cancer Risk Study"
+    },
+    {
+      "id": "mccormack2006",
+      "citation": "McCormack VA, dos Santos Silva I. Breast density and parenchymal patterns as markers of breast cancer risk: a meta-analysis. Cancer Epidemiol Biomarkers Prev. 2006;15(6):1159-1169",
+      "pmid": "16775176",
+      "doi": "10.1158/1055-9965.EPI-06-0034",
+      "type": "Meta-Analysis"
+    },
+    {
+      "id": "destounis2022",
+      "citation": "Destounis S, et al. Mammographic breast density and the risk of breast cancer: A systematic review and meta-analysis. Eur J Radiol. 2022;155:110474",
+      "pmid": "36063686",
+      "pmc": "PMC9530665",
+      "doi": "10.1016/j.ejrad.2022.110474",
+      "type": "Recent Meta-Analysis (BI-RADS 5th)"
+    },
+    {
+      "id": "acr_birads",
+      "citation": "ACR BI-RADS Atlas, 5th Edition. American College of Radiology, 2013",
+      "type": "Clinical Standard"
+    },
+    {
+      "id": "brand2014",
+      "citation": "Brand JS, Czene K, Shepherd JA, et al. Automated measurement of volumetric mammographic density: a tool for widespread breast cancer risk assessment. Cancer Epidemiol Biomarkers Prev. 2014;23(9):1764-1772",
+      "pmid": "24969236",
+      "doi": "10.1158/1055-9965.EPI-13-1219",
+      "type": "Volumetric Density Study"
+    },
+    {
+      "id": "winkler2020",
+      "citation": "Winkel RR, et al. Mammographic density and structural features can individually and jointly contribute to breast cancer risk assessment in mammography screening. BMC Cancer. 2016;16:583",
+      "pmid": "27487832",
+      "pmc": "PMC4972959",
+      "doi": "10.1186/s12885-016-2669-3",
+      "type": "Risk Assessment Study"
+    }
+  ],
+  "content": {
+    "definition": {
+      "source_ref": "boyd2007",
+      "description": "유방 밀도는 맘모그램에서 섬유선 조직(radiopaque, 밝게 보임)과 지방 조직(radiolucent, 어둡게 보임)의 상대적 비율을 의미",
+      "importance": "유방암 위험 인자이자 암 검출을 방해하는 masking 효과의 원인"
+    },
+    "birads_classification": {
+      "source_ref": "acr_birads",
+      "version": "BI-RADS 5th Edition (2013)",
+      "categories": {
+        "a": {
+          "name": "Almost entirely fatty",
+          "description": "거의 전적으로 지방 조직",
+          "masking_risk": "최소"
+        },
+        "b": {
+          "name": "Scattered areas of fibroglandular density",
+          "description": "산재된 섬유선 밀도 영역",
+          "masking_risk": "낮음"
+        },
+        "c": {
+          "name": "Heterogeneously dense",
+          "description": "불균일하게 치밀함 - 작은 종괴 검출이 어려울 수 있음",
+          "masking_risk": "중간-높음"
+        },
+        "d": {
+          "name": "Extremely dense",
+          "description": "극도로 치밀함 - 맘모그래피 민감도 저하",
+          "masking_risk": "높음"
+        }
+      },
+      "change_from_4th_edition": "퍼센트 기반 구분 제거, masking 위험 강조"
+    },
+    "cancer_risk": {
+      "source_ref": "boyd2007, mccormack2006, destounis2022",
+      "classic_estimate": {
+        "finding": "75% 이상 치밀유방은 5-10% 이하 대비 4-6배 유방암 위험 증가",
+        "source_ref": "mccormack2006"
+      },
+      "updated_estimate": {
+        "source_ref": "destounis2022",
+        "finding": "BI-RADS D(극도로 치밀)는 BI-RADS B(산재 밀도) 대비 2.11배 위험 증가 (95% CI 1.84-2.42)",
+        "age_bmi_adjusted": "나이와 BMI 보정 시 1.83배 (95% CI 1.52-2.21)",
+        "note": "디지털 맘모그래피와 BI-RADS 5판 사용으로 기존 추정보다 낮은 위험도"
+      },
+      "risk_per_category": {
+        "source_ref": "boyd2007",
+        "percent_density_0": "RR 1.0 (reference)",
+        "percent_density_1_10": "RR 1.79",
+        "percent_density_11_25": "RR 2.11",
+        "percent_density_26_50": "RR 2.92",
+        "percent_density_51_75": "RR 3.96",
+        "percent_density_over_75": "RR 5.30"
+      }
+    },
+    "masking_effect": {
+      "source_ref": "boyd2007, acr_birads",
+      "description": "치밀유방에서 암이 정상 조직과 유사한 밀도로 보여 검출이 어려움",
+      "sensitivity_impact": {
+        "fatty_breast": "맘모그래피 민감도 ~85-90%",
+        "extremely_dense": "맘모그래피 민감도 ~50-60%"
+      },
+      "clinical_implication": "치밀유방 여성에서 보조 검사(US, MRI) 고려"
+    },
+    "measurement_methods": {
+      "source_ref": "brand2014, winkler2020",
+      "visual_assessment": {
+        "method": "방사선과 전문의의 주관적 BI-RADS 분류",
+        "limitation": "관찰자간 변이(kappa ~0.77)",
+        "advantage": "임상 표준, 널리 사용"
+      },
+      "area_based": {
+        "method": "2D 영상에서 치밀 영역 면적 비율 측정",
+        "tools": "Cumulus, ImageJ 등",
+        "limitation": "유방 두께 미반영"
+      },
+      "volumetric": {
+        "method": "3D 볼륨 기반 섬유선 조직량 측정",
+        "tools": "Volpara, Quantra 등",
+        "advantages": [
+          "재현성 높음",
+          "관찰자간 변이 없음",
+          "유방 두께 고려"
+        ],
+        "source_ref": "brand2014"
+      }
+    },
+    "interobserver_variability": {
+      "source_ref": "destounis2022",
+      "visual_kappa": "0.77 (substantial agreement)",
+      "volumetric_vs_visual_kappa": "0.55 (moderate agreement)",
+      "implication": "자동화된 볼륨 측정이 표준화에 도움되나 방사선과 전문의 판단과 완전히 일치하지 않음"
+    }
+  },
+  "clinical_relevance": {
+    "screening_implications": "치밀유방 여성에서 보조 영상 검사(초음파, MRI, 조영 맘모그래피) 고려",
+    "risk_stratification": "유방 밀도를 다른 위험 인자와 함께 개인화된 선별 전략에 활용",
+    "notification_laws": "미국 등에서 치밀유방 통지 법률 시행 중",
+    "dose_consideration": "치밀유방은 동일 두께에서 더 높은 감쇠 → AEC가 더 높은 선량 사용",
+    "source_ref": "boyd2007, acr_birads, destounis2022"
+  }
+}

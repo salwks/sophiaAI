@@ -6,6 +6,7 @@ Pydantic 모델 정의 - 논문 메타데이터, 검색 쿼리, 검색 결과
 
 from datetime import datetime
 from typing import List, Optional
+from urllib.parse import quote
 
 from pydantic import BaseModel, Field, computed_field, field_validator
 
@@ -98,6 +99,12 @@ class Paper(BaseModel):
 
     @computed_field
     @property
+    def google_scholar_url(self) -> str:
+        """Google Scholar 검색 링크 (제목 기반)"""
+        return f"https://scholar.google.com/scholar?q={quote(self.title)}"
+
+    @computed_field
+    @property
     def author_string(self) -> str:
         """저자 문자열 (첫 3명 + et al.)"""
         if len(self.authors) <= 3:
@@ -156,6 +163,11 @@ class SearchQuery(BaseModel):
     filters: QueryFilters = Field(default_factory=QueryFilters)
     intent: str = Field("", description="검색 의도 설명")
     recommended_exclusions: List[str] = Field(default_factory=list, description="제외 권장 출판 유형: Case Reports, Letter")
+
+    # Phase 1: Medical-Logic-CoT 확장 필드
+    expanded_keywords: List[str] = Field(default_factory=list, description="CoT 추론으로 확장된 의학 키워드")
+    reasoning_trace: str = Field("", description="DeepSeek-R1 <think> 추론 과정")
+    semantic_variations: List[str] = Field(default_factory=list, description="동의어/유사어 확장")
 
     @computed_field
     @property
