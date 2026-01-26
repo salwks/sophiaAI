@@ -162,11 +162,16 @@
         "problem_1": "열적 한계 → mA 제한 (25±10mA) → mAs 부족",
         "problem_2": "광자 희석 → 픽셀당 광자 수 1/M² 감소",
         "result": "두 효과가 합쳐져 노이즈가 크게 증가",
-        "calculation": "1.8배 확대 + mAs 40% = 실효 SNR 약 0.4/1.8 = 22% 수준"
+        "calculation": {
+          "formula": "SNR_ratio = √(mAs_mag/mAs_contact) / M",
+          "example": "√(20/50) / 1.8 = 0.632 / 1.8 = 0.35 = 35%",
+          "interpretation": "확대 촬영 SNR은 접촉 촬영의 약 35% 수준"
+        },
+        "source_ref": "samei2006_magnification"
       },
       "motion_blur_primary": {
         "WARNING": "환자 움직임 블러가 '먹먹함'의 주원인, 열 번짐은 부차적",
-        "mechanism": "mA 제한 → 노출 시간 증가 (500ms → 2000ms) → 미세 움직임 축적",
+        "mechanism": "mA 제한 → 노출 시간 증가 (1.0s → 3.2s at 28kVp) → 미세 움직임 축적",
         "measured_motion": {
           "typical_during_exposure": "0.62mm (18×24cm 패들 기준)",
           "paddle_movement_10sec": "0.32-0.43mm (패들 유형에 따라)",
@@ -181,24 +186,65 @@
         "source_ref": "mackenzie2017_motion_blur, ma2014_patient_movement"
       },
       "practical_solutions": {
-        "solution_1": "배율 감소: 1.8배 → 1.5배 (광자 희석 36% 개선, 1/1.5² vs 1/1.8²)",
-        "solution_2": "Air-gap 활용: 그리드 제거하여 광자 손실 최소화 (15-20% 선량 절감)",
+        "solution_1": {
+          "description": "배율 감소: 1.8배 → 1.5배",
+          "calculation": "1/1.5²=0.444 vs 1/1.8²=0.309 → 44% 더 많은 광자",
+          "benefit": "SNR 개선 + 노출 시간 단축"
+        },
+        "solution_2": {
+          "description": "Air-gap 활용: 그리드 제거",
+          "measured_dose_reduction": "평균 약 8% (두께에 따라 0-30% 변동)",
+          "caveat": "두꺼운 유방에서는 효과 제한적",
+          "source_ref": "gennaro2007_grid_removal"
+        },
         "solution_3": "최적 노출 매트릭스: 배율별 kVp/mAs 최적 조합 사전 정의",
-        "solution_4": "kVp 증가: 28→35 kVp로 노출 시간 3.2s→1.0s 감소 (motion blur 개선)",
-        "trade_off": "배율 감소 시 공간 해상도 감소 vs 노이즈 감소 트레이드오프",
-        "source_ref": "young2001_magnification_dose, samei2006_magnification"
+        "solution_4": {
+          "description": "kVp 증가: 28→35 kVp",
+          "effect": "노출 시간 3.2s→1.0s (68% 감소)",
+          "benefit": "motion blur 대폭 개선",
+          "source_ref": "young2001_magnification_dose"
+        },
+        "trade_off": "배율 감소 시 공간 해상도 감소 vs 노이즈 감소 트레이드오프"
       }
     }
   },
   "formulas": {
-    "heat_unit_single_phase": "HU = kVp × mA × s",
-    "heat_unit_three_phase": "HU = 1.35 × kVp × mA × s",
-    "power": "P (W) = w × kVp × mA",
-    "noise_vs_dose": "Noise ∝ 1/√(mAs)",
-    "focal_spot_doubling": "2× focal spot size → ~3× tube rating",
-    "photon_dilution": "픽셀당 광자 밀도 ∝ 1/M² (확대 시 광자 희석)",
-    "magnification_snr": "SNR_mag = SNR_contact × √(mAs_mag/mAs_contact) × (1/M)",
-    "required_dose_for_equal_snr": "Dose_mag = Dose_contact × M² (동일 SNR 유지에 필요한 선량)"
+    "heat_unit_single_phase": {
+      "formula": "HU = kVp × mA × s",
+      "source_ref": "radiopaedia_tube_rating"
+    },
+    "heat_unit_three_phase": {
+      "formula": "HU = 1.35 × kVp × mA × s",
+      "source_ref": "radiopaedia_tube_rating"
+    },
+    "power": {
+      "formula": "P (W) = w × kVp × mA (w = waveform factor)",
+      "source_ref": "radiopaedia_tube_rating"
+    },
+    "noise_vs_dose": {
+      "formula": "Noise ∝ 1/√(mAs)",
+      "derivation": "Poisson statistics: σ = √N, SNR = N/σ = √N",
+      "source_ref": "mainprize2016_quantum_noise"
+    },
+    "focal_spot_doubling": {
+      "formula": "2× focal spot size → ~3× tube rating",
+      "source_ref": "radiopaedia_tube_rating"
+    },
+    "photon_dilution": {
+      "formula": "픽셀당 광자 밀도 ∝ 1/M² (확대 시 광자 희석)",
+      "derivation": "Inverse square law applied to detector plane",
+      "source_ref": "samei2006_magnification"
+    },
+    "magnification_snr": {
+      "formula": "SNR_ratio = √(mAs_mag/mAs_contact) / M",
+      "derivation": "SNR ∝ √(photons), photons ∝ mAs/M²",
+      "source_ref": "samei2006_magnification"
+    },
+    "required_dose_for_equal_snr": {
+      "formula": "Dose_mag = Dose_contact × M²",
+      "example": "1.8x 확대: 3.24배 선량 필요",
+      "source_ref": "samei2006_magnification"
+    }
   },
   "common_misconceptions": {
     "WARNING": "다음은 LLM이 자주 잘못 설명하는 열용량 관련 오류입니다.",
@@ -220,8 +266,13 @@
     "misconception_4_temperature_calculation": {
       "WRONG": "초점 열용량 계산 시 모든 열이 초점에 축적된다고 가정 → 수십만도 온도 상승 계산",
       "CORRECT": "회전 양극(rotating anode)이 열을 초점 트랙 전체로 분산, 열전도로 양극 본체로 전달",
-      "realistic_values": "실제 초점 온도 상승은 수백~2000도 수준, 텅스텐 융점(3,422℃) 미만 유지",
-      "physics_proof": "초점 트랙 전체 길이 = 2πr (r = 양극 반경), 회전 속도로 열 분산"
+      "realistic_values": {
+        "focal_spot_temperature": "2,000~2,700°C (노출 중)",
+        "anode_assembly_temperature": "~1,000°C (연속 노출 후)",
+        "tungsten_melting_point": "3,422°C"
+      },
+      "physics_proof": "초점 트랙 전체 길이 = 2πr (r = 양극 반경), 회전 속도로 열 분산",
+      "source_ref": "radiopaedia_anode, sprawls_xray_heat"
     },
     "misconception_5_magnification_noise": {
       "WRONG": "확대 촬영 노이즈는 열용량 한계만의 문제다",
@@ -321,6 +372,21 @@
       "url": "https://pubmed.ncbi.nlm.nih.gov/26895467/",
       "type": "Research Article",
       "key_data": "Cascaded systems analysis for quantum noise propagation in mammography detectors"
+    },
+    {
+      "id": "gennaro2007_grid_removal",
+      "citation": "Gennaro G, et al. Grid removal and impact on population dose in full-field digital mammography. Med Phys. 2007;34(2):547-55.",
+      "pmid": "17279966",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/17279966/",
+      "type": "Research Article",
+      "key_data": "Average dose reduction ~8% with grid removal, insufficient to justify clinical implementation"
+    },
+    {
+      "id": "radiopaedia_anode",
+      "citation": "Radiopaedia.org. Anode (x-ray tube). Radiology Reference Article.",
+      "url": "https://radiopaedia.org/articles/anode-x-ray-tube",
+      "type": "Educational Reference",
+      "key_data": "Focal spot temperature 2,500°C during exposure, anode assembly ~1,000°C"
     }
   ]
 }
