@@ -72,7 +72,8 @@ class KnowledgeManager:
     def get_relevant_knowledge(
         self,
         query: str,
-        max_modules: int = 3  # Phase 7.4: 3개로 증가
+        max_modules: int = 3,  # Phase 7.4: 3개로 증가
+        min_score_threshold: float = 0.15  # Phase 7.18: 최소 관련성 점수
     ) -> List[Dict[str, Any]]:
         """
         질문에 관련된 지식 모듈 검색 (Phase 7.4: 하드웨어 우선순위 적용)
@@ -80,18 +81,40 @@ class KnowledgeManager:
         Args:
             query: 사용자 질문
             max_modules: 최대 반환 모듈 수
+            min_score_threshold: 최소 관련성 점수 (이하면 제외)
 
         Returns:
             관련 지식 모듈 리스트
         """
         query_lower = query.lower()
-        matched_ids = set()
 
-        # 키워드 매칭 (다중 모듈 지원)
+        # Phase 7.18: 모듈별 매칭 점수 계산 (키워드 매칭 횟수 기반)
+        module_scores: Dict[str, float] = {}
+        query_keywords = set(query_lower.split())
+
         for keyword, file_ids in self._keyword_map.items():
             if keyword in query_lower:
                 for file_id in file_ids:
-                    matched_ids.add(file_id)
+                    if file_id not in module_scores:
+                        module_scores[file_id] = 0.0
+                    # 긴 키워드에 가중치 부여 (더 구체적인 매칭)
+                    keyword_weight = min(len(keyword) / 10.0, 1.0)
+                    module_scores[file_id] += keyword_weight
+
+        # 점수 정규화 (최대 점수 기준)
+        if module_scores:
+            max_score = max(module_scores.values())
+            if max_score > 0:
+                for file_id in module_scores:
+                    module_scores[file_id] /= max_score
+
+        # Phase 7.18: threshold 이상인 모듈만 선택
+        matched_ids = set()
+        for file_id, score in module_scores.items():
+            if score >= min_score_threshold:
+                matched_ids.add(file_id)
+            else:
+                logger.debug(f"Module {file_id} excluded: score {score:.2f} < threshold {min_score_threshold}")
 
         # Phase 7.4: 하드웨어 키워드 감지 시 detector_physics 우선순위 부여
         hardware_keywords = [
