@@ -23,6 +23,47 @@ from src.search.relay_router import RelayRouter, get_relay_router, QueryIntent
 from src.evaluation.agent_judge import TextExcellencePipeline, get_text_excellence_pipeline, JudgeVerdict
 from src.retrieval.dynamic_evidence import DynamicEvidencePipeline, get_dynamic_evidence_pipeline
 
+
+def convert_latex_for_streamlit(text: str) -> str:
+    """
+    LLM 응답의 수식을 Streamlit이 렌더링할 수 있는 형태로 변환
+
+    패턴:
+    - (수식) → $수식$ (LaTeX 문법이 포함된 경우만)
+    - \(...\) → $...$
+    - \[...\] → $$...$$
+    """
+    if not text:
+        return text
+
+    # 1. \(...\) 인라인 LaTeX → $...$
+    text = re.sub(r'\\\((.+?)\\\)', r'$\1$', text)
+
+    # 2. \[...\] 디스플레이 LaTeX → $$...$$
+    text = re.sub(r'\\\[(.+?)\\\]', r'$$\1$$', text, flags=re.DOTALL)
+
+    # 3. (수식) 패턴 변환 - LaTeX 문법이 포함된 경우만
+    # LaTeX 문법 패턴: \frac, \times, \sin, \cos, \pi, \sqrt, _{, ^{, ×, ∝, ≈
+    latex_indicators = r'\\(?:frac|times|sin|cos|pi|sqrt|alpha|beta|sigma|delta|Delta|mu)|_\{|\^\{|[×∝≈∼→←↑↓]'
+
+    def replace_latex_parens(match):
+        content = match.group(1)
+        # LaTeX 문법이 포함되어 있으면 $...$로 변환
+        if re.search(latex_indicators, content):
+            return f'${content}$'
+        # 아니면 그대로 유지
+        return match.group(0)
+
+    # 괄호 안에 = 또는 LaTeX 문법이 있는 경우만 변환
+    # 예: (w = f \times (M-1)) → $w = f \times (M-1)$
+    text = re.sub(r'\(([^()]*(?:=|' + latex_indicators + r')[^()]*)\)', replace_latex_parens, text)
+
+    # 4. <br> 태그 전후의 수식 정리
+    text = re.sub(r'\$\s*<br>\s*', '<br>\n$', text)
+    text = re.sub(r'\s*<br>\s*\$', '$<br>\n', text)
+
+    return text
+
 # =============================================================================
 # 페이지 설정
 # =============================================================================
@@ -1297,7 +1338,7 @@ def main():
                         # 📚 KnowledgeManager 직접 응답 (LLM 호출 스킵)
                         st.caption("⚡ **고속 응답**: 검증된 표준 지식에서 직접 답변")
                         full_response = dispatch_result.knowledge_answer
-                        st.markdown(full_response)
+                        st.markdown(convert_latex_for_streamlit(full_response))
 
                     elif (dispatch_result.intent in [QueryIntent.PHYSICS_CALCULATION, QueryIntent.COMPLEX_REASONING]
                           or (dispatch_result.intent == QueryIntent.UNKNOWN
@@ -1341,7 +1382,7 @@ def main():
                             st.error("⚠️ 응답 생성에 실패했습니다. 다시 시도해 주세요.")
                             st.info("💡 팁: 질문을 더 간단하게 다시 작성하거나, 잠시 후 다시 시도하세요.")
                         else:
-                            st.markdown(full_response)
+                            st.markdown(convert_latex_for_streamlit(full_response))
 
                         # Phase 7.1 상태 정보 표시
                         col1, col2, col3, col4 = st.columns(4)
@@ -1394,7 +1435,7 @@ def main():
                             full_response += chunk
                             response_placeholder.markdown(full_response + "▌")
 
-                        response_placeholder.markdown(full_response)
+                        response_placeholder.markdown(convert_latex_for_streamlit(full_response))
 
             else:
                 # BI-RADS 없음 - 근거 자료 안내만 표시
