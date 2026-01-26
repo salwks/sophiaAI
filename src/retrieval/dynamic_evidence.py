@@ -220,10 +220,18 @@ class DynamicEvidencePipeline:
             question, papers, max_pmc_fetch
         )
 
-        # 2. 단순 프롬프트 구성 (불필요한 지시 제거)
-        simple_prompt = self._build_simple_prompt(
-            question, physics_knowledge, enriched_context
-        )
+        # 2. CQO/QOCO 프롬프트 구성 (Phase 1: Lost in the Prompt Order)
+        prompt_strategy = self._select_prompt_strategy(question)
+        if prompt_strategy == "qoco":
+            simple_prompt = self._build_qoco_prompt(
+                question, physics_knowledge, enriched_context
+            )
+            logger.info(f"[SIMPLE] Using QOCO prompt strategy (calculation/comparison)")
+        else:
+            simple_prompt = self._build_simple_prompt(
+                question, physics_knowledge, enriched_context
+            )
+            logger.info(f"[SIMPLE] Using CQO prompt strategy (concept/principle)")
 
         # 3. 직접 LLM 호출 (단일 단계)
         import requests
@@ -259,7 +267,7 @@ class DynamicEvidencePipeline:
         # 4. 최소 후처리 (LaTeX 등)
         answer_content = self._simple_postprocess(answer_content)
 
-        # 5. 결과 반환 (간소화된 구조)
+        # 5. 결과 반환 (간소화된 구조 + 전략 정보)
         from src.reasoning.text_logic import RefinedAnswer, AnswerQuality
         from src.evaluation.agent_judge import JudgeResult, JudgeVerdict, EvaluationCriteria
         from src.reasoning.evidence_mapper import EvidenceReport
@@ -301,13 +309,14 @@ class DynamicEvidencePipeline:
             overall_credibility=confidence
         )
 
-        # 포맷팅
+        # 포맷팅 (프롬프트 전략 표시)
+        strategy_label = "CQO" if prompt_strategy == "cqo" else "QOCO"
         formatted = f"""## 답변
 
 {answer_content}
 
 ---
-*[단순화 모드] 신뢰도: {confidence:.0%}*
+*[Phase 1: {strategy_label} 프롬프트] 신뢰도: {confidence:.0%}*
 """
 
         return DynamicEvidenceResult(
@@ -326,39 +335,145 @@ class DynamicEvidencePipeline:
         physics_knowledge: str,
         enriched_context: EnrichedContext
     ) -> str:
-        """단순 프롬프트 구성 (최소한의 지시)"""
+        """
+        CQO 프롬프트 구성 (Phase 1: Lost in the Prompt Order 적용)
+
+        CQO = Context → Question → Options
+        - Context: 모든 참조 정보를 먼저 제시 (decoder-only LLM이 더 잘 활용)
+        - Question: 컨텍스트 직후 명확히 제시
+        - Options: 출력 형식 지시는 최소화하여 마지막에
+
+        논문 근거: "Lost in the Prompt Order" (2026) - CQO 순서가
+        QCO, OQC 대비 +14.7% 정확도 향상 (decoder-only LLM 기준)
+        """
         prompt_parts = []
 
-        # 역할 (간단하게)
+        # ═══════════════════════════════════════════════════════════════
+        # [C] CONTEXT: 모든 참조 정보 (역할 + 지식 + 문헌)
+        # ═══════════════════════════════════════════════════════════════
+
+        # 역할 정의 (Context의 일부로 포함)
         prompt_parts.append(
-            "당신은 유방영상의학 물리학 전문가입니다. "
-            "아래 질문에 정확하고 명확하게 답변하세요."
+            "═══ 맥락 정보 ═══\n\n"
+            "역할: 유방영상의학 물리학 전문가"
         )
 
-        # 지식 (있으면)
+        # 물리학 지식 (핵심 컨텍스트)
         if physics_knowledge:
-            # 핵심 부분만 추출 (최대 4000자)
             knowledge_excerpt = physics_knowledge[:4000]
-            prompt_parts.append(f"\n### 참고 지식\n{knowledge_excerpt}")
+            prompt_parts.append(f"\n\n[표준 물리학 참조]\n{knowledge_excerpt}")
 
-        # 논문 컨텍스트 (있으면, 최소화)
+        # 논문/문헌 컨텍스트
         if enriched_context.enriched_context and len(enriched_context.enriched_context) > 100:
             context_excerpt = enriched_context.enriched_context[:2000]
-            prompt_parts.append(f"\n### 관련 문헌\n{context_excerpt}")
+            prompt_parts.append(f"\n\n[관련 문헌]\n{context_excerpt}")
 
-        # 질문
-        prompt_parts.append(f"\n### 질문\n{question}")
+        # ═══════════════════════════════════════════════════════════════
+        # [Q] QUESTION: 컨텍스트 직후 명확히 제시
+        # ═══════════════════════════════════════════════════════════════
+        prompt_parts.append(f"\n\n═══ 질문 ═══\n\n{question}")
 
-        # 출력 지시 (최소화)
+        # ═══════════════════════════════════════════════════════════════
+        # [O] OPTIONS: 출력 지시 (최소화)
+        # ═══════════════════════════════════════════════════════════════
         prompt_parts.append(
-            "\n### 답변 요구사항\n"
-            "1. 물리적 원리를 명확히 설명하세요\n"
-            "2. 수치가 필요하면 계산 과정을 보여주세요\n"
-            "3. 한국어로 답변하세요\n"
-            "4. 자연스러운 문단으로 작성하세요 (JSON 형식 금지)"
+            "\n\n═══ 답변 형식 ═══\n"
+            "- 물리 원리 기반 설명\n"
+            "- 필요시 계산 과정 포함\n"
+            "- 한국어, 자연스러운 문단"
         )
 
         return "\n".join(prompt_parts)
+
+    def _build_qoco_prompt(
+        self,
+        question: str,
+        physics_knowledge: str,
+        enriched_context: EnrichedContext
+    ) -> str:
+        """
+        QOCO 프롬프트 구성 (Phase 1 대안)
+
+        QOCO = Question-framing → Options → Context → Output
+        - 질문 의도를 먼저 명확히 → 어떤 정보가 필요한지 프레이밍
+        - 옵션/제약조건 제시
+        - 그 다음 컨텍스트 (질문 의도를 알고 읽음)
+        - 마지막에 출력 형식
+
+        사용 케이스: 계산/비교 질문 (명확한 답 형식이 필요한 경우)
+        """
+        prompt_parts = []
+
+        # ═══════════════════════════════════════════════════════════════
+        # [Q] QUESTION FRAMING: 질문 의도 명확화
+        # ═══════════════════════════════════════════════════════════════
+        prompt_parts.append(
+            f"═══ 질문 ═══\n\n"
+            f"다음 유방영상의학 물리학 질문에 답변하시오:\n\n{question}"
+        )
+
+        # ═══════════════════════════════════════════════════════════════
+        # [O] OPTIONS: 답변 제약조건
+        # ═══════════════════════════════════════════════════════════════
+        prompt_parts.append(
+            "\n\n═══ 요구사항 ═══\n"
+            "- 물리 공식과 원리 기반으로 설명\n"
+            "- 수치 계산 시 단계별 과정 제시\n"
+            "- 참조 지식과 일관성 유지"
+        )
+
+        # ═══════════════════════════════════════════════════════════════
+        # [C] CONTEXT: 참조 정보
+        # ═══════════════════════════════════════════════════════════════
+        if physics_knowledge:
+            knowledge_excerpt = physics_knowledge[:4000]
+            prompt_parts.append(f"\n\n═══ 참조 지식 ═══\n{knowledge_excerpt}")
+
+        if enriched_context.enriched_context and len(enriched_context.enriched_context) > 100:
+            context_excerpt = enriched_context.enriched_context[:2000]
+            prompt_parts.append(f"\n\n═══ 관련 문헌 ═══\n{context_excerpt}")
+
+        # ═══════════════════════════════════════════════════════════════
+        # [O] OUTPUT: 출력 형식
+        # ═══════════════════════════════════════════════════════════════
+        prompt_parts.append(
+            "\n\n═══ 답변 ═══\n"
+            "한국어로 명확하게 답변:"
+        )
+
+        return "\n".join(prompt_parts)
+
+    def _select_prompt_strategy(self, question: str) -> str:
+        """
+        질문 유형에 따른 프롬프트 전략 선택 (Phase 1)
+
+        CQO: 개념 설명, 원리 질문 (컨텍스트 이해가 중요)
+        QOCO: 계산, 비교, 수치 질문 (명확한 답 형식 필요)
+
+        Returns: "cqo" or "qoco"
+        """
+        # 계산/수치 키워드
+        calculation_keywords = [
+            "계산", "구하", "얼마", "몇", "%", "배",
+            "비교", "차이", "vs", "대비",
+            "공식", "수치", "값"
+        ]
+
+        # 개념/원리 키워드
+        concept_keywords = [
+            "왜", "어떻게", "원리", "메커니즘", "이유",
+            "설명", "의미", "영향", "관계"
+        ]
+
+        question_lower = question.lower()
+
+        calc_score = sum(1 for kw in calculation_keywords if kw in question_lower)
+        concept_score = sum(1 for kw in concept_keywords if kw in question_lower)
+
+        # 계산 질문이면 QOCO, 아니면 CQO (기본)
+        if calc_score > concept_score and calc_score >= 2:
+            return "qoco"
+        return "cqo"
 
     def _simple_postprocess(self, text: str) -> str:
         """최소 후처리"""
