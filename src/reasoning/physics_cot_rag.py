@@ -376,15 +376,21 @@ class PhysicsCausalChainDetector:
                 ("확대", "자글자글"), ("magnification", "thermal"),
                 ("small focal", "noise"), ("확대", "선량", "노이즈"),
                 ("thermal capacity",), ("thermal", "focal"),
-                ("확대", "mas"), ("소초점", "선량")
+                ("확대", "mas"), ("소초점", "선량"), ("먹먹",),
+                ("grainy",), ("경계", "불명확")
             ],
-            "causal_chain": "소초점 사용 → mA 제한(25±10mA) → mAs 부족 → 양자 노이즈 증가",
+            "causal_chain": "[열적 한계] 소초점 → mA 제한(25±10mA) → mAs 부족 + [광자 희석] 확대(M) → 픽셀당 광자 1/M² 감소 → 복합적 SNR 저하 + 노출 시간 증가 → Motion Blur → 경계 '먹먹'",
             "required_modules": [
                 "xray_tube_thermal_capacity",
                 "magnification_geometry",
                 "noise_analysis"
             ],
-            "formulas": ["HU = kVp × mA × s", "Noise ∝ 1/√mAs"]
+            "formulas": [
+                "HU = kVp × mA × s",
+                "Noise ∝ 1/√mAs",
+                "픽셀당 광자 밀도 ∝ 1/M²",
+                "동일 SNR 유지에 필요한 선량 = Dose × M²"
+            ]
         },
         "mtf_beam_hardening": {
             "triggers": [

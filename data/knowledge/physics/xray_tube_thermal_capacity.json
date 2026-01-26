@@ -146,6 +146,40 @@
         "noise_increase": "√(50/20) = 1.58배 (58% 노이즈 증가)",
         "dose_for_equal_noise": "2.5배 선량 필요하나 열적 한계로 불가능"
       }
+    },
+    "photon_dilution_effect": {
+      "WARNING": "⚠️ 확대 촬영 노이즈의 핵심 원인 - LLM이 자주 누락함",
+      "principle": "확대 시 동일 X선이 더 넓은 검출기 면적에 분산되어 픽셀당 광자 수 감소",
+      "formula": "픽셀당 광자 밀도 ∝ 1/M² (M = 확대율)",
+      "source_ref": "samei2006_magnification, mainprize2016_quantum_noise",
+      "example_1_8x": {
+        "magnification": 1.8,
+        "dilution_factor": "1/1.8² = 1/3.24 ≈ 0.31",
+        "required_dose_increase": "동일 SNR 유지하려면 선량 3.24배 필요",
+        "thermal_limit_conflict": "소초점 열적 한계로 3.24배 선량 공급 불가"
+      },
+      "combined_effect": {
+        "problem_1": "열적 한계 → mA 제한 (25±10mA) → mAs 부족",
+        "problem_2": "광자 희석 → 픽셀당 광자 수 1/M² 감소",
+        "result": "두 효과가 합쳐져 노이즈가 크게 증가",
+        "calculation": "1.8배 확대 + mAs 40% = 실효 SNR 약 0.4/1.8 = 22% 수준"
+      },
+      "motion_blur_primary": {
+        "WARNING": "환자 움직임 블러가 '먹먹함'의 주원인, 열 번짐은 부차적",
+        "mechanism": "mA 제한 → 노출 시간 증가 (500ms → 2000ms) → 미세 움직임 축적",
+        "typical_motion": "유방 고정 상태에서도 0.1-0.2mm 미세 움직임 발생",
+        "effect_on_calcification": "미세 석회화(0.1-0.5mm) 경계가 블러되어 '먹먹'해 보임",
+        "detection_threshold": "0.4mm 이상 움직임에서 시각적 블러 감지 (96% 관찰자)",
+        "source_ref": "mackenzie2017_motion_blur, ma2014_patient_movement, young2001_magnification_dose"
+      },
+      "practical_solutions": {
+        "solution_1": "배율 감소: 1.8배 → 1.5배 (광자 희석 36% 개선, 1/1.5² vs 1/1.8²)",
+        "solution_2": "Air-gap 활용: 그리드 제거하여 광자 손실 최소화 (15-20% 선량 절감)",
+        "solution_3": "최적 노출 매트릭스: 배율별 kVp/mAs 최적 조합 사전 정의",
+        "solution_4": "kVp 증가: 28→35 kVp로 노출 시간 3.2s→1.0s 감소 (motion blur 개선)",
+        "trade_off": "배율 감소 시 공간 해상도 감소 vs 노이즈 감소 트레이드오프",
+        "source_ref": "young2001_magnification_dose, samei2006_magnification"
+      }
     }
   },
   "formulas": {
@@ -153,7 +187,10 @@
     "heat_unit_three_phase": "HU = 1.35 × kVp × mA × s",
     "power": "P (W) = w × kVp × mA",
     "noise_vs_dose": "Noise ∝ 1/√(mAs)",
-    "focal_spot_doubling": "2× focal spot size → ~3× tube rating"
+    "focal_spot_doubling": "2× focal spot size → ~3× tube rating",
+    "photon_dilution": "픽셀당 광자 밀도 ∝ 1/M² (확대 시 광자 희석)",
+    "magnification_snr": "SNR_mag = SNR_contact × √(mAs_mag/mAs_contact) × (1/M)",
+    "required_dose_for_equal_snr": "Dose_mag = Dose_contact × M² (동일 SNR 유지에 필요한 선량)"
   },
   "common_misconceptions": {
     "WARNING": "다음은 LLM이 자주 잘못 설명하는 열용량 관련 오류입니다.",
@@ -171,6 +208,17 @@
       "WRONG": "X선관 타겟은 알루미늄, 티타늄 등으로 만들어진다",
       "CORRECT": "맘모그래피 X선관 타겟은 Mo(몰리브덴), Rh(로듐), W(텅스텐)으로 제작",
       "reason": "고융점 + 적절한 특성 X선 에너지 필요"
+    },
+    "misconception_4_temperature_calculation": {
+      "WRONG": "초점 열용량 계산 시 모든 열이 초점에 축적된다고 가정 → 수십만도 온도 상승 계산",
+      "CORRECT": "회전 양극(rotating anode)이 열을 초점 트랙 전체로 분산, 열전도로 양극 본체로 전달",
+      "realistic_values": "실제 초점 온도 상승은 수백~2000도 수준, 텅스텐 융점(3,422℃) 미만 유지",
+      "physics_proof": "초점 트랙 전체 길이 = 2πr (r = 양극 반경), 회전 속도로 열 분산"
+    },
+    "misconception_5_magnification_noise": {
+      "WRONG": "확대 촬영 노이즈는 열용량 한계만의 문제다",
+      "CORRECT": "열용량 한계(mA 제한) + 광자 희석(1/M²) 두 효과가 복합 작용",
+      "physics_proof": "1.8배 확대: (1) mAs 40% 제한 + (2) 광자 밀도 31% 희석 → 실효 SNR 대폭 감소"
     }
   },
   "clinical_relevance": {
@@ -223,6 +271,48 @@
       "pmid": "3306772",
       "type": "Review Article",
       "key_data": "≥90,000 HU adequate, ≤20,000 HU may require cooling delays"
+    },
+    {
+      "id": "samei2006_magnification",
+      "citation": "Samei E, Flynn MJ. An experimental comparison of detector performance for computed radiography systems. Med Phys. 2006;33(3):682-92.",
+      "pmid": "16696475",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/16696475/",
+      "type": "Research Article",
+      "key_data": "Magnification SNR: 0.3mm focal spot crossover point, optimal magnification improves SNR² by 1.2x"
+    },
+    {
+      "id": "mackenzie2017_motion_blur",
+      "citation": "Mackenzie A, et al. Blurred digital mammography images: an analysis of technical recall and observer detection performance. Br J Radiol. 2017;90(1078):20170106.",
+      "pmid": "28749174",
+      "pmc": "PMC5601529",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5601529/",
+      "type": "Research Article",
+      "key_data": "0.4mm minimum motion for visual blur detection, blur in up to 20% of FFDM"
+    },
+    {
+      "id": "young2001_magnification_dose",
+      "citation": "Young KC. Image quality and dose in film-screen magnification mammography. Br J Radiol. 2001;74(878):146-50.",
+      "pmid": "11271899",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11271899/",
+      "type": "Research Article",
+      "key_data": "28kVp→35kVp reduces exposure time 3.2s→1.0s without affecting detection"
+    },
+    {
+      "id": "ma2014_patient_movement",
+      "citation": "Ma WK, et al. Extra patient movement during mammographic imaging: an experimental study. Br J Radiol. 2014;87(1044):20140241.",
+      "pmid": "25348098",
+      "pmc": "PMC4243204",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4243204/",
+      "type": "Research Article",
+      "key_data": "Paddle movement up to 1.5mm during exposure, linear relationship with compression force"
+    },
+    {
+      "id": "mainprize2016_quantum_noise",
+      "citation": "Mainprize JG, et al. A comprehensive model for quantum noise characterization in digital mammography. Med Phys. 2016;43(3):1514.",
+      "pmid": "26895467",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/26895467/",
+      "type": "Research Article",
+      "key_data": "Cascaded systems analysis for quantum noise propagation in mammography detectors"
     }
   ]
 }
