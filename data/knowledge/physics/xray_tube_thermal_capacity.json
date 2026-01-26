@@ -167,10 +167,18 @@
       "motion_blur_primary": {
         "WARNING": "환자 움직임 블러가 '먹먹함'의 주원인, 열 번짐은 부차적",
         "mechanism": "mA 제한 → 노출 시간 증가 (500ms → 2000ms) → 미세 움직임 축적",
-        "typical_motion": "유방 고정 상태에서도 0.1-0.2mm 미세 움직임 발생",
-        "effect_on_calcification": "미세 석회화(0.1-0.5mm) 경계가 블러되어 '먹먹'해 보임",
-        "detection_threshold": "0.4mm 이상 움직임에서 시각적 블러 감지 (96% 관찰자)",
-        "source_ref": "mackenzie2017_motion_blur, ma2014_patient_movement, young2001_magnification_dose"
+        "measured_motion": {
+          "typical_during_exposure": "0.62mm (18×24cm 패들 기준)",
+          "paddle_movement_10sec": "0.32-0.43mm (패들 유형에 따라)",
+          "blur_threshold_pixel": "0.09mm 움직임으로 0.1mm 픽셀에서 블러 발생 가능"
+        },
+        "visual_detection": {
+          "minimum_for_detection": "0.4mm (인간 시각 한계: 60 arcsec @ 75cm)",
+          "detection_rates": "0.4mm: 96%, 0.6mm+: 100%",
+          "clinical_recall_rate": "0.86% (blur로 인한 리콜)"
+        },
+        "effect_on_calcification": "미세 석회화(0.1-0.5mm) 경계가 0.6mm 움직임으로 블러 → '먹먹'",
+        "source_ref": "mackenzie2017_motion_blur, ma2014_patient_movement"
       },
       "practical_solutions": {
         "solution_1": "배율 감소: 1.8배 → 1.5배 (광자 희석 36% 개선, 1/1.5² vs 1/1.8²)",
