@@ -33,8 +33,9 @@
       "type": "Combined Effects Study"
     },
     {
-      "id": "hofvind2012",
+      "id": "hofvind2008",
       "citation": "Hofvind S, Vacek PM, Skelly J, Weaver DL, Geller BM. Comparing screening mammography for early breast cancer detection in Vermont and Norway. J Natl Cancer Inst. 2008;100(15):1082-1091",
+      "CORRECTION_NOTE": "이전 source ID 'hofvind2012'는 출판연도 2008년과 불일치. hofvind2008로 수정",
       "pmid": "18664650",
       "pmc": "PMC2518165",
       "doi": "10.1093/jnci/djn224",
@@ -66,7 +67,7 @@
   ],
   "content": {
     "performance_metrics": {
-      "source_ref": "carney2003, hofvind2012",
+      "source_ref": "carney2003, hofvind2008",
       "sensitivity": {
         "definition": "유방암이 있는 여성 중 맘모그래피에서 양성으로 판정되는 비율",
         "overall_range_percent": "77-95",
@@ -114,7 +115,7 @@
       }
     },
     "interval_cancer": {
-      "source_ref": "hofvind2012, sprague2021",
+      "source_ref": "hofvind2008, sprague2021",
       "definition": "선별검사 음성 후 다음 검사 전에 발견되는 암",
       "rate_per_1000": "0.7-1.2",
       "causes": [
@@ -126,7 +127,7 @@
       "program_sensitivity": "중간암 발생률은 프로그램 민감도의 역지표"
     },
     "international_comparison": {
-      "source_ref": "hofvind2012",
+      "source_ref": "hofvind2008",
       "us_vs_europe": {
         "recall_rate_us_percent": "9-12",
         "recall_rate_europe_percent": "3-5",
@@ -146,6 +147,6 @@
     "dense_breast_supplementation": "치밀유방 여성에서 보조 영상(초음파, MRI, CEM) 고려",
     "quality_improvement": "프로그램 성능 지표 모니터링으로 지속적 품질 향상",
     "patient_communication": "민감도 한계와 중간암 가능성에 대한 환자 교육 필요",
-    "source_ref": "carney2003, pisano2005, hofvind2012"
+    "source_ref": "carney2003, pisano2005, hofvind2008"
   }
 }

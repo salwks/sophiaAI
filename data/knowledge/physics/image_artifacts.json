@@ -12,18 +12,21 @@
   ],
   "sources": [
     {
-      "id": "sickles2014",
-      "citation": "Sickles EA, et al. Mammographic Artifacts on Full-Field Digital Mammography. J Clin Med. 2014;3(1):51-62",
+      "id": "choi2014",
+      "citation": "Choi JJ, Kim SH, Kang BJ, Choi BG, Song B, Jung H. Mammographic Artifacts on Full-Field Digital Mammography. J Digit Imaging. 2014;27(2):231-236",
       "pmc": "PMC3948935",
-      "doi": "10.3390/jcm3010051",
-      "type": "Artifact Classification Study"
+      "pmid": "24129660",
+      "doi": "10.1007/s10278-013-9641-4",
+      "type": "Artifact Classification Study",
+      "CORRECTION_NOTE": "이전 저자 'Sickles EA'와 저널 'J Clin Med'은 완전히 잘못됨. 실제 저자: Choi JJ, Kim SH, Kang BJ, et al. 실제 저널: J Digit Imaging"
     },
     {
-      "id": "geiser2008",
-      "citation": "Geiser WR, et al. Digital mammographic artifacts on full-field systems: what are they and how do I fix them? Radiographics. 2008;28(7):1999-2008",
+      "id": "ayyala2008",
+      "citation": "Ayyala RS, Chorlton M, Behrman RH, Kornguth PJ, Slanetz PJ. Digital mammographic artifacts on full-field systems: what are they and how do I fix them? Radiographics. 2008;28(7):1999-2008",
       "pmid": "19001654",
       "doi": "10.1148/rg.287085053",
-      "type": "Technical Review"
+      "type": "Technical Review",
+      "CORRECTION_NOTE": "이전 저자 'Geiser WR'는 잘못됨. 실제 저자: Ayyala RS, Chorlton M, Behrman RH, Kornguth PJ, Slanetz PJ"
     },
     {
       "id": "zhao2006",
@@ -33,20 +36,22 @@
       "type": "Lag/Ghosting Study"
     },
     {
-      "id": "seibert2011",
-      "citation": "Seibert JA, et al. Artifacts Found During Quality Assurance Testing of Computed Radiography and Digital Radiography Detectors. J Am Coll Radiol. 2011;8(2):91-98",
+      "id": "honey2008",
+      "citation": "Honey ID, Mackenzie A. Artifacts Found During Quality Assurance Testing of Computed Radiography and Digital Radiography Detectors. J Digit Imaging. 2009;22(4):383-392",
       "pmc": "PMC3043706",
-      "doi": "10.1016/j.jacr.2010.08.003",
-      "type": "QA Artifact Study"
+      "pmid": "18427901",
+      "doi": "10.1007/s10278-008-9109-0",
+      "type": "QA Artifact Study",
+      "CORRECTION_NOTE": "이전 저자 'Seibert JA'와 저널 'J Am Coll Radiol. 2011'은 완전히 잘못됨. 실제 저자: Honey ID, Mackenzie A. 실제 저널: J Digit Imaging. 실제 연도: 2008/2009"
     }
   ],
   "content": {
     "artifact_classification": {
-      "source_ref": "sickles2014, geiser2008",
+      "source_ref": "choi2014, ayyala2008",
       "categories": ["환자 관련", "하드웨어 관련", "소프트웨어 처리 관련"]
     },
     "incidence_study": {
-      "source_ref": "sickles2014",
+      "source_ref": "choi2014",
       "total_images_reviewed": 8582,
       "direct_FFDM_images": 4440,
       "indirect_FFDM_images": 4142,
@@ -54,7 +59,7 @@
       "direct_vs_indirect": "직접 변환 검출기 4.2% vs 간접 변환 검출기 2.6%"
     },
     "patient_related_artifacts": {
-      "source_ref": "sickles2014",
+      "source_ref": "choi2014",
       "incidence": "1.7%",
       "types": {
         "motion_artifact": {
@@ -77,7 +82,7 @@
       }
     },
     "hardware_related_artifacts": {
-      "source_ref": "sickles2014, geiser2008",
+      "source_ref": "choi2014, ayyala2008",
       "incidence": "0.7%",
       "types": {
         "underexposure": {
@@ -87,7 +92,7 @@
           "solution": "노출 파라미터 적절히 조정"
         },
         "dead_pixels": {
-          "source_ref": "geiser2008, seibert2011",
+          "source_ref": "ayyala2008, honey2008",
           "description": "단일 불량 픽셀, 불량 픽셀 그룹, 불량 라인",
           "clinical_concern": "석회화로 오인될 수 있음",
           "note": "개별 불량 라인은 일반적으로 검출기 교체 사유가 되지 않음"
@@ -102,7 +107,7 @@
       }
     },
     "software_processing_artifacts": {
-      "source_ref": "sickles2014",
+      "source_ref": "choi2014",
       "incidence": "0.8%",
       "types": {
         "high_density_artifact": {
@@ -137,7 +142,7 @@
       }
     },
     "ghosting_management": {
-      "source_ref": "seibert2011",
+      "source_ref": "honey2008",
       "residual_image": "높은 방사선 노출로 인해 잔상 남음",
       "flat_fielding_effect": "flat fielding이 일시적으로 잔상 제거하나, 검출기 영향이 사라지면서 역상 나타날 수 있음",
       "solution": "새 캘리브레이션 및 재촬영"
@@ -148,6 +153,6 @@
     "dead_pixel_concern": "불량 픽셀이 미세석회화로 오인될 수 있음",
     "QC_importance": "정기적 품질관리로 검출기 아티팩트 조기 발견",
     "vendor_specificity": "아티팩트는 검출기 기술(직접/간접 변환)과 제조사에 따라 다름",
-    "source_ref": "sickles2014, geiser2008"
+    "source_ref": "choi2014, ayyala2008"
   }
 }

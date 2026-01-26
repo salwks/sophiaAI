@@ -19,11 +19,12 @@
     },
     {
       "id": "miglioretti2016",
-      "citation": "Miglioretti DL, Lange J, van den Broek JJ, et al. Radiation-Induced Breast Cancer Incidence and Mortality From Digital Mammography Screening. Ann Intern Med. 2016;164(4):205-214",
-      "pmid": "26756606",
+      "citation": "Miglioretti DL, Lange J, van den Broek JJ, et al. Radiation-Induced Breast Cancer Incidence and Mortality From Digital Mammography Screening: A Modeling Study. Ann Intern Med. 2016;164(4):205-214",
+      "pmid": "26756460",
       "pmc": "PMC4878445",
       "doi": "10.7326/M15-1241",
-      "type": "Comprehensive Modeling Study"
+      "type": "Comprehensive Modeling Study",
+      "CORRECTION_NOTE": "이전 PMID 26756606은 다른 논문(Mandelblatt 2016 screening strategies). 올바른 PMID: 26756460"
     },
     {
       "id": "hendrick2010",
@@ -80,14 +81,15 @@
       "source_ref": "miglioretti2016, yaffe2011",
       "biennial_50_74_screening": {
         "description": "50-74세 2년 간격 선별검사 (13회)",
-        "induced_cases_per_100000": "11-23",
-        "induced_deaths_per_100000": "2-4",
-        "source_ref": "miglioretti2016"
+        "induced_cases_per_100000": "27 (95% CI: 19-38)",
+        "induced_deaths_per_100000": "4 (95% CI: 3-6)",
+        "source_ref": "miglioretti2016",
+        "CORRECTION_NOTE": "이전 값(11-23 cases, 2-4 deaths)은 오류. PMC4878445 원문에서 확인된 정확한 값으로 수정"
       },
       "annual_40_74_screening": {
         "description": "40-74세 매년 선별검사 (35회)",
-        "induced_cases_per_100000": "125 (median)",
-        "induced_deaths_per_100000": "16 (median)",
+        "induced_cases_per_100000": "125 (95% CI: 88-178)",
+        "induced_deaths_per_100000": "16 (95% CI: 11-23)",
         "source_ref": "miglioretti2016"
       },
       "age_dependence": {

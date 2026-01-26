@@ -14,18 +14,20 @@
       "type": "Atlas Chapter"
     },
     {
-      "id": "liberman2005",
+      "id": "liberman2002",
       "citation": "Liberman L, Menell JH. Breast imaging reporting and data system (BI-RADS). Radiol Clin North Am. 2002;40(3):409-430",
       "pmid": "12117184",
       "doi": "10.1016/S0033-8389(01)00017-3",
-      "type": "Review"
+      "type": "Review",
+      "CORRECTION_NOTE": "이전 ID 'liberman2005'는 연도 불일치. 실제 출판연도: 2002"
     },
     {
       "id": "orel1999",
       "citation": "Orel SG, Kay N, Reynolds C, Sullivan DC. BI-RADS categorization as a predictor of malignancy. Radiology. 1999;211(3):845-850",
-      "pmid": "10352613",
+      "pmid": "10352614",
       "doi": "10.1148/radiology.211.3.r99jn31845",
-      "type": "Malignancy Rate Study"
+      "type": "Malignancy Rate Study",
+      "CORRECTION_NOTE": "이전 PMID 10352613은 완전히 다른 논문(Liberman - Sentinel lymph node biopsy). 올바른 PMID: 10352614"
     }
   ],
   "definitions": {

@@ -107,21 +107,26 @@
   "sources": [
     {
       "id": "Zhao2004",
-      "citation": "Zhao W, et al. X-ray imaging performance of structured cesium iodide scintillators. Med Phys. 2004;31(9):2594-2605.",
-      "pmid": "15487737",
-      "type": "primary"
+      "citation": "Zhao W, Ristic G, Rowlands JA. X-ray imaging performance of structured cesium iodide scintillators. Med Phys. 2004;31(9):2594-2605.",
+      "pmid": "15487742",
+      "doi": "10.1118/1.1782676",
+      "type": "primary",
+      "CORRECTION_NOTE": "이전 PMID 15487737은 완전히 다른 논문(Franken - portal dosimetry). 올바른 PMID: 15487742"
     },
     {
-      "id": "Samei2007",
+      "id": "Samei2003",
       "citation": "Samei E, Flynn MJ. An experimental comparison of detector performance for direct and indirect digital radiography systems. Med Phys. 2003;30(4):608-622.",
-      "pmid": "12722812",
-      "type": "primary"
+      "pmid": "12722813",
+      "doi": "10.1118/1.1561285",
+      "type": "primary",
+      "CORRECTION_NOTE": "이전 PMID 12722812는 다른 논문(neonatal imaging). 올바른 PMID: 12722813. source ID도 Samei2007→Samei2003 수정"
     },
     {
-      "id": "Dance2014",
+      "id": "Dance2005",
       "citation": "Dance DR, et al. Breast dosimetry using high-resolution voxel phantoms. Radiat Prot Dosimetry. 2005;114(1-3):359-363.",
       "pmid": "15933136",
-      "type": "supporting"
+      "type": "supporting",
+      "CORRECTION_NOTE": "source ID Dance2014→Dance2005 수정 (논문 출판년도 2005)"
     }
   ]
 }

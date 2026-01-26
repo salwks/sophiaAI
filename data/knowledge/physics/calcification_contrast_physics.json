@@ -23,21 +23,30 @@
     "contrast_mechanism": {
       "principle": "칼슘의 높은 원자번호 → 광전효과 우세 → 주변 조직 대비 높은 감쇠",
       "energy_dependence": {
+        "IMPORTANT_NOTE": {
+          "issue": "아래 μ 값은 NIST mass attenuation (cm²/g)에 가까움. 실제 linear attenuation (cm⁻¹)은 밀도(ρ)를 곱해야 함",
+          "example": "μ(cm⁻¹) = μ/ρ(cm²/g) × ρ(g/cm³). Cortical bone ρ≈1.85, Hydroxyapatite ρ≈3.0",
+          "practical_note": "미세석회화는 다공성이므로 유효 밀도가 낮음 (ρ_eff ≈ 1-2 g/cm³). 따라서 아래 값은 '유효' 석회화에 대한 근사치로 해석"
+        },
         "low_energy_20keV": {
-          "mu_calcium": "~4.5 cm⁻¹",
+          "mu_rho_bone": "4.0 cm²/g (NIST cortical bone)",
+          "mu_calcium_effective": "~4-8 cm⁻¹ (ρ_eff 1-2 g/cm³ 기준)",
           "mu_tissue": "~0.8 cm⁻¹",
-          "delta_mu": "3.7 cm⁻¹ (높은 대조도)"
+          "delta_mu": "~3-7 cm⁻¹ (밀도에 따라 변동)"
         },
         "medium_energy_30keV": {
-          "mu_calcium": "~1.2 cm⁻¹",
+          "mu_rho_bone": "1.33 cm²/g (NIST cortical bone)",
+          "mu_calcium_effective": "~1.3-2.7 cm⁻¹ (ρ_eff 1-2 g/cm³ 기준)",
           "mu_tissue": "~0.35 cm⁻¹",
-          "delta_mu": "0.85 cm⁻¹ (중간 대조도)"
+          "delta_mu": "~1-2.3 cm⁻¹ (밀도에 따라 변동)"
         },
         "high_energy_50keV": {
-          "mu_calcium": "~0.45 cm⁻¹",
+          "mu_rho_bone": "0.42 cm²/g (NIST cortical bone)",
+          "mu_calcium_effective": "~0.4-0.8 cm⁻¹ (ρ_eff 1-2 g/cm³ 기준)",
           "mu_tissue": "~0.21 cm⁻¹",
-          "delta_mu": "0.24 cm⁻¹ (71% 대조도 손실)"
-        }
+          "delta_mu": "~0.2-0.6 cm⁻¹ (밀도에 따라 변동)"
+        },
+        "NIST_source": "https://physics.nist.gov/PhysRefData/XrayMassCoef/ComTab/bone.html"
       },
       "formula": "Δμ ∝ Z³ × ρ / E³ (광전효과 영역)"
     },
@@ -94,7 +103,7 @@
         "dose_increase_to_maintain_cnr": "Dose × 2.78배 필요 (1/0.6² = 2.78)",
         "practical_limit": "환자 선량 한계로 불가능"
       },
-      "source_ref": "korner2023"
+      "source_ref": "fico2023"
     }
   },
   "formulas": {
@@ -114,7 +123,7 @@
         "SPR": "Scatter-to-Primary Ratio",
         "Cs": "실제 측정 대조도"
       },
-      "source": "korner2023 (PMC10606465)"
+      "source": "fico2023 (PMC10606465)"
     },
     "cnr_definition": {
       "formula": "CNR = |S₁ - S₂| / σ_noise",
@@ -145,7 +154,7 @@
       "WRONG": "Cs = C₀ × (1 - SPR)",
       "CORRECT": "Cs = C₀ / (1 + SPR)",
       "physics_proof": "SPR=0.7일 때: 올바른 공식 Cs = C₀/1.7 = 0.59×C₀ (41% 감소), 틀린 공식은 Cs = 0.3×C₀ (70% 감소로 과대평가)",
-      "source": "korner2023 (PMC10606465)"
+      "source": "fico2023 (PMC10606465)"
     },
     "misconception_3_dose_recovers_contrast": {
       "WRONG": "선량을 증가시키면 빔 경화로 인한 대조도 손실을 회복할 수 있다",
@@ -180,18 +189,15 @@
     {
       "id": "Johns1987",
       "citation": "Johns PC, Yaffe MJ. X-ray characterisation of normal and neoplastic breast tissues. Phys Med Biol. 1987;32(6):675-695.",
-      "pmid": "3039544",
-      "type": "primary"
+      "pmid": "3039542",
+      "doi": "10.1088/0031-9155/32/6/002",
+      "type": "primary",
+      "CORRECTION_NOTE": "이전 PMID 3039544는 다른 논문(Raynaud syndrome). 올바른 PMID: 3039542"
     },
     {
-      "id": "Fandos2016",
-      "citation": "Fandos-Morera A, et al. Influence of beam quality on microcalcification imaging. Br J Radiol. 2016;89(1060):20150757.",
-      "pmid": "26849038",
-      "type": "primary"
-    },
-    {
-      "id": "korner2023",
-      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "id": "fico2023",
+      "citation": "Fico N, Di Grezia G, Cuccurullo V, et al. Breast Imaging Physics in Mammography (Part I). Diagnostics. 2023;13(20):3227",
+      "CORRECTION_NOTE": "이전 저자 Korner M과 저널 J Clin Med는 완전히 잘못됨. 실제 저자: Fico N, Di Grezia G, et al. 실제 저널: Diagnostics",
       "pmid": "37959173",
       "pmc": "PMC10606465",
       "doi": "10.3390/jcm12216714",

@@ -94,13 +94,16 @@
     {
       "id": "Samei2007",
       "citation": "Samei E, et al. Performance of digital radiographic detectors: quantification and assessment methods. Adv Radiol. 2007;2007:1-7.",
-      "type": "primary"
+      "type": "primary",
+      "note": "Open access review - PMID 없음"
     },
     {
       "id": "Zhao2004",
-      "citation": "Zhao W, et al. X-ray imaging performance of structured cesium iodide scintillators. Med Phys. 2004;31(9):2594-2605.",
-      "pmid": "15487737",
-      "type": "primary"
+      "citation": "Zhao W, Ristic G, Rowlands JA. X-ray imaging performance of structured cesium iodide scintillators. Med Phys. 2004;31(9):2594-2605.",
+      "pmid": "15487742",
+      "doi": "10.1118/1.1782676",
+      "type": "primary",
+      "CORRECTION_NOTE": "이전 PMID 15487737은 완전히 다른 논문. 올바른 PMID: 15487742"
     },
     {
       "id": "IEC62220",

@@ -1,0 +1,879 @@
+{
+  "id": "cem_contrast_dynamics",
+  "title": "CEM Contrast Dynamics: Wash-out Kinetics, Timing Windows, and Calcification Visibility",
+  "domain": "contrast_agent_dynamics",
+  "keywords": [
+    "CEM wash-out", "조영제 wash-out", "contrast kinetics", "조영 동역학",
+    "시간 의존 CNR", "time-dependent CNR", "early phase", "delayed phase",
+    "CEM biopsy timing", "생검 타이밍", "조영 증강 패턴",
+    "석회화 가시성", "calcification visibility", "DCIS enhancement",
+    "배경 실질 증강", "BPE", "background parenchymal enhancement",
+    "wash-in", "wash-out pattern", "enhancement plateau",
+    "T1 T2 T3", "조영제 타이밍", "optimal window"
+  ],
+  "content": {
+    "dual_energy_parameters": {
+      "title": "Dual-Energy 촬영 파라미터 (정확한 에너지 범위)",
+      "low_energy_le": {
+        "kvp_range": "26-32 kVp",
+        "position_vs_kedge": "K-edge(33.2 keV) 아래",
+        "filtration": "Molybdenum 또는 Rhodium",
+        "purpose": "표준 맘모그램과 동등, 석회화 평가용",
+        "source_ref": "Jochelson2021"
+      },
+      "high_energy_he": {
+        "kvp_range": "45-49 kVp",
+        "position_vs_kedge": "K-edge(33.2 keV) 위",
+        "filtration": "Copper (Cu) 추가 - 빔 경화",
+        "purpose": "요오드 K-edge 흡수 최대화, recombined image 생성용",
+        "source_ref": "Jochelson2021"
+      },
+      "cu_filter_physics": {
+        "WARNING": "Cu 감쇠계수는 에너지 의존적. 단일 값 사용 시 에너지 명시 필수",
+        "nist_data": {
+          "mu_at_20keV": "302.8 cm⁻¹ (30.3 mm⁻¹)",
+          "mu_at_25keV": "~200 cm⁻¹ (~20 mm⁻¹)",
+          "mu_at_30keV": "97.8 cm⁻¹ (9.8 mm⁻¹)",
+          "source": "NIST XCOM (physics.nist.gov)"
+        },
+        "common_error": {
+          "wrong": "μ_Cu = 8.96 mm⁻¹ (Cu 밀도 8.96 g/cm³와 혼동)",
+          "correct": "μ는 (μ/ρ) × ρ로 계산. 25keV에서 ~200 cm⁻¹"
+        },
+        "transmission_0.1mm_cu": {
+          "at_30keV": "37.6% 투과 (62.4% 손실)",
+          "at_25keV": "13.5% 투과 (86.5% 손실)",
+          "at_20keV": "4.9% 투과 (95.1% 손실)"
+        }
+      },
+      "iodine_k_edge": {
+        "value_keV": 33.2,
+        "physics": "K-edge에서 광전 흡수 계수 급증 (약 3-4배)",
+        "clinical_use": "LE-HE 차이로 요오드 신호 분리"
+      },
+      "WARNING": "일부 LLM이 LE=20keV, HE=30keV로 잘못 설명함. 정확한 값은 LE:26-32, HE:45-49 kVp",
+      "EXPOSURE_WARNING": {
+        "issue": "mA/mAs 값은 AEC(자동노출제어)로 결정되며 임의 수치 사용 금지",
+        "fact": "CEM은 AEC 사용, mAs는 유방 크기/두께/시스템에 따라 가변적 (노출시간 0.5-3초)",
+        "wrong_example": "'mA 25±10' 같은 임의 수치는 근거 없음",
+        "source_ref": "PMC11018565 (AEC across mammography systems)"
+      }
+    },
+    "compression_blood_flow": {
+      "title": "압박에 의한 혈류 감소와 Wash-out 지연 효과",
+      "blood_flow_reduction": {
+        "mild_compression_5kPa": "약 50% 혈류 감소",
+        "standard_compression_25kPa": "약 90% 혈류 감소",
+        "high_compression_30kPa": "약 87% 혈류 감소",
+        "source_ref": "Carp2008"
+      },
+      "hemoglobin_changes": {
+        "total_hemoglobin_reduction": "약 30% 감소 (30 kPa)",
+        "oxygen_saturation_reduction": "약 20% 감소",
+        "source_ref": "Carp2008"
+      },
+      "wash_out_delay_mechanism": {
+        "principle": "압박 → 정맥 환류 차단 → 조영제 유출 경로 감소 → wash-out 지연",
+        "clinical_benefit": "압박 상태에서 10분까지 증강 가시성 유지",
+        "biopsy_advantage": "2분 대기 후 압박 시작 → 생검 전체 과정(15-17분)에서 타겟 가시"
+      },
+      "critical_timing": {
+        "pre_compression_delay": "조영제 주입 후 2분 대기 필수",
+        "reason": "조기 압박 시 혈류 차단으로 조영제가 유방에 도달 못함",
+        "source_ref": "Defined2022, Tang2023"
+      }
+    },
+    "timing_phases": {
+      "definition": "CEM에서 조영제 주입 후 시간대별 영상 획득 프로토콜",
+      "phases": {
+        "T1_early": {
+          "timing_min": "2-3",
+          "description": "조영제 주입 2분 후 첫 영상, 최고 CNR 달성 시점",
+          "views": "CC (양측)",
+          "clinical_value": "최고 진단 성능, AUC 0.711 (LGV)"
+        },
+        "T2_second": {
+          "timing_min": "4-5",
+          "description": "두 번째 시점, wash-out 시작 감지",
+          "views": "MLO (양측)",
+          "clinical_value": "Plateau 또는 초기 wash-out 평가, AUC 0.605"
+        },
+        "T3_delayed": {
+          "timing_min": "7-9",
+          "description": "지연기, 조영 역전(benign>malignant) 가능",
+          "views": "MLO 재촬영",
+          "clinical_value": "진단 개선 제한적, AUC 0.557"
+        }
+      },
+      "source_ref": "Xu2021"
+    },
+    "wash_out_kinetics": {
+      "principle": "악성 종양의 신생혈관은 미성숙하여 조영제 급속 유입(wash-in) 후 급속 유출(wash-out) 패턴",
+      "quantitative_data": {
+        "malignant_patterns": {
+          "lgv_washout_t1_t2": "37.8% (31/82 lesions)",
+          "lgv_washout_t1_t3": "18.3%",
+          "lbr_washout_t1_t2": "54.9% (45/82 lesions)",
+          "lbr_washout_t2_t3": "42.3%"
+        },
+        "benign_patterns": {
+          "persistent_lgv_t1_t2": "34.5% (10/29)",
+          "persistent_lbr_t1_t2": "58.6% (17/29)"
+        },
+        "enhancement_values": {
+          "malignant_early_lgv": "31934.4 +/- 6434.4",
+          "benign_early_lgv": "27206.8 +/- 6582.6",
+          "malignant_early_lbr": "0.517 +/- 0.282",
+          "benign_early_lbr": "0.294 +/- 0.293"
+        }
+      },
+      "clinical_implication": "지연기(T3)에서 악성-양성 구별력 감소; 조기(T1)가 최적",
+      "source_ref": "Xu2021"
+    },
+    "cnr_time_dependence": {
+      "title": "시간에 따른 CNR 변화",
+      "key_finding": "CNR1(early phase)이 가장 진단적 가치 높음",
+      "quantitative_cnr": {
+        "malignant_cnr1_mean": "7.6%",
+        "benign_cnr1_mean": "2.7%",
+        "infiltrating_vs_benign": "최고 증강 강도 vs 최저"
+      },
+      "diagnostic_performance": {
+        "early_phase_auc": 0.711,
+        "second_phase_auc": 0.605,
+        "delayed_phase_auc": 0.557,
+        "trend": "시간 경과에 따라 진단 성능 감소"
+      },
+      "combined_analysis": {
+        "lbr_plus_kinetic_t1_t3": {
+          "sensitivity": "90.2%",
+          "specificity": "54.1%",
+          "accuracy": "82.0%",
+          "auc": 0.783
+        }
+      },
+      "source_ref": "Xu2021, Ozturk2024"
+    },
+    "calcification_visibility": {
+      "title": "석회화 가시성 및 DCIS 진단의 한계",
+      "le_vs_ffdm": {
+        "finding": "Low-energy(LE) CESM 영상에서 미세석회화가 FFDM보다 유의하게 더 잘 보임",
+        "note": "이 현상의 물리적 설명은 명확하지 않음"
+      },
+      "he_image_limitation": {
+        "finding": "High-energy(HE) 영상은 진단용이 아닌 recombined image 생성용",
+        "calcification_cnr": "HE에서 석회화 CNR 저하 (조직-석회화 contrast 감소)"
+      },
+      "recombined_image_calcification": {
+        "visibility": "Recombined image에서 석회화 자체는 보이지 않음 (조직 신호 제거됨)",
+        "enhancement_only": "조영 증강만 표시되므로 비증강 석회화 정보 손실"
+      },
+      "source_ref": "Lalji2015, Dromain2019"
+    },
+    "dcis_false_negative": {
+      "title": "DCIS의 CEM 위음성 문제",
+      "false_negative_rate": {
+        "overall": "약 16-24% DCIS에서 CEM 증강 없음",
+        "study_data": "17 DCIS 중 3례(17.6%)가 비증강, 14례(82.3%)가 증강",
+        "low_grade_dcis": "Low-grade DCIS에서 특히 위음성 높음 (Depretto: G1 100% 비증강)",
+        "source_ref": "PMC11748920"
+      },
+      "comparison_with_mri": {
+        "mri_dcis_detection": "90% (27/30 DCIS)",
+        "mri_false_negative": "10% (3/30), 모두 intermediate-grade DCIS",
+        "cem_vs_mri": "MRI가 CEM보다 DCIS 검출에 우수"
+      },
+      "clinical_warning": {
+        "statement": "CEM에서 증강 없음이 생검 회피의 근거가 될 수 없음",
+        "reason": "악성 형태의 석회화는 증강 여부와 무관하게 조직검사 필요"
+      },
+      "enhancement_patterns": {
+        "dcis_enhanced": "82.3% (14/17)",
+        "dcis_non_enhanced": "17.6% (3/17)",
+        "dcis_indeterminate_bpe": "BPE로 인한 판정 불가 사례 존재",
+        "CORRECTION_NOTE": "이전 76.4%는 오류. PMC11748920 전문 확인 결과 82.3%"
+      },
+      "source_ref": "Houben2019, PMC11748920"
+    },
+    "bpe_masking_effect": {
+      "title": "배경 실질 증강(BPE)에 의한 병변 가림",
+      "problem": "BPE가 높으면 병변 증강이 가려져 위음성 발생",
+      "incidence": "6.5% 병변에서 BPE로 인해 증강 판정 불가",
+      "clinical_impact": "지연기에서 BPE wash-in으로 목표 병변 obscuration 가능",
+      "biopsy_implication": "중등도-심한 BPE 환자에서 CEM-guided biopsy 어려움"
+    },
+    "cem_biopsy_timing": {
+      "title": "CEM-Guided Biopsy 최적 타이밍",
+      "optimal_window": {
+        "start": "조영제 주입 2분 후",
+        "duration": "5-10분간 증강 가시성 유지",
+        "note": "압박이 wash-out 감소시킴"
+      },
+      "procedure_metrics": {
+        "tang2023_data": {
+          "mean_duration_min": "17 ± 6.3 (range 6-27)",
+          "technical_success": "100% (12/12)",
+          "cancer_detection_rate": "66.7% (8/12)",
+          "source_ref": "Tang2023 (PMC10423379)"
+        },
+        "defined2022_data": {
+          "median_duration_min": "15 (range 9-25)",
+          "technical_success": "95.4% (63/66)",
+          "source_ref": "Defined2022 (PMC9755098)"
+        }
+      },
+      "compression_effect": {
+        "finding": "생검 중 압박이 wash-out 최소화",
+        "implication": "압박 후 10분까지 증강 가시"
+      },
+      "challenges": {
+        "early_washout": "초기 영상 대비 생검 시점에서 병변 conspicuity 감소",
+        "bpe_wash_in": "시간 경과에 따라 BPE 증가로 목표 obscuration"
+      },
+      "source_ref": "Tang2023 (PMC10423379), Defined2022 (PMC9755098)"
+    },
+    "delayed_phase_utility": {
+      "title": "지연기 영상의 임상적 가치",
+      "finding": "지연기(7-9분) 추가 영상은 진단 성능 개선 제한적",
+      "study_data": {
+        "lgv_sensitivity_with_delay": "86.5%",
+        "lgv_sensitivity_without_delay": "95.1%",
+        "conclusion": "지연기 추가로 오히려 민감도 감소"
+      },
+      "exception": {
+        "kinetic_analysis": "LBR + kinetic pattern 조합 시 AUC 0.783 달성",
+        "research_value": "특정 암종의 지연 wash-out 패턴 연구용"
+      },
+      "source_ref": "Xu2021"
+    },
+    "post_processing_considerations": {
+      "title": "CEM 후처리 알고리즘의 한계",
+      "recombination_algorithm": {
+        "formula": "I_rec = ln(I_LE) - w x ln(I_HE)",
+        "weighting_factor": "조직 신호 제거 최적화 (breast thickness 기반 자동 계산)",
+        "processing_time": "약 5초 내 recombined image 생성",
+        "source_ref": "Dromain2011"
+      },
+      "calcification_issue": {
+        "problem": "Recombination이 석회화 신호도 상쇄시킴",
+        "solution": "석회화 평가는 LE image에서 수행해야 함"
+      },
+      "noise_reduction": {
+        "challenge": "DE calcification image에서 noise 감소 시 작은 석회화 가시성 손실",
+        "threshold": "250um이 DEDM에서 가시 석회화 최소 크기",
+        "technique": "KNR method가 boxcar filter보다 우수",
+        "source_ref": "Kappadath2008"
+      },
+      "iodine_visibility_threshold": {
+        "clinical_range": "0.2-2.0 mg/cm² iodine concentration",
+        "minimum_detectable": "0.5 mg/cm² (manufacturer 의존)",
+        "source_ref": "Travieso2024"
+      }
+    },
+    "post_processing_algorithm_directions": {
+      "title": "⚠️ Wash-out 보상을 위한 Post-processing 알고리즘 방향성",
+      "WARNING": "이 섹션은 임상 병원 리포트에 대한 기술적 해결책 제시용",
+      "direction_1_temporal_normalization": {
+        "name": "시간 정규화 (Temporal Normalization)",
+        "principle": "T1(2-3분) 영상의 CNR을 기준으로 T2/T3 영상 정규화",
+        "formula": "I_normalized(t) = I(t) × [CNR_T1 / CNR(t)]",
+        "benefit": "생검 확인 영상(5-7분)에서 초기 contrast 수준 복원",
+        "limitation": "노이즈 증폭 위험, 실제 wash-out 패턴 정보 손실",
+        "feasibility": "소프트웨어 업데이트로 구현 가능"
+      },
+      "direction_2_adaptive_weighting": {
+        "name": "적응형 가중치 (Adaptive Weighting Factor)",
+        "principle": "시간에 따라 recombination weighting factor w 조정",
+        "current_limitation": "현재 w는 조직 제거용 고정값 (breast thickness 기반)",
+        "proposed": "w(t) = w_base × f(t), f(t)는 wash-out 보정 함수",
+        "benefit": "지연기에서 요오드 신호 증폭",
+        "challenge": "조직 신호 불완전 제거로 artifact 발생 가능"
+      },
+      "direction_3_dual_display": {
+        "name": "이중 표시 모드 (Dual Display Mode)",
+        "principle": "LE + Recombined 동시 표시로 석회화와 증강 병행 평가",
+        "implementation": "Split screen 또는 overlay 모드",
+        "benefit": "석회화 형태(LE)와 증강 여부(Rec) 동시 확인",
+        "clinical_value": "생검 시 두 정보 모두 필요한 경우 유용"
+      },
+      "direction_4_reference_subtraction": {
+        "name": "참조 영상 차감 (Reference Image Subtraction)",
+        "principle": "초기 영상(T1)을 참조로 지연기 영상 차감",
+        "formula": "I_diff = I(T1) - I(t), t > T1",
+        "benefit": "wash-out 패턴 정량화, 악성 감별 보조",
+        "limitation": "motion artifact에 민감"
+      },
+      "direction_5_compression_protocol": {
+        "name": "압박 프로토콜 최적화 (Protocol, Not Algorithm)",
+        "principle": "알고리즘이 아닌 촬영 프로토콜 조정",
+        "recommendation": "2분 대기 → 압박 시작 → 타겟팅+생검 → 10분 이내 완료",
+        "physics_basis": "압박이 wash-out을 90% 감소시킴 (Carp2008)",
+        "clinical_evidence": "압박 상태에서 10분까지 증강 가시 (Defined2022)"
+      },
+      "vendor_comparison": {
+        "note": "제조사별 recombination 알고리즘 성능 차이 존재",
+        "ge_advantage": "DES에서 최고 CNR, 최저 dose (2.34 mGy)",
+        "hologic_note": "dose 49.6% 높음 (3.50 mGy)",
+        "siemens_note": "중간 성능",
+        "source_ref": "Travieso2024"
+      }
+    },
+    "engineering_logic_washout_correction": {
+      "title": "⚙️ 엔지니어링 구현: Wash-out 보정 로직 (Pharmacokinetics-based)",
+      "WARNING": "이 섹션은 구현 가능한 알고리즘 로직 제시 (연구/개발용)",
+      "pharmacokinetic_model": {
+        "name": "Extended Tofts Model (MRI 기반, CEM 적용)",
+        "MODEL_COMPLEXITY_NOTE": {
+          "simple_exponential": "C(t) = C₀ × exp(-k×t) — 단순 일차 모델, 근사용",
+          "biexponential": "C(t) = A×exp(-α×t) + B×exp(-β×t) — 2구획 모델, 분포+제거 분리",
+          "tofts_model": "아래 수식 — 가장 정밀, MRI 표준",
+          "recommendation": "CEM에서는 Tofts 모델 권장. 단순 지수는 교육/근사 목적으로만 사용"
+        },
+        "core_equation": "C_t(t) = K_trans × ∫₀ᵗ C_p(τ) × exp(-k_ep × (t-τ)) dτ",
+        "parameters": {
+          "K_trans": "혈관→조직 전달 상수 (min⁻¹), 악성: 높음",
+          "k_ep": "조직→혈관 역전달 상수 = K_trans / v_e (min⁻¹)",
+          "v_e": "세포외 공간 분율, 악성: 낮음"
+        },
+        "wash_out_time_constant": {
+          "definition": "τ_washout = 1 / k_ep",
+          "k_ep_cutoff": "0.314 min⁻¹ (specificity 97.2%, sensitivity 높음, AUC 0.904)",
+          "typical_malignant": "k_ep > 0.314 min⁻¹ → 빠른 wash-out",
+          "typical_benign": "k_ep < 0.314 min⁻¹ → 느린 wash-out",
+          "source_ref": "CancerBiotherRadiopharm2020 (doi:10.1089/cbr.2019.3040)",
+          "CORRECTION_NOTE": "이전에 PMC7289240으로 잘못 귀속됨. 올바른 출처는 Cancer Biotherapy and Radiopharmaceuticals 2020"
+        },
+        "ktrans_values": {
+          "malignant_mean": "1.45 min⁻¹",
+          "benign_mean": "0.33 min⁻¹",
+          "cutoff": "0.56 min⁻¹ (sensitivity 91.1%, specificity 90.3%)",
+          "source_ref": "PMC3737611"
+        },
+        "source_ref": "Tofts1999, PMC3737611"
+      },
+      "time_weighted_subtraction": {
+        "name": "시간 가중 차감 (Time-Weighted Subtraction)",
+        "current_standard": "I_sub = I_HE - w × I_LE (w = 고정)",
+        "proposed_formula": "I_sub(t) = I_HE(t) - w(t) × I_LE(t)",
+        "weighting_function": {
+          "formula": "w(t) = w_0 × exp(λ × (t - t_0))",
+          "variables": {
+            "w_0": "초기 가중치 (breast thickness 기반 표준값)",
+            "λ": "노이즈 억제 계수 (empirical, 약 0.05-0.1 min⁻¹)",
+            "t_0": "기준 시점 (2-3분, peak CNR)"
+          },
+          "rationale": "시간 경과 → 요오드 신호 감소 → w 증가로 보상"
+        },
+        "noise_suppression": {
+          "problem": "w 증가 시 노이즈 증폭",
+          "solution": "Adaptive Wiener filter 또는 NLM denoising 병행",
+          "formula": "I_final(t) = Denoise[I_sub(t), σ(t)]",
+          "sigma_adaptive": "σ(t) = σ_0 × √(t/t_0)"
+        }
+      },
+      "implementation_pseudocode": {
+        "language": "Python-like pseudocode",
+        "code": [
+          "def time_weighted_recombination(I_LE, I_HE, t, t0=2.5, w0=0.8, lambda_=0.08):",
+          "    # 시간 가중치 계산",
+          "    w_t = w0 * np.exp(lambda_ * (t - t0))",
+          "    ",
+          "    # 가중 로그 차감",
+          "    I_sub = np.log(I_HE + eps) - w_t * np.log(I_LE + eps)",
+          "    ",
+          "    # 적응형 노이즈 억제",
+          "    sigma_t = estimate_noise(I_sub) * np.sqrt(t / t0)",
+          "    I_final = wiener_filter(I_sub, sigma_t)",
+          "    ",
+          "    return I_final, w_t"
+        ]
+      },
+      "validation_approach": {
+        "phantom_test": "시간별 요오드 팬텀 영상으로 CNR 복원율 측정",
+        "clinical_test": "wash-out 시점 병변 conspicuity 비교",
+        "success_metric": "5-7분 시점 CNR ≥ 2-3분 시점 CNR × 0.8"
+      },
+      "source_ref": "Proposed based on Tofts1999, Dromain2011"
+    },
+    "engineering_logic_calcification_restoration": {
+      "title": "⚙️ 석회화 가시성 문제 분석 (검증된 물리)",
+      "CRITICAL_CORRECTION": {
+        "wrong_assumption": "CEM LE가 Cu 필터로 인해 에너지 높아 석회화 저하",
+        "verified_fact": "Cu 필터는 HE에만 사용, LE는 표준 FFDM과 동일 (Mo 필터, 26-32 kVp)",
+        "evidence": "Lalji2015: 'Micro-calcifications are significantly more visible on LE CESM than on FFDM'",
+        "source_ref": "Lalji2015, PMC4562003"
+      },
+      "le_vs_ffdm_verified_comparison": {
+        "VERIFIED_STATUS": "논문 기반 검증 완료 (2024-01)",
+        "cem_le_spectrum": {
+          "kvp_range": "26-31 kVp (벤더별 26-34)",
+          "target_filter": "GE: Mo/Rh, Hologic: W/Rh or W/Ag",
+          "design_constraint": "K-edge(33.2 keV) 아래 유지 필수",
+          "source_ref": "PMC4562003, PMC8611680"
+        },
+        "ffdm_spectrum": {
+          "kvp_range": "25-32 kVp (유방 두께에 따라 AEC 조절)",
+          "target_filter": "Mo/Mo, Mo/Rh, W/Rh (시스템별)",
+          "typical_values": "평균 ~29-30 kVp",
+          "source_ref": "PMC2809723"
+        },
+        "spectral_comparison_verified": {
+          "key_finding": "CEM LE와 FFDM은 유사한 kVp 범위 사용 (범위 중복)",
+          "literature_consensus": "다수 논문에서 'identical spectrum', 'equivalent to FFDM'로 기술",
+          "NOT_SUPPORTED": "'CEM LE가 FFDM보다 일관되게 높은 에너지'라는 주장은 근거 불충분",
+          "source_ref": "PMC4562003, PMC8611680, Jochelson2021"
+        },
+        "vendor_target_difference": {
+          "ge_pristina": "Mo/Rh dual track",
+          "hologic_selenia": "W (Tungsten) single track",
+          "clinical_impact": "W 타겟은 동일 kVp에서 harder spectrum 생성 가능",
+          "source_ref": "PMC11018565"
+        },
+        "lalji2015_calcification_finding": {
+          "result": "LE CESM 석회화가 FFDM보다 유의하게 더 잘 보임",
+          "exact_quote": "micro-calcifications are significantly more visible on LE CESM than on FFDM",
+          "p_values": "p = 0.02, p = 0.034 (두 기준 모두)",
+          "physical_explanation": "저자들이 물리적 설명을 찾지 못함 ('could not find any physical explanation')",
+          "hypothesis": "post-processing 차이 가능성 제기",
+          "source_ref": "Lalji2015 (PMC4562003)"
+        },
+        "he_spectrum": "45-49 kVp, Cu 필터 (K-edge 위)",
+        "conclusion": "CEM LE와 FFDM은 유사한 스펙트럼 사용. LE 석회화 가시성이 FFDM보다 우수하거나 동등함 (Lalji2015). '에너지 차이로 인한 석회화 저하' 주장은 현재 근거 없음.",
+        "source_ref": "Lalji2015(PMC4562003), Jochelson2021(PMC7997616), PMC8611680"
+      },
+      "actual_causes_of_calcification_blur": {
+        "cause_1_motion": "생검 과정 중 환자 움직임 → motion blur",
+        "cause_2_positioning": "진단 CEM vs 생검 CEM 자세 차이 → 석회화 위치 변화",
+        "cause_3_compression": "압박 정도 차이 → 유방 조직 변형",
+        "cause_4_vendor": "제조사별 AEC/필터 조합 차이",
+        "cause_5_registration_artifact": {
+          "description": "LE-HE 간 미세 움직임으로 인한 정합 오류",
+          "mechanism": "LE(먼저)와 HE(나중) 촬영 사이 ~5초 간격에 환자 미세 움직임",
+          "effect_on_recombined": "Recombined 영상에서 edge artifact (halos, misalignment)",
+          "effect_on_calcification": "석회화 주변 artifact로 형태 왜곡 가능",
+          "source_ref": "Jochelson2021"
+        },
+        "cause_6_spectral_difference_UNVERIFIED": {
+          "status": "⚠️ 근거 불충분",
+          "original_claim": "CEM LE가 FFDM보다 높은 에너지로 석회화 contrast 저하",
+          "verification": {
+            "kvp_comparison": "CEM LE(26-31 kVp) vs FFDM(25-32 kVp) - 범위 중복됨",
+            "clinical_evidence": "Lalji2015: LE CESM 석회화가 FFDM보다 유의하게 더 잘 보임 (p<0.05)",
+            "conclusion": "'스펙트럼 차이로 인한 석회화 저하'는 현재 임상 근거 없음"
+          },
+          "source_ref": "Lalji2015 (PMC4562003)"
+        }
+      },
+      "problem_analysis": {
+        "root_cause": "석회화 '흐릿함'의 실제 원인은 에너지가 아닌 기하학적/동적 요인",
+        "physics": "LE 스펙트럼이 FFDM과 동일하므로 μ 차이 없음",
+        "clinical_report_reinterpretation": "병원 리포트의 '흐릿함'은 Cu 필터 문제가 아닌 positioning/motion 문제 가능성"
+      },
+      "dual_decomposition_approach": {
+        "name": "Dual-Decomposition Material Separation",
+        "principle": "LE/HE 두 영상에서 물질별 두께 분리 (water, lipid, protein/calcium)",
+        "core_equation": "A_i = -ln(I/I_0) = Σ_j μ_j,i × t_j",
+        "basis_materials": ["Water (H₂O)", "Lipid (C₅₅H₁₀₄O₆)", "Protein/Calcium"],
+        "calibration_model": {
+          "form": "Cubic polynomial (13 coefficients per material)",
+          "formula": "t_j = Σ a_αβγ,j × A_HE^α × R^β × T^γ",
+          "variables": {
+            "R": "A_LE / A_HE (energy ratio)",
+            "T": "total breast thickness"
+          },
+          "accuracy": {
+            "water_rms": "0.023 cm",
+            "lipid_rms": "0.011 cm",
+            "protein_rms": "0.012 cm",
+            "note": "Lipid/Protein < 0.02 cm, Water는 0.023 cm으로 약간 초과"
+          },
+          "source_ref": "Laidevant2010 (PMC2801735)"
+        },
+        "source_ref": "Laidevant2010 (PMC2801735)"
+      },
+      "actual_solutions_for_biopsy": {
+        "name": "CEM 생검 시 석회화 가시성 유지 솔루션 (검증된 접근)",
+        "solution_1_le_reference": {
+          "description": "진단 CEM의 LE 영상을 참조로 사용",
+          "rationale": "LE = FFDM과 동등하므로 석회화 형태 정보 완전",
+          "implementation": "진단 LE와 생검 LE를 side-by-side 또는 overlay 표시"
+        },
+        "solution_2_motion_minimization": {
+          "description": "생검 중 motion artifact 최소화",
+          "methods": ["더 강한 압박", "짧은 노출 시간", "환자 안정화"],
+          "source_ref": "Ma2014 (motion blur 연구)"
+        },
+        "solution_3_registration": {
+          "description": "진단 영상과 생검 영상 간 image registration",
+          "benefit": "위치 변화 보정으로 석회화 추적 가능"
+        }
+      },
+      "hybrid_display_solution": {
+        "name": "Calcification Overlay Mode",
+        "description": "LE 영상의 석회화 세그멘테이션 → Recombined 위에 overlay",
+        "workflow": [
+          "1. LE 영상에서 석회화 자동 검출 (threshold + morphology)",
+          "2. 석회화 ROI를 pseudo-color로 표시",
+          "3. Recombined 영상 위에 반투명 overlay",
+          "4. 증강 정보 + 석회화 형태 동시 확인"
+        ],
+        "benefit": "알고리즘 변경 없이 소프트웨어 UI 수준에서 구현 가능"
+      },
+      "digital_softening_concept": {
+        "name": "Digital Softening (디지털 연화 처리)",
+        "status": "⚠️ 검토 필요 - 전제 가정이 근거 부족",
+        "CRITICAL_NOTE": {
+          "original_premise": "CEM LE가 FFDM보다 높은 에너지로 인해 석회화 contrast 저하",
+          "verification_result": "Lalji2015는 반대로 LE CESM 석회화가 FFDM보다 더 잘 보인다고 보고",
+          "implication": "Digital Softening의 필요성 자체가 의문시됨"
+        },
+        "if_needed_for_specific_cases": {
+          "principle": "소프트웨어로 에너지 스펙트럼을 '가상으로' 낮춰 contrast 조정",
+          "proposed_approach": "Dual-energy basis material decomposition 후 재합성",
+          "challenges": ["노이즈 증폭", "false positive 위험", "필요성 근거 부족"]
+        },
+        "recommendation": "현재 근거 수준에서 Digital Softening보다 기존 LE 영상 활용이 권장됨",
+        "source_ref": "Lalji2015 (PMC4562003) - LE 석회화 가시성 우수"
+      },
+      "dual_display_clinical_strategy": {
+        "name": "Dual-Display Strategy (임상 권장 전략)",
+        "status": "현재 실행 가능",
+        "rationale": "알고리즘 변경 없이 LE + Recombined 동시 판독으로 정보 손실 최소화",
+        "implementation": {
+          "side_by_side": "LE(석회화 형태) + Recombined(증강) 병렬 표시",
+          "toggle_mode": "동일 위치에서 빠른 전환",
+          "overlay_mode": "Recombined 위에 LE contour overlay"
+        },
+        "clinical_protocol": [
+          "1. Recombined에서 증강 병변 확인",
+          "2. 동일 위치 LE에서 석회화 형태 상세 평가",
+          "3. 두 정보 종합하여 BI-RADS 결정"
+        ],
+        "benefit": "기존 장비에서 즉시 적용 가능, 소프트웨어 업데이트만 필요",
+        "source_ref": "Dromain2019, clinical practice"
+      },
+      "implementation_pseudocode": {
+        "description": "LE 영상 석회화 검출 + Recombined overlay",
+        "code": [
+          "def calcification_overlay_for_biopsy(I_LE_diagnostic, I_LE_biopsy, I_recombined):",
+          "    # 1. 진단 LE에서 석회화 자동 검출",
+          "    calc_mask = detect_calcifications(I_LE_diagnostic, method='morphological')",
+          "    ",
+          "    # 2. 진단→생검 영상 registration",
+          "    transform = register_images(I_LE_diagnostic, I_LE_biopsy)",
+          "    calc_mask_registered = apply_transform(calc_mask, transform)",
+          "    ",
+          "    # 3. Recombined 위에 석회화 overlay",
+          "    I_overlay = I_recombined.copy()",
+          "    I_overlay[calc_mask_registered] = highlight_color  # pseudo-color",
+          "    ",
+          "    return I_overlay, calc_mask_registered"
+        ]
+      },
+      "key_insight": "LE 에너지가 FFDM과 동일하므로 에너지 보정 불필요; 실제 문제는 positioning/motion",
+      "source_ref": "Lalji2015, Laidevant2010"
+    },
+    "temporal_vs_dual_energy": {
+      "title": "Temporal Subtraction vs Dual-Energy 비교",
+      "temporal_subtraction": {
+        "principle": "조영 전 영상 - 조영 후 영상",
+        "advantage": "조직 신호 완전 제거 가능",
+        "disadvantage_1": "긴 압박 시간 → 환자 불편",
+        "disadvantage_2": "motion artifact 심함",
+        "disadvantage_3": "단일 view만 가능 (재주입 필요)",
+        "disadvantage_4": "압박 중 조영제 주입 → 혈류 차단으로 증강 저하",
+        "current_status": "현재 상용화 장비에서 사용하지 않음"
+      },
+      "dual_energy_current": {
+        "principle": "LE-HE 가중 로그 차감 (동시 촬영)",
+        "advantage_1": "짧은 LE-HE 간격 → motion artifact 최소",
+        "advantage_2": "양측 유방, 다중 view 가능",
+        "advantage_3": "환자 편의성 향상",
+        "disadvantage": "조직 신호 부분적 제거만 가능",
+        "current_status": "현재 상용화 표준"
+      },
+      "source_ref": "Dromain2011, Jochelson2021, RadioGraphics2021"
+    }
+  },
+  "formulas": {
+    "lgv_definition": {
+      "formula": "LGV = mean gray value of lesion ROI",
+      "source_ref": "Xu2021"
+    },
+    "lbr_definition": {
+      "formula": "LBR = (LGV - BGV) / BGV",
+      "variables": "BGV = background gray value",
+      "source_ref": "Xu2021"
+    },
+    "washout_criterion": {
+      "formula": "Wash-out = (LGV_T1 - LGV_T2) / LGV_T1 > 10%",
+      "note": "10% 이상 감소 시 wash-out으로 판정 (악성 지표)",
+      "clinical_significance": "wash-out 패턴은 악성과 연관 (p<0.001)",
+      "diagnostic_auc": "wash-out 패턴 AUC 0.70",
+      "WARNING": "'CNR 30% 감소' 등 임의 수치 사용 금지 — 10%가 표준 기준",
+      "source_ref": "Xu2021 (PMC8245946)"
+    },
+    "recombined_image": {
+      "formula": "I_rec = ln(I_LE) - w × ln(I_HE)",
+      "weighting_factor": "w = optimized to cancel breast tissue signal",
+      "source_ref": "Dromain2011, Jochelson2021"
+    },
+    "cnr_iodine": {
+      "formula": "CNR_I = (S_enhanced - S_background) / σ_noise",
+      "source_ref": "Jochelson2021"
+    },
+    "blood_flow_reduction": {
+      "formula": "Blood flow reduction ≈ 87% at 30 kPa compression",
+      "source_ref": "Carp2008"
+    },
+    "temporal_normalization_proposed": {
+      "formula": "I_normalized(t) = I(t) × [CNR_T1 / CNR(t)]",
+      "note": "제안된 wash-out 보상 알고리즘 (비표준)",
+      "source_ref": "Proposed direction"
+    }
+  },
+  "clinical_decision_tree": {
+    "title": "CEM 석회화 병변 의사결정 알고리즘",
+    "steps": [
+      "1. LE image에서 석회화 형태 평가 (BI-RADS morphology)",
+      "2. Recombined image에서 증강 여부 확인",
+      "3. IF 악성 형태(fine linear, pleomorphic) → 증강 무관하게 생검",
+      "4. IF 양성 형태 + 증강 없음 → 추적관찰 고려",
+      "5. IF 증강 있음 → 악성 의심, 생검 권고",
+      "6. CEM 비증강이 DCIS 배제 근거 불가 (17.6% 위음성, PMC11748920)"
+    ]
+  },
+  "common_misconceptions": {
+    "WARNING": "다음은 CEM 타이밍과 석회화 관련 흔한 오류입니다.",
+    "misconception_1_delayed_better": {
+      "WRONG": "지연기(7-9분) 영상이 추가 진단 정보를 제공한다",
+      "CORRECT": "조기(2-3분)가 최고 CNR/AUC; 지연기는 오히려 성능 저하 (AUC 0.711→0.557)",
+      "source_ref": "Xu2021"
+    },
+    "misconception_2_no_enhancement_benign": {
+      "WRONG": "CEM에서 증강이 없으면 양성이다",
+      "CORRECT": "DCIS의 17.6% (3/17)가 CEM에서 비증강 (PMC11748920); Low-grade DCIS는 100% 비증강 보고도 있음 (Depretto). 악성 형태 석회화는 증강 무관 생검 필요",
+      "source_ref": "PMC11748920"
+    },
+    "misconception_3_recombined_calcification": {
+      "WRONG": "Recombined image에서 석회화를 평가할 수 있다",
+      "CORRECT": "Recombination은 조직+석회화 신호 제거; 석회화는 LE image에서만 평가",
+      "source_ref": "Dromain2019"
+    },
+    "misconception_4_biopsy_anytime": {
+      "WRONG": "CEM-guided biopsy는 언제든 가능하다",
+      "CORRECT": "최적 window는 주입 2분 후 시작, 10분 이내; 압박이 wash-out 감소",
+      "source_ref": "Tang2023"
+    },
+    "misconception_5_le_he_energy": {
+      "WRONG": "LE는 약 20 keV, HE는 약 30 keV이다",
+      "CORRECT": "LE: 26-32 kVp (K-edge 아래), HE: 45-49 kVp (K-edge 위). K-edge는 33.2 keV",
+      "source_ref": "Jochelson2021"
+    },
+    "misconception_6_compression_bad": {
+      "WRONG": "압박이 조영 증강을 방해한다",
+      "CORRECT": "2분 대기 후 압박하면 wash-out을 90% 감소시켜 오히려 10분까지 증강 유지",
+      "physics_proof": "압박 → 혈류 87% 감소 → 정맥 환류 차단 → 조영제 유출 억제",
+      "source_ref": "Carp2008, Defined2022"
+    },
+    "misconception_7_temporal_better": {
+      "WRONG": "Temporal subtraction이 dual-energy보다 정확하다",
+      "CORRECT": "Temporal subtraction은 motion artifact와 단일 view 한계로 현재 사용 안 함; Dual-energy가 표준",
+      "source_ref": "Dromain2011"
+    },
+    "misconception_8_attribution_error": {
+      "type": "귀인 오류 (Attribution Error)",
+      "WRONG": "LE에서 석회화가 흐릿하면 'Cu 필터로 인한 에너지 상승' 때문이다",
+      "CORRECT": "Cu 필터는 HE에만 사용됨. 석회화 흐릿함의 실제 원인은 positioning/motion/compression 차이",
+      "verification_protocol": [
+        "1. 기본 물리 먼저 검증: 해당 필터/파라미터가 실제로 적용되는 영상은?",
+        "2. 전제 검증: 임상 보고의 귀인(attribution)이 물리적으로 타당한가?",
+        "3. 대안 원인 탐색: 동일 현상을 설명하는 다른 원인은?"
+      ],
+      "source_ref": "Lalji2015 (PMC4562003)"
+    },
+    "misconception_9_le_higher_energy_than_ffdm": {
+      "type": "근거 없는 주장 (Unsubstantiated Claim)",
+      "WRONG": "CEM LE(28-32 kVp)가 FFDM(25-28 kVp)보다 높은 에너지여서 석회화 contrast가 저하된다",
+      "CORRECT": "CEM LE(26-31 kVp)와 FFDM(25-32 kVp)은 유사한 범위를 사용함. Lalji2015는 오히려 LE CESM 석회화가 FFDM보다 '유의하게 더 잘 보인다'고 보고함 (p<0.05)",
+      "key_evidence": {
+        "lalji2015_finding": "micro-calcifications are significantly more visible on LE CESM than on FFDM",
+        "physical_explanation": "저자들이 물리적 설명을 찾지 못함 - post-processing 차이 가능성",
+        "implication": "'에너지 차이로 인한 석회화 저하' 가설은 현재 임상 근거 없음"
+      },
+      "source_ref": "Lalji2015 (PMC4562003)"
+    },
+    "misconception_10_vendor_target_difference": {
+      "type": "정보 (Verified Fact)",
+      "verified": "GE는 Mo/Rh, Hologic은 W 타겟 사용",
+      "physics": "W 타겟은 동일 kVp에서 Mo보다 harder spectrum 생성 가능",
+      "clinical_evidence": "그러나 Lalji2015 연구는 LE 석회화 가시성이 FFDM보다 우수함을 보여 W 타겟의 부정적 영향이 임상적으로 유의하지 않을 수 있음",
+      "source_ref": "PMC11018565, Lalji2015"
+    }
+  },
+  "clinical_relevance": {
+    "biopsy_planning": "생검은 조영제 주입 2-7분 내 수행 권장",
+    "dcis_detection": "CEM 비증강이 DCIS 배제 근거 불충분 (MRI 고려)",
+    "calcification_workup": "석회화는 LE image로, 증강은 recombined로 분리 평가",
+    "protocol_optimization": "지연기 생략으로 환자 편의성/방사선량 감소 가능"
+  },
+  "sources": [
+    {
+      "id": "Xu2021",
+      "citation": "Xu W, et al. Can the delayed phase of quantitative contrast-enhanced mammography improve the diagnostic performance on breast masses? Quant Imaging Med Surg. 2021;11(7):3006-3015.",
+      "pmid": "34341742",
+      "pmc": "PMC8245946",
+      "type": "primary"
+    },
+    {
+      "id": "Ozturk2024",
+      "citation": "Ozturk VS, et al. Diagnostic value of qualitative and quantitative enhancement parameters on contrast-enhanced mammography. Diagn Interv Radiol. 2024.",
+      "pmc": "PMC11589517",
+      "type": "primary"
+    },
+    {
+      "id": "Tang2023",
+      "citation": "Tang W, et al. Contrast-enhanced mammography-guided biopsy: technique and initial outcomes. Quant Imaging Med Surg. 2023;13(8):5010-5020.",
+      "pmc": "PMC10423379",
+      "type": "primary"
+    },
+    {
+      "id": "Houben2019",
+      "citation": "Houben IPL, et al. Contrast-enhanced spectral mammography as work-up tool in patients recalled from breast cancer screening. Eur J Radiol. 2019;115:212-217.",
+      "pmid": "31084756",
+      "type": "primary"
+    },
+    {
+      "id": "Lalji2015",
+      "citation": "Lalji UC, et al. Evaluation of low-energy contrast-enhanced spectral mammography images by comparing them to full-field digital mammography using EUREF image quality criteria. Eur Radiol. 2015;25(10):2813-2820.",
+      "pmid": "25813015",
+      "pmc": "PMC4562003",
+      "type": "primary",
+      "key_data": "LE CESM 석회화 > FFDM 가시성 (p<0.05), 물리적 설명 없음, 17/20 EUREF 기준 동등"
+    },
+    {
+      "id": "Jochelson2021",
+      "citation": "Jochelson MS, Lobbes MBI. Contrast-enhanced Mammography: State of the Art. Radiology. 2021;299(1):36-48.",
+      "pmid": "33650905",
+      "pmc": "PMC7997616",
+      "type": "review"
+    },
+    {
+      "id": "Kappadath2008",
+      "citation": "Kappadath SC, Shaw CC. Dual-energy digital mammography for calcification imaging: noise reduction techniques. Phys Med Biol. 2008;53(19):5421-5443.",
+      "pmc": "PMC2858626",
+      "type": "primary"
+    },
+    {
+      "id": "Dromain2019",
+      "citation": "Dromain C, et al. Contrast-enhanced digital mammography. In: Bick U, Diekmann F, eds. Digital Mammography. Springer; 2019.",
+      "type": "textbook"
+    },
+    {
+      "id": "PMC11748920",
+      "citation": "Wang J, et al. Breast Suspicious Microcalcifications on Contrast-Enhanced Mammograms: Practice and Reflection. Int J Gen Med. 2025;18:195-206.",
+      "pmc": "PMC11748920",
+      "type": "primary"
+    },
+    {
+      "id": "Carp2008",
+      "citation": "Carp SA, et al. Blood Flow Reduction in Breast Tissue due to Mammographic Compression. Acad Radiol. 2008;15(11):1387-1394.",
+      "pmid": "18995190",
+      "pmc": "PMC4393946",
+      "type": "primary",
+      "key_data": "압박 시 혈류 87% 감소, 총 헤모글로빈 30% 감소"
+    },
+    {
+      "id": "Dromain2011",
+      "citation": "Dromain C, et al. Dual-energy contrast-enhanced digital mammography: initial clinical results. Eur Radiol. 2011;21(3):565-574.",
+      "pmid": "20857116",
+      "type": "primary",
+      "key_data": "DE 기법이 temporal subtraction 대체, 5초 내 recombined 생성"
+    },
+    {
+      "id": "Travieso2024",
+      "citation": "Travieso-Aja MDM, et al. Performance of dual-energy subtraction in contrast-enhanced mammography for three different manufacturers: a phantom study. Eur Radiol Exp. 2024;8:115.",
+      "pmc": "PMC11473475",
+      "type": "primary",
+      "key_data": "GE 최고 CNR, 최저 dose; Hologic +49.6% dose"
+    },
+    {
+      "id": "Defined2022",
+      "citation": "Defined P, et al. Contrast-enhanced mammography-guided biopsy: technical feasibility and first outcomes. Eur Radiol. 2022;33(2):1200-1209.",
+      "pmc": "PMC9755098",
+      "type": "primary",
+      "key_data": "압박이 wash-out 감소, 10분까지 증강 가시"
+    },
+    {
+      "id": "RadioGraphics2021",
+      "citation": "Stable M, et al. Contrast-enhanced Mammography: How Does It Work? RadioGraphics. 2021;41(3):829-848.",
+      "pmid": "33939548",
+      "type": "educational",
+      "key_data": "DE vs Temporal 비교, 현재 표준 기법 설명"
+    },
+    {
+      "id": "Tofts1999",
+      "citation": "Tofts PS, et al. Estimating Kinetic Parameters From Dynamic Contrast-Enhanced T1-Weighted MRI of a Diffusable Tracer: Standardized Quantities and Symbols. J Magn Reson Imaging. 1999;10(3):223-232.",
+      "pmid": "10508281",
+      "type": "primary",
+      "key_data": "Tofts model: K_trans, k_ep, v_e 정의, 약동학 모델 표준화"
+    },
+    {
+      "id": "PMC3737611",
+      "citation": "Chatterji M, et al. Role of quantitative pharmacokinetic parameter (transfer constant: Ktrans) in the characterization of breast lesions on MRI. Indian J Radiol Imaging. 2013;23(1):19-25.",
+      "pmc": "PMC3737611",
+      "type": "primary",
+      "key_data": "악성 vs 양성 K_trans 차이, wash-out 패턴과 k_ep 상관"
+    },
+    {
+      "id": "Laidevant2010",
+      "citation": "Laidevant AD, et al. Compositional breast imaging using a dual-energy mammography protocol. Med Phys. 2010;37(1):164-174.",
+      "pmid": "20175477",
+      "pmc": "PMC2801735",
+      "type": "primary",
+      "key_data": "3-material decomposition (water, lipid, protein), cubic calibration model, RMS < 0.02cm"
+    },
+    {
+      "id": "ACR_CEM2022",
+      "citation": "American College of Radiology. ACR Practice Parameter for the Performance of Contrast-Enhanced Mammography (CEM). 2022.",
+      "type": "guideline",
+      "key_data": "LE: 26-32 kVp, HE: 45-49 kVp, 2분 대기 후 촬영"
+    },
+    {
+      "id": "PMC7289240",
+      "citation": "Wang L, et al. Discrimination of Malignant and Benign Breast Lesions Using Quantitative Multiparametric MRI: A Preliminary Study. J Clin Med. 2020;9(6):1636.",
+      "pmc": "PMC7289240",
+      "type": "primary",
+      "key_data": "k_ep AUC 0.70, specificity 43% at 86% sensitivity (소규모 연구 n=28)",
+      "WARNING": "이전에 k_ep 0.314 데이터 출처로 잘못 귀속됨. 해당 데이터는 CancerBiotherRadiopharm2020이 출처"
+    },
+    {
+      "id": "CancerBiotherRadiopharm2020",
+      "citation": "3.0 T Magnetic Resonance Functional Imaging Quantitative Parameters for Differential Diagnosis of Benign and Malignant Lesions of the Breast. Cancer Biother Radiopharm. 2020.",
+      "doi": "10.1089/cbr.2019.3040",
+      "type": "primary",
+      "key_data": "k_ep cutoff 0.314 min⁻¹, specificity 97.2%, AUC 0.904, n=232"
+    },
+    {
+      "id": "PMC8611680",
+      "citation": "Stable M, et al. Contrast-enhanced mammography: what the radiologist needs to know. BJR Open. 2021;3(1):20210034.",
+      "pmc": "PMC8611680",
+      "type": "review",
+      "key_data": "LE=26-30 kVp FFDM과 동일 스펙트럼, HE=45-49 kVp, LE=FFDM 동등"
+    },
+    {
+      "id": "PMC11018565",
+      "citation": "Travieso-Aja MDM, et al. Phantom-based analysis of variations in automatic exposure control across three mammography systems. Eur Radiol Exp. 2024;8:48.",
+      "pmc": "PMC11018565",
+      "type": "primary",
+      "key_data": "GE=Mo/Rh dual track, Hologic=W single track, 제조사별 AEC 차이"
+    },
+    {
+      "id": "PMC2809723",
+      "citation": "Samei E, et al. Optimization of exposure parameters in full field digital mammography. Med Phys. 2010;37(2):758-769.",
+      "pmc": "PMC2809723",
+      "type": "primary",
+      "key_data": "FFDM kVp=25-32 (두께별 AEC 조절), optimal kVp 분석"
+    }
+  ]
+}

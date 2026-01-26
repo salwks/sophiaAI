@@ -45,14 +45,6 @@
       "type": "DQE Analysis"
     },
     {
-      "id": "korner2023",
-      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
-      "pmid": "37959173",
-      "pmc": "PMC10606465",
-      "doi": "10.3390/jcm12216714",
-      "type": "Review Article"
-    },
-    {
       "id": "iec62220",
       "citation": "IEC 62220-1-2:2007. Medical electrical equipment - Characteristics of digital X-ray imaging devices - Part 1-2: Determination of the detective quantum efficiency - Mammography detectors",
       "type": "International Standard"
@@ -96,7 +88,12 @@
         "k_edge_keV": 12.7,
         "optimal_energy_range_keV": "15-25",
         "electric_field_V_per_um": "10-15",
-        "electron_hole_pair_energy_eV": 50,
+        "electron_hole_pair_energy_eV": {
+          "commonly_cited": 50,
+          "at_mammographic_energy_17keV_10Vum": 64,
+          "note": "W값은 X선 에너지와 전장(E)에 의존. 고에너지(50keV)에서 ~50eV, 맘모그래피 에너지(17keV)와 10V/μm에서 ~64eV. Zhao 2002 참조.",
+          "source": "PMID:11929014"
+        },
         "advantages": [
           "높은 공간 해상도 (no light spread)",
           "우수한 MTF at high spatial frequencies",
@@ -210,8 +207,9 @@
       "focal_spot_size": "초점 크기 ↑ → geometric unsharpness ↑ → MTF ↓"
     },
     "clinical_thresholds": {
-      "microcalcification_detection": "MTF(5 lp/mm) ≥ 0.30 권장",
-      "mass_detection": "MTF(2 lp/mm) ≥ 0.50 권장"
+      "CAUTION_NOTE": "이 임계값들의 출처 불명확. 참고용으로만 사용",
+      "microcalcification_detection": "MTF(5 lp/mm) ≥ 0.30 (출처 미확인)",
+      "mass_detection": "MTF(2 lp/mm) ≥ 0.50 (출처 미확인)"
     }
   },
 

@@ -22,9 +22,12 @@
     },
     {
       "id": "baldelli2010",
-      "citation": "Baldelli P, Phelan N, Egan G. Evaluation of automatic exposure control options in digital mammography. Phys Med. 2010;26(3):172-178",
-      "pmid": "24865213",
-      "type": "AEC Evaluation"
+      "citation": "Baldelli P, Phelan N, Egan G. Investigation of the effect of anode/filter materials on the dose and image quality of a digital mammography system based on an amorphous selenium flat panel detector. Br J Radiol. 2010;83(988):290-295",
+      "pmid": "20019173",
+      "pmc": "PMC3473454",
+      "doi": "10.1259/bjr/60404532",
+      "type": "AEC/Dose Study",
+      "CORRECTION_NOTE": "이전 PMID 24865213은 Zhou 2014 논문 (완전히 다른 저자/논문). 올바른 PMID: 20019173. 제목과 저널도 수정"
     },
     {
       "id": "samei2025",
@@ -33,8 +36,9 @@
       "type": "Large-Scale Clinical Study"
     },
     {
-      "id": "korner2023",
-      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "id": "fico2023",
+      "citation": "Fico N, Di Grezia G, Cuccurullo V, et al. Breast Imaging Physics in Mammography (Part I). Diagnostics. 2023;13(20):3227",
+      "CORRECTION_NOTE": "이전 저자 Korner M과 저널 J Clin Med는 완전히 잘못됨. 실제 저자: Fico N, Di Grezia G, et al. 실제 저널: Diagnostics",
       "pmid": "37959173",
       "pmc": "PMC10606465",
       "doi": "10.3390/jcm12216714",
@@ -52,7 +56,7 @@
       "AEC는 유방 두께와 밀도에 따라 최적 노출 조건을 자동 결정",
       "디지털 시스템에서는 Exposure Index로 적정 노출 확인"
     ],
-    "source_ref": "korner2023",
+    "source_ref": "fico2023",
     "figure_of_merit": {
       "source_ref": "williams2008",
       "formula": "FOM = SNR² / MGD",
@@ -95,13 +99,17 @@
       "key_finding": "디지털 맘모그래피 시스템 간 MGD에 상당한 변동성 존재, 주로 AEC 동작 및 anode/filter 선택 차이에 기인",
       "clinical_implication": "각 제조사의 AEC 알고리즘이 유방 압박 두께 증가에 따라 다르게 노출 파라미터(kVp, mAs) 조정"
     },
-    "aec_table_comparison": {
+    "aec_vs_optimal_parameters": {
       "source_ref": "baldelli2010",
-      "system": "Hologic Selenia",
-      "finding": "AEC table 1이 4.5-6cm 유방 두께에서 저대조 FOM을 11-20% 개선"
+      "system": "Lorad-Hologic (W/Rh and Mo/Mo systems)",
+      "finding": {
+        "W_Rh_system": "AEC가 최적 파라미터 대비 4cm에서 15%, 6cm에서 8% 낮은 FOM 제공",
+        "Mo_Mo_system": "AEC가 최적 파라미터 대비 27% 낮은 FOM 제공"
+      },
+      "CORRECTION_NOTE": "이전 내용 '11-20% FOM 개선'은 완전히 잘못됨. 실제로 논문은 AEC가 최적값보다 낮은 FOM을 제공한다고 보고"
     },
     "kvp_parameters": {
-      "source_ref": "williams2008, korner2023",
+      "source_ref": "williams2008, fico2023",
       "range_kVp": "23-39",
       "effect": {
         "increase": "투과력↑, 대조도↓, 선량↓",
@@ -123,7 +131,7 @@
     },
     "snr_relationship": {
       "formula": "SNR ∝ √(mAs)",
-      "source_ref": "korner2023"
+      "source_ref": "fico2023"
     },
     "deviation_index": {
       "formula": "DI = 10 × log₁₀(EI / EI_target)",

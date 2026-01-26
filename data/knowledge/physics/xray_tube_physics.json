@@ -27,30 +27,34 @@
       "type": "Monte Carlo Study"
     },
     {
-      "id": "korner2023",
-      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "id": "fico2023",
+      "citation": "Fico N, Di Grezia G, Cuccurullo V, et al. Breast Imaging Physics in Mammography (Part I). Diagnostics. 2023;13(20):3227",
+      "CORRECTION_NOTE": "이전 저자 Korner M과 저널 J Clin Med는 완전히 잘못됨. 실제 저자: Fico N, Di Grezia G, et al. 실제 저널: Diagnostics",
       "pmid": "37959173",
       "pmc": "PMC10606465",
       "doi": "10.3390/jcm12216714",
       "type": "Review Article"
     },
     {
-      "id": "yaffe2000",
+      "id": "yaffe1997",
       "citation": "Yaffe MJ, Rowlands JA. X-ray detectors for digital radiography. Phys Med Biol. 1997;42(1):1-39",
-      "pmid": "9015816",
-      "type": "Technical Review"
+      "pmid": "9015806",
+      "doi": "10.1088/0031-9155/42/1/001",
+      "type": "Technical Review",
+      "CORRECTION_NOTE": "이전 PMID 9015816은 완전히 다른 논문(Persliden J - scatter rejection). 올바른 PMID: 9015806. source ID도 yaffe2000→yaffe1997로 수정"
     },
     {
-      "id": "behling2021",
+      "id": "behling2018",
       "citation": "Behling R, Grüner F. Diagnostic X-ray sources—present and future. Nucl Instrum Methods Phys Res A. 2018;878:50-57",
       "doi": "10.1016/j.nima.2017.05.036",
-      "type": "Technical Review"
+      "type": "Technical Review",
+      "CORRECTION_NOTE": "source ID behling2021→behling2018로 수정 (논문 출판년도 2018)"
     }
   ],
   "content": {
     "target_materials": {
       "description": "맘모그래피 시스템은 회전 양극을 사용하며 일반적으로 몰리브덴, 로듐, 또는 텅스텐으로 제작됨",
-      "source_ref": "korner2023",
+      "source_ref": "fico2023",
       "materials": {
         "molybdenum": {
           "symbol": "Mo",
@@ -60,7 +64,7 @@
             "K_beta": 19.6
           },
           "optimal_use": "얇은 유방, 지방 조직 우세",
-          "source_ref": "korner2023, boone1997"
+          "source_ref": "fico2023, boone1997"
         },
         "rhodium": {
           "symbol": "Rh",
@@ -71,14 +75,14 @@
           },
           "K_edge_keV": 23.3,
           "optimal_use": "중간 두께 유방, Mo보다 높은 투과력 필요 시",
-          "source_ref": "korner2023, boone1997"
+          "source_ref": "fico2023, boone1997"
         },
         "tungsten": {
           "symbol": "W",
           "atomic_number": 74,
           "note": "특성 X선(59.3/67.2 keV)은 맘모그래피 에너지 범위 밖 - 제동복사 스펙트럼 사용",
           "optimal_use": "두꺼운 유방, 디지털 맘모그래피에서 주로 사용",
-          "source_ref": "korner2023, thilander1997"
+          "source_ref": "fico2023, thilander1997"
         }
       }
     },
@@ -114,11 +118,11 @@
     "optimal_energy_range": {
       "range_keV": "15-25",
       "description": "환자 해부학적 구조에 따라 가변적. 저에너지는 선량에 기여하나 영상 품질 기여 낮음, 고에너지는 선량↓ 대조도↓",
-      "source_ref": "korner2023"
+      "source_ref": "fico2023"
     },
     "focal_spot": {
       "description": "맘모그래피에서 높은 공간해상도 요구 - 작은 초점과 작은 양극 각도 사용",
-      "source_ref": "korner2023",
+      "source_ref": "fico2023",
       "sizes": {
         "contact_mammography": {
           "nominal_mm": "0.3-0.4",
@@ -146,7 +150,7 @@
           "size_mm": 0.1,
           "current_mA": "25±10"
         },
-        "source_ref": "korner2023"
+        "source_ref": "fico2023"
       }
     },
     "target_filter_recommendations": {
@@ -183,7 +187,7 @@
     "inherent_filtration": {
       "beryllium_window_mm": 1.0,
       "description": "맘모그래피 튜브는 유리 대신 베릴륨 창 사용 - 저에너지 X선 투과 허용",
-      "source_ref": "korner2023"
+      "source_ref": "fico2023"
     }
   },
   "formulas": {
@@ -200,12 +204,12 @@
         "OID": "물체-영상 거리 (mm)",
         "SOD": "선원-물체 거리 (mm)"
       },
-      "source_ref": "korner2023"
+      "source_ref": "fico2023"
     }
   },
   "clinical_relevance": {
     "target_filter_selection": "유방 두께와 밀도에 따른 최적 조합 선택이 영상 품질과 선량 최적화의 핵심",
     "digital_vs_film": "디지털 시스템에서 W 타겟 사용 증가 - 넓은 동적 범위 활용",
-    "source_ref": "korner2023, thilander1997"
+    "source_ref": "fico2023, thilander1997"
   }
 }

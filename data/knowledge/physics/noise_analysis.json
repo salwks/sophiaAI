@@ -9,11 +9,12 @@
   ],
   "sources": [
     {
-      "id": "vedantham1999",
-      "citation": "Vedantham S, Karellas A, Suryanarayanan S, et al. Noise power spectra of images from digital mammography detectors. Med Phys. 1999;26(8):1492-1502",
+      "id": "williams1999",
+      "citation": "Williams MB, Mangiafico P, Simoni P. Noise power spectra of images from digital mammography detectors. Med Phys. 1999;26(8):1279-1293",
       "pmid": "10435530",
-      "doi": "10.1118/1.598647",
-      "type": "NPS Measurement Study"
+      "doi": "10.1118/1.598623",
+      "type": "NPS Measurement Study",
+      "CORRECTION_NOTE": "이전 귀속 'Vedantham S, Karellas A'는 완전히 잘못됨. 실제 저자: Williams MB, Mangiafico P, Simoni P. 페이지 번호도 수정 (1492-1502 → 1279-1293)"
     },
     {
       "id": "monnin2016",
@@ -35,14 +36,6 @@
       "pmid": "25198143",
       "doi": "10.1118/1.4894308",
       "type": "Noise Component Analysis"
-    },
-    {
-      "id": "korner2023",
-      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
-      "pmid": "37959173",
-      "pmc": "PMC10606465",
-      "doi": "10.3390/jcm12216714",
-      "type": "Review Article"
     }
   ],
   "content": {
@@ -65,7 +58,7 @@
       }
     },
     "NPS_measurement": {
-      "source_ref": "vedantham1999",
+      "source_ref": "williams1999",
       "methods": {
         "1D_NPS": "1차원 노이즈 파워 스펙트럼 - DQE 계산에 유용",
         "2D_NPS": "2차원 노이즈 파워 스펙트럼 - 방향별 비대칭 특성 확인"
@@ -93,12 +86,12 @@
       "european_guidelines": "European Guidelines에서 디지털 맘모그래피 QC에 채택"
     },
     "aliasing_effects": {
-      "source_ref": "vedantham1999",
+      "source_ref": "williams1999",
       "description": "앨리어싱이 측정된 노이즈 파워에 유의미하게 기여, 특히 Nyquist 주파수 근처에서",
       "validation": "이론적 presampling NPS와 앨리어싱 노이즈 명시적 포함 시 측정값과 잘 일치"
     },
     "quantum_limited_operation": {
-      "source_ref": "vedantham1999, monnin2016",
+      "source_ref": "williams1999, monnin2016",
       "condition": "양자 노이즈가 전자 노이즈보다 지배적인 영역",
       "low_dose_limitation": "저 X선 노출에서 양자 제한 동작은 저주파에서만 가능할 수 있음",
       "clinical_dose_behavior": "임상 선량에서 대부분의 시스템이 양자 노이즈 제한 상태로 동작"
@@ -113,7 +106,7 @@
     "NPS_definition": {
       "formula": "NPS(f) = |FT{noise_image}|² / Area",
       "description": "주파수 영역에서의 노이즈 분포",
-      "source_ref": "vedantham1999"
+      "source_ref": "williams1999"
     },
     "polynomial_model": {
       "formula": "σ² = a + b×DAK + c×DAK²",
@@ -127,13 +120,13 @@
     "quantum_noise_relationship": {
       "formula": "σ_quantum = √N, SNR = √N",
       "dose_relation": "NPS ∝ 1/Dose (양자 제한 영역)",
-      "source_ref": "korner2023"
+      "source_ref": "monnin2016"
     }
   },
   "clinical_relevance": {
     "microcalcification_detection": "고주파 영역 NPS 증가가 미세석회화 검출에 직접 영향",
     "QC_application": "정기적 노이즈 평가로 검출기 성능 저하 모니터링",
     "dose_optimization": "양자 제한 영역에서 동작 확인으로 선량 최적화",
-    "source_ref": "monnin2014, korner2023"
+    "source_ref": "monnin2014, monnin2016"
   }
 }

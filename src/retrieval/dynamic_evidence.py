@@ -16,6 +16,9 @@ Workflow:
 
 import asyncio
 import logging
+import json
+import os
+from datetime import datetime
 from typing import Optional, Dict, Any, List, Tuple
 from dataclasses import dataclass, field
 
@@ -367,6 +370,16 @@ class DynamicEvidencePipeline:
 *[Phase 1+: {strategy_label} 프롬프트] 신뢰도: {confidence:.0%}*
 """
 
+        # Q&A 로깅
+        self._log_qa(
+            question=question,
+            answer=answer_content,
+            domain=detected_type["type"] if detected_type else prompt_strategy,
+            modules_used=detected_type["required_modules"] if detected_type else [],
+            cot_detected=detected_type is not None,
+            confidence=confidence
+        )
+
         return DynamicEvidenceResult(
             answer=formatted,
             refined_answer=refined,
@@ -376,6 +389,62 @@ class DynamicEvidencePipeline:
             used_fulltext=enriched_context.fetched_count > 0,
             used_summarizer=False
         )
+
+    def _log_qa(
+        self,
+        question: str,
+        answer: str,
+        domain: str,
+        modules_used: List[str],
+        cot_detected: bool,
+        confidence: float
+    ) -> None:
+        """
+        Q&A 기록을 JSON 파일에 저장
+
+        학습 데이터 축적 및 귀인 오류 분석용
+        """
+        try:
+            log_dir = "logs"
+            log_file = os.path.join(log_dir, "qa_history.json")
+
+            # logs 디렉토리 생성
+            os.makedirs(log_dir, exist_ok=True)
+
+            # 기존 파일 로드 또는 새로 생성
+            if os.path.exists(log_file):
+                with open(log_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            else:
+                data = {
+                    "version": "1.0",
+                    "created": datetime.now().isoformat(),
+                    "records": []
+                }
+
+            # 새 레코드 추가
+            new_record = {
+                "id": len(data["records"]) + 1,
+                "ts": datetime.now().isoformat(),
+                "question": question,
+                "answer": answer[:2000] if len(answer) > 2000 else answer,  # 길이 제한
+                "metadata": {
+                    "domain": domain,
+                    "modules": modules_used,
+                    "cot_detected": cot_detected,
+                    "confidence": confidence
+                }
+            }
+            data["records"].append(new_record)
+
+            # 파일 저장
+            with open(log_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+
+            logger.info(f"[QA_LOG] Recorded Q&A #{new_record['id']}")
+
+        except Exception as e:
+            logger.warning(f"[QA_LOG] Failed to log Q&A: {e}")
 
     def _build_simple_prompt(
         self,

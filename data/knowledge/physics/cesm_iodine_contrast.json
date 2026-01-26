@@ -18,9 +18,10 @@
       "mechanism": "혈관 투과성 증가 병변에 아이오딘 조영제 축적 → K-edge 효과로 대조도 증강",
       "iodine_k_edge": "33.2 keV",
       "dual_energy": {
-        "low_energy": "26-32 keV (K-edge 아래, 조직 대조도)",
-        "high_energy": "45-49 keV (K-edge 위, 아이오딘 강조)",
-        "recombined": "로그 차감 → 조직 신호 제거, 아이오딘만 표시"
+        "low_energy": "26-31 kVp (K-edge 아래, 조직 대조도)",
+        "high_energy": "44-49 kVp (K-edge 위, 아이오딘 강조)",
+        "recombined": "로그 차감 → 조직 신호 제거, 아이오딘만 표시",
+        "UNIT_NOTE": "kVp = 관전압(tube voltage). 평균 광자 에너지(keV)와 다름. LE 평균 ~17-20 keV, HE 평균 ~30-35 keV"
       }
     },
     "clinical_application": {
@@ -39,7 +40,12 @@
     "physics_optimization": {
       "energy_separation": "LE/HE 에너지 차이가 클수록 아이오딘 CNR 향상",
       "k_edge_positioning": "HE 평균 에너지가 K-edge 직상(35-40 keV)일 때 최적",
-      "dose_allocation": "LE:HE = 1:1 또는 1.5:1 권장"
+      "dose_allocation": {
+        "clinical_practice": "LE:HE ≈ 2:1 (임상에서 LE가 진단 영상이므로 높은 선량)",
+        "optimization_research": "CNR 최적화 연구에서는 HE 비중 증가 권장 (Piacentini 2015)",
+        "source": "PMC8997084 (2-center prospective), PMC4478839 (optimization)",
+        "NOTE": "임상 vs 최적화 권장값이 다름. 시스템/프로토콜에 따라 변동"
+      }
     },
     "difference_from_calcification": {
       "iodine_contrast": "혈관성 병변 (Mass, Enhancement)",
@@ -61,14 +67,18 @@
     {
       "id": "Dromain2011",
       "citation": "Dromain C, et al. Dual-energy contrast-enhanced digital mammography: initial clinical results. Eur Radiol. 2011;21(3):565-574.",
-      "pmid": "20865420",
+      "pmid": "20839001",
+      "CORRECTION_NOTE": "이전 PMID 20865420은 오류. 올바른 PMID: 20839001",
       "type": "primary"
     },
     {
       "id": "Jochelson2013",
-      "citation": "Jochelson MS, et al. Bilateral contrast-enhanced dual-energy digital mammography: feasibility and comparison with conventional digital mammography and MR imaging in women with known breast carcinoma. Radiology. 2013;266(3):743-751.",
-      "pmid": "23220899",
-      "type": "primary"
+      "citation": "Jochelson MS, Dershaw DD, Sung JS, et al. Bilateral contrast-enhanced dual-energy digital mammography: feasibility and comparison with conventional digital mammography and MR imaging in women with known breast carcinoma. Radiology. 2013;266(3):743-751.",
+      "pmid": "23220903",
+      "pmc": "PMC5673037",
+      "doi": "10.1148/radiol.12121084",
+      "type": "primary",
+      "CORRECTION_NOTE": "이전 PMID 23220899는 완전히 다른 논문(CT/MR perfusion). 올바른 PMID: 23220903"
     },
     {
       "id": "ACR_CEM",

@@ -26,12 +26,13 @@
       "type": "Meta-Analysis"
     },
     {
-      "id": "destounis2022",
-      "citation": "Destounis S, et al. Mammographic breast density and the risk of breast cancer: A systematic review and meta-analysis. Eur J Radiol. 2022;155:110474",
+      "id": "bodewes2022",
+      "citation": "Bodewes FTH, van Asselt AA, Dorrius MD, Greuter MJW, de Bock GH. Mammographic breast density and the risk of breast cancer: A systematic review and meta-analysis. The Breast. 2022;66:62-68",
       "pmid": "36063686",
       "pmc": "PMC9530665",
-      "doi": "10.1016/j.ejrad.2022.110474",
-      "type": "Recent Meta-Analysis (BI-RADS 5th)"
+      "doi": "10.1016/j.breast.2022.09.007",
+      "type": "Recent Meta-Analysis (BI-RADS 5th)",
+      "CORRECTION_NOTE": "이전 저자 'Destounis S'와 저널 'Eur J Radiol', 권호 '155:110474'는 완전히 잘못됨. 실제 저자: Bodewes FTH, van Asselt AA, et al. 실제 저널: The Breast. 실제 권호: 66:62-68"
     },
     {
       "id": "acr_birads",
@@ -88,25 +89,34 @@
       "change_from_4th_edition": "퍼센트 기반 구분 제거, masking 위험 강조"
     },
     "cancer_risk": {
-      "source_ref": "boyd2007, mccormack2006, destounis2022",
+      "source_ref": "boyd2007, mccormack2006, bodewes2022",
       "classic_estimate": {
-        "finding": "75% 이상 치밀유방은 5-10% 이하 대비 4-6배 유방암 위험 증가",
-        "source_ref": "mccormack2006"
+        "finding": "75% 이상 치밀유방은 <5% 대비 4-6배 유방암 위험 증가",
+        "source_ref": "mccormack2006",
+        "mccormack2006_values": {
+          "reference_category": "<5% (RR 1.0)",
+          "percent_density_5_24": "RR 1.79 (95% CI: 1.48-2.16)",
+          "percent_density_25_49": "RR 2.11 (95% CI: 1.70-2.63)",
+          "percent_density_50_74": "RR 2.92 (95% CI: 2.49-3.42)",
+          "percent_density_75_plus": "RR 4.64 (95% CI: 3.64-5.91)"
+        },
+        "verification_note": "McCormack 2006 meta-analysis에서 직접 검증됨 (PMID 16775176)"
       },
       "updated_estimate": {
-        "source_ref": "destounis2022",
+        "source_ref": "bodewes2022",
         "finding": "BI-RADS D(극도로 치밀)는 BI-RADS B(산재 밀도) 대비 2.11배 위험 증가 (95% CI 1.84-2.42)",
         "age_bmi_adjusted": "나이와 BMI 보정 시 1.83배 (95% CI 1.52-2.21)",
         "note": "디지털 맘모그래피와 BI-RADS 5판 사용으로 기존 추정보다 낮은 위험도"
       },
       "risk_per_category": {
         "source_ref": "boyd2007",
-        "percent_density_0": "RR 1.0 (reference)",
-        "percent_density_1_10": "RR 1.79",
-        "percent_density_11_25": "RR 2.11",
-        "percent_density_26_50": "RR 2.92",
-        "percent_density_51_75": "RR 3.96",
-        "percent_density_over_75": "RR 5.30"
+        "CORRECTION_NOTE": "이전 값(RR 1.79, 2.11, 2.92, 3.96, 5.30)과 카테고리 경계가 Boyd 2007 Table 3와 불일치했음. 논문은 OR 사용, RR 아님. 아래는 NEJM Table 3 원문 기준 수정",
+        "reference_category": "<10% (OR 1.0)",
+        "percent_density_10_24": "OR 1.8 (95% CI: 1.2-2.7)",
+        "percent_density_25_49": "OR 2.1 (95% CI: 1.4-3.2)",
+        "percent_density_50_74": "OR 2.9 (95% CI: 1.8-4.6)",
+        "percent_density_75_plus": "OR 4.7 (95% CI: 3.0-7.4)",
+        "note": "전체 유방암 기준. Screen-detected: OR 3.5, Interval >12개월: OR 5.7"
       }
     },
     "masking_effect": {
@@ -142,7 +152,7 @@
       }
     },
     "interobserver_variability": {
-      "source_ref": "destounis2022",
+      "source_ref": "bodewes2022",
       "visual_kappa": "0.77 (substantial agreement)",
       "volumetric_vs_visual_kappa": "0.55 (moderate agreement)",
       "implication": "자동화된 볼륨 측정이 표준화에 도움되나 방사선과 전문의 판단과 완전히 일치하지 않음"
@@ -153,6 +163,6 @@
     "risk_stratification": "유방 밀도를 다른 위험 인자와 함께 개인화된 선별 전략에 활용",
     "notification_laws": "미국 등에서 치밀유방 통지 법률 시행 중",
     "dose_consideration": "치밀유방은 동일 두께에서 더 높은 감쇠 → AEC가 더 높은 선량 사용",
-    "source_ref": "boyd2007, acr_birads, destounis2022"
+    "source_ref": "boyd2007, acr_birads, bodewes2022"
   }
 }

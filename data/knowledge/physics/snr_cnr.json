@@ -19,14 +19,6 @@
       "id": "iec62220",
       "citation": "IEC 62220-1-2:2007. Medical electrical equipment - Characteristics of digital X-ray imaging devices - Part 1-2: Determination of the detective quantum efficiency - Mammography detectors",
       "type": "International Standard"
-    },
-    {
-      "id": "korner2023",
-      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
-      "pmid": "37959173",
-      "pmc": "PMC10606465",
-      "doi": "10.3390/jcm12216714",
-      "type": "Review Article"
     }
   ],
   "definitions": {

@@ -86,10 +86,12 @@
       "type": "textbook"
     },
     {
-      "id": "Niklason1998",
+      "id": "Niklason1997",
       "citation": "Niklason LT, et al. Digital tomosynthesis in breast imaging. Radiology. 1997;205(2):399-406.",
       "pmid": "9356620",
-      "type": "primary"
+      "doi": "10.1148/radiology.205.2.9356620",
+      "type": "primary",
+      "CORRECTION_NOTE": "source ID를 Niklason1998에서 Niklason1997로 수정 (출판년도 1997)"
     },
     {
       "id": "ACR_Mammo",

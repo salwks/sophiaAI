@@ -11,12 +11,13 @@
   ],
   "sources": [
     {
-      "id": "broeders2017",
-      "citation": "Broeders MJ, et al. Can Breast Compression Be Reduced in Digital Mammography and Breast Tomosynthesis? AJR Am J Roentgenol. 2017;209(5):W322-W332",
+      "id": "agasthya2017",
+      "citation": "Agasthya GA, D'Orsi E, Kim YJ, Handa P, Ho CP, D'Orsi CJ, Sechopoulos I. Can Breast Compression Be Reduced in Digital Mammography and Breast Tomosynthesis? AJR Am J Roentgenol. 2017;209(5):W322-W332",
       "pmid": "28929809",
       "pmc": "PMC5751437",
       "doi": "10.2214/AJR.16.17615",
-      "type": "Force Reduction Study"
+      "type": "Force Reduction Study",
+      "CORRECTION_NOTE": "이전 저자 'Broeders MJ'는 완전히 잘못됨. 실제 저자: Agasthya GA, D'Orsi E, Kim YJ, et al."
     },
     {
       "id": "branderhorst2012",
@@ -33,8 +34,9 @@
       "type": "Pressure-Controlled Protocol"
     },
     {
-      "id": "korner2023",
-      "citation": "Korner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714",
+      "id": "fico2023",
+      "citation": "Fico N, Di Grezia G, Cuccurullo V, et al. Breast Imaging Physics in Mammography (Part I). Diagnostics. 2023;13(20):3227",
+      "CORRECTION_NOTE": "이전 저자 Korner M과 저널 J Clin Med는 완전히 잘못됨. 실제 저자: Fico N, Di Grezia G, et al. 실제 저널: Diagnostics",
       "pmid": "37959173",
       "pmc": "PMC10606465",
       "doi": "10.3390/jcm12216714",
@@ -50,14 +52,14 @@
   ],
   "content": {
     "principles": {
-      "source_ref": "korner2023",
+      "source_ref": "fico2023",
       "dose_reduction_mechanism": "유방 압박으로 두께 감소 → 투과 광자 증가 → 동일 광자 수를 위한 입사 선량 감소",
       "Lambert_Beer_law": "두께 감소 시 광자 투과율 증가로 조직 내 에너지 침착 감소",
       "compression_range_N": "10-30 (일반적으로 10-20 N)",
       "thickness_reduction_example": "9cm → 2cm로 감소 가능"
     },
     "force_reduction_study": {
-      "source_ref": "broeders2017",
+      "source_ref": "agasthya2017",
       "findings": {
         "force_reduction_percent": {
           "CC_view": 48,
@@ -107,7 +109,7 @@
       "tolerance_observation": "증가된 압박력 내성은 유방 표면적과 관련"
     },
     "reduced_compression_effects": {
-      "source_ref": "broeders2017",
+      "source_ref": "agasthya2017",
       "90N_compression": {
         "thickness_increase_mm": 3,
         "dose_increase_percent": 20,
@@ -123,7 +125,7 @@
     "dose_thickness_relationship": {
       "formula": "Dose ∝ exp(μ × thickness)",
       "description": "Lambert-Beer 법칙에 따라 두께 감소 시 선량 지수적 감소",
-      "source_ref": "korner2023"
+      "source_ref": "fico2023"
     }
   },
   "clinical_relevance": {
@@ -131,6 +133,6 @@
     "image_quality": "산란 감소, 움직임 아티팩트 감소, 해부학적 구조 분리 개선",
     "patient_compliance": "과도한 압박은 통증으로 인한 검사 기피 유발 가능",
     "standardization": "압력 기반 프로토콜이 힘 기반보다 재현성 우수",
-    "source_ref": "broeders2017, de_groot2015"
+    "source_ref": "agasthya2017, de_groot2015"
   }
 }

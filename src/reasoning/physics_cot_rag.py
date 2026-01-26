@@ -445,6 +445,50 @@ class PhysicsCausalChainDetector:
                 "detector_physics"
             ],
             "formulas": ["SNR_PCD > SNR_EID (at low dose)", "DQE_PCD(0) ≈ 1"]
+        },
+        "cem_contrast_timing": {
+            "triggers": [
+                ("CEM", "wash-out"), ("CEM", "타이밍"), ("CEM", "생검"),
+                ("조영", "wash"), ("조영제", "시간"), ("조영 증강", "생검"),
+                ("CESM", "biopsy"), ("contrast", "timing"), ("CEDM", "delayed"),
+                ("조영", "석회화"), ("CEM", "calcification"), ("LE", "HE"),
+                ("recombined", "석회화"), ("조영", "지연"), ("wash-in",),
+                ("wash-out",), ("CNR", "시간"), ("enhancement", "kinetics"),
+                ("DCIS", "CEM"), ("DCIS", "조영"), ("배경 실질", "증강"),
+                ("BPE",), ("background parenchymal",)
+            ],
+            "causal_chain": "[시간 의존성] 조영제 주입 2-3분 = Peak CNR(AUC 0.711) → 5-7분 Plateau/Wash-out → 7-9분 진단력 감소(AUC 0.557) + [석회화 가시성] Recombined image에서 조직 제거 시 석회화 신호도 상쇄 → LE image에서만 석회화 평가 가능 + [DCIS 위음성] Low-grade DCIS 16-24% 비증강",
+            "required_modules": [
+                "cem_contrast_dynamics",
+                "cesm_iodine_contrast",
+                "contrast_enhanced_mammography",
+                "calcification_contrast_physics"
+            ],
+            "formulas": [
+                "LBR = (LGV - BGV) / BGV",
+                "AUC: Early(0.711) > Second(0.605) > Delayed(0.557)",
+                "DCIS false negative: 16-24%",
+                "Optimal biopsy window: 2-10 min post-injection"
+            ]
+        },
+        "cem_calcification_visibility": {
+            "triggers": [
+                ("CEM", "미세석회화"), ("CESM", "calcification"),
+                ("조영", "석회화", "가시성"), ("recombined", "calc"),
+                ("LE", "석회화"), ("HE", "석회화"),
+                ("dual-energy", "calcification")
+            ],
+            "causal_chain": "Dual-energy recombination → 조직 신호 제거 목적 weighting → 석회화 신호도 부분 상쇄 → Recombined에서 석회화 불가시 → LE에서만 석회화 형태 평가",
+            "required_modules": [
+                "cem_contrast_dynamics",
+                "cesm_iodine_contrast",
+                "calcification_contrast_physics"
+            ],
+            "formulas": [
+                "I_rec = ln(I_LE) - w × ln(I_HE)",
+                "Calcification visibility: LE >> Recombined",
+                "Minimum visible calcification (DEDM): 250 μm"
+            ]
         }
     }
 

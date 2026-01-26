@@ -136,10 +136,11 @@
   },
   "sources": [
     {
-      "id": "Cunningham2000",
+      "id": "Cunningham1999",
       "citation": "Cunningham IA, Shaw R. Signal-to-noise optimization of medical imaging systems. J Opt Soc Am A. 1999;16(3):621-632.",
-      "pmid": "10069050",
-      "type": "primary"
+      "doi": "10.1364/JOSAA.16.000621",
+      "type": "primary",
+      "CORRECTION_NOTE": "이전 PMID 10069050은 Burgess의 'Rose model revisited' 논문으로 완전히 다른 논문. J Opt Soc Am A는 PubMed에 인덱싱되지 않아 PMID 없음. DOI로 대체. source ID도 2000→1999로 수정"
     },
     {
       "id": "IEC62220",

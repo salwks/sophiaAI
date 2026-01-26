@@ -28,12 +28,13 @@
       "type": "IAEA Protocol"
     },
     {
-      "id": "vanEngen2006",
-      "citation": "van Engen R, et al. Quality assurance and quality control in mammography: a review of available guidance worldwide. Insights Imaging. 2013;4(5):539-553",
-      "pmid": "24014362",
+      "id": "reis2013",
+      "citation": "Reis C, Pascoal A, Sakellaris T, Koutalonis M. Quality assurance and quality control in mammography: a review of available guidance worldwide. Insights Imaging. 2013;4(5):539-553",
+      "pmid": "23912879",
       "pmc": "PMC3781250",
       "doi": "10.1007/s13244-013-0269-1",
-      "type": "Worldwide QC Review"
+      "type": "Worldwide QC Review",
+      "CORRECTION_NOTE": "이전 PMID 24014362는 완전히 다른 논문 (Kaur - vomeronasal neurons). 올바른 PMID: 23912879. 저자도 van Engen이 아닌 Reis et al. source ID도 reis2013에서 reis2013으로 수정"
     },
     {
       "id": "hendrick1995",
@@ -52,7 +53,7 @@
   ],
   "content": {
     "qc_framework_overview": {
-      "source_ref": "vanEngen2006",
+      "source_ref": "reis2013",
       "description": "맘모그래피 품질관리는 인수 시험, 정기 검사, 그리고 지속적 모니터링으로 구성",
       "major_protocols": [
         "ACR (미국, 캐나다, 호주)",
@@ -89,7 +90,7 @@
       }
     },
     "euref_protocol": {
-      "source_ref": "euref_guidelines, vanEngen2006",
+      "source_ref": "euref_guidelines, reis2013",
       "overview": "European Guidelines for Quality Assurance in Breast Cancer Screening and Diagnosis",
       "phantom": {
         "primary": "CDMAM (Contrast-Detail Mammography) phantom",
@@ -154,7 +155,7 @@
       }
     },
     "phantom_comparison": {
-      "source_ref": "song2012, vanEngen2006",
+      "source_ref": "song2012, reis2013",
       "acr_phantom": {
         "advantages": "널리 사용, 통과/불통과 기준 명확, 규제 준수 용이",
         "limitations": "정량적 영상 품질 점수 없음, 시스템 간 미세 차이 구분 어려움"
@@ -181,6 +182,6 @@
     "dose_optimization": "정기 QC로 불필요한 선량 노출 방지",
     "image_quality_assurance": "일관된 진단 품질 유지",
     "early_problem_detection": "장비 문제 조기 발견으로 환자 안전 확보",
-    "source_ref": "vanEngen2006, acr_qc_manual"
+    "source_ref": "reis2013, acr_qc_manual"
   }
 }

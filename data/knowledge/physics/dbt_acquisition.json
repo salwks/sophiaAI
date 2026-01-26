@@ -18,11 +18,13 @@
       "type": "Comprehensive Review - Acquisition"
     },
     {
-      "id": "michell2018",
-      "citation": "Michell MJ, et al. Digital breast tomosynthesis: State of the Art. Radiology. 2015;277(3):663-684",
+      "id": "vedantham2015",
+      "citation": "Vedantham S, Karellas A, Vijayaraghavan GR, Kopans DB. Digital Breast Tomosynthesis: State of the Art. Radiology. 2015;277(3):663-684",
       "pmid": "26599926",
+      "pmc": "PMC4666121",
       "doi": "10.1148/radiol.2015141303",
-      "type": "State of the Art Review"
+      "type": "State of the Art Review",
+      "CORRECTION_NOTE": "이전 ID 'vedantham2015'과 저자 'Michell MJ'는 완전히 잘못됨. 실제 저자: Vedantham S, Karellas A, et al."
     },
     {
       "id": "rodriguez2016",
@@ -32,18 +34,21 @@
       "type": "Multi-System Comparison"
     },
     {
-      "id": "feng2007",
+      "id": "feng2012",
       "citation": "Feng SS, Sechopoulos I. Clinical digital breast tomosynthesis system: dosimetric characterization. Radiology. 2012;263(1):35-42",
       "pmid": "22332070",
+      "pmc": "PMC3309800",
       "doi": "10.1148/radiol.11111789",
-      "type": "Dosimetric Characterization"
+      "type": "Dosimetric Characterization",
+      "CORRECTION_NOTE": "이전 ID 'feng2007'은 연도 불일치. 실제 출판연도: 2012"
     },
     {
       "id": "baker2011",
       "citation": "Baker JA, Lo JY. Breast tomosynthesis: state-of-the-art and review of the literature. Acad Radiol. 2011;18(10):1298-1310",
-      "pmid": "21893294",
+      "pmid": "21893296",
       "doi": "10.1016/j.acra.2011.06.011",
-      "type": "Literature Review"
+      "type": "Literature Review",
+      "CORRECTION_NOTE": "이전 PMID 21893294는 다른 논문(흉부 CT). 올바른 PMID: 21893296"
     }
   ],
   "content": {
@@ -58,7 +63,7 @@
       ]
     },
     "system_comparison": {
-      "source_ref": "rodriguez2016, michell2018",
+      "source_ref": "rodriguez2016, vedantham2015",
       "systems": {
         "hologic_dimensions": {
           "angular_range_deg": 15,
@@ -88,13 +93,14 @@
           "note": "step-and-shoot로 motion blur 최소화"
         },
         "fujifilm_amulet": {
-          "angular_range_deg": 15,
-          "projections": 15,
+          "angular_range_deg": "15 (ST mode) or 40 (HR mode)",
+          "projections": "N/A - 출처 미확인으로 제거",
           "tube_motion": "continuous",
           "detector_motion": "stationary",
           "sid_cm": 65,
           "pixel_pitch_um": 50,
-          "note": "직접 변환 검출기, 높은 해상도"
+          "note": "직접 변환 a-Se 검출기, 높은 해상도. ST mode ±7.5°(15°), HR mode ±20°(40°)",
+          "CORRECTION_NOTE": "projections 수(15개)는 출처 확인 불가로 제거. angular range는 Fujifilm 공식 자료 기반"
         }
       }
     },

@@ -53,12 +53,19 @@
       "pmid": "21302803",
       "doi": "10.1118/1.3505014",
       "type": "Analytical Model"
+    },
+    {
+      "id": "li2025",
+      "citation": "Li K, Liu X, Jacobsen MC, et al. User evaluation of detector performance in clinical photon-counting and energy-integrating CT scanners using DICOM images. Med Phys. 2025;52(10):e70045",
+      "pmid": "41046473",
+      "type": "Clinical Comparison",
+      "NOTE": "evidence_database에서 참조되어 sources에 추가함"
     }
   ],
   "_legacy_citation_priority": {
       "tier_0_full_text_verified": ["leng2019", "flohr2023"],
       "tier_1_cross_or_abstract_quote": ["danielsson2021", "kuttig2015", "xu2014", "li2025"],
-      "tier_2_abstract_supported": ["fredenberg2018", "acciavatti2010"],
+      "tier_2_abstract_supported": ["berggren2018", "acciavatti2010"],
       "usage_rule": "tier_0 우선 인용, tier_1은 수치 근거로 보조, tier_2는 배경/맥락 제공"
   },
   "core_physics": {
@@ -139,7 +146,7 @@
           "solver_connection": "η_abs=0.85 파라미터 근거"
         },
         {
-          "ref_id": "fredenberg2018",
+          "ref_id": "berggren2018",
           "finding": "PCD 기반 유방 tomosynthesis에서 DQE(0)=0.72 실측. 좁은 슬릿 기하학으로 산란선 감소 효과 포함.",
           "abstract_quote": "The zero-frequency DQE of the system was found to be 0.72",
           "source": "Berggren K, et al. Med Phys. 2018;45(2):549-560 [PMID:29159881]",

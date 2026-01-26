@@ -19,39 +19,45 @@
       "type": "Comprehensive Review - Reconstruction"
     },
     {
-      "id": "erhard2017",
-      "citation": "Erhard K, et al. New reconstruction algorithm for digital breast tomosynthesis: better image quality for humans and computers. Acta Radiol. 2018;59(9):1051-1059",
+      "id": "rodriguez2018",
+      "citation": "Rodriguez-Ruiz A, Teuwen J, Vreemann S, et al. New reconstruction algorithm for digital breast tomosynthesis: better image quality for humans and computers. Acta Radiol. 2018;59(9):1051-1059",
       "pmid": "29254355",
-      "doi": "10.1177/0284185117752101",
-      "type": "FBP vs Iterative Comparison"
+      "doi": "10.1177/0284185117748487",
+      "type": "FBP vs Iterative Comparison",
+      "CORRECTION_NOTE": "이전 ID 'rodriguez2018'과 저자 'Erhard K'는 완전히 잘못됨. 실제 저자: Rodriguez-Ruiz A, et al. DOI도 수정됨"
     },
     {
-      "id": "zheng2019",
-      "citation": "Zheng J, et al. Evaluation of a new image reconstruction method for digital breast tomosynthesis: effects on the visibility of breast lesions and breast density. Eur Radiol. 2020;30(2):915-923",
+      "id": "krammer2019",
+      "citation": "Krammer J, Zolotarev S, Hillman I, et al. Evaluation of a new image reconstruction method for digital breast tomosynthesis: effects on the visibility of breast lesions and breast density. Br J Radiol. 2019;92(1103):20190345",
       "pmid": "31453718",
-      "doi": "10.1007/s00330-019-06423-3",
-      "type": "Clinical Reconstruction Comparison"
+      "doi": "10.1259/bjr.20190345",
+      "type": "Clinical Reconstruction Comparison",
+      "CORRECTION_NOTE": "이전 ID 'krammer2019', 저자 'Zheng J', 저널 'Eur Radiol'은 완전히 잘못됨. 실제 저자: Krammer J, et al. 실제 저널: Br J Radiol"
     },
     {
-      "id": "wu2004",
+      "id": "wu2003",
       "citation": "Wu T, Stewart A, Stanton M, et al. Tomographic mammography using a limited number of low-dose cone-beam projection images. Med Phys. 2003;30(3):365-380",
       "pmid": "12674237",
       "doi": "10.1118/1.1543934",
-      "type": "Early Reconstruction Methods"
+      "type": "Early Reconstruction Methods",
+      "CORRECTION_NOTE": "이전 ID 'wu2004'는 연도 불일치. 실제 출판연도: 2003"
     },
     {
       "id": "das2011",
-      "citation": "Das M, et al. Penalized maximum likelihood reconstruction for improved microcalcification detection in breast tomosynthesis. IEEE Trans Med Imaging. 2011;30(4):904-914",
-      "pmid": "21118769",
+      "citation": "Das M, Gifford HC, O'Connor JM, Glick SJ. Penalized maximum likelihood reconstruction for improved microcalcification detection in breast tomosynthesis. IEEE Trans Med Imaging. 2011;30(4):904-914",
+      "pmid": "21041158",
+      "pmc": "PMC3398486",
       "doi": "10.1109/TMI.2010.2089694",
-      "type": "PML Reconstruction"
+      "type": "PML Reconstruction",
+      "CORRECTION_NOTE": "이전 PMID 21118769는 완전히 다른 논문(X-ray categorization). 올바른 PMID: 21041158"
     },
     {
-      "id": "abreu2021",
-      "citation": "Abreu E, et al. A Realistic Breast Phantom Proposal for 3D Image Reconstruction in Digital Breast Tomosynthesis. Diagnostics. 2022;12(9):2167",
+      "id": "polat2022",
+      "citation": "Polat A, Kumrular RK. A Realistic Breast Phantom Proposal for 3D Image Reconstruction in Digital Breast Tomosynthesis. Technol Cancer Res Treat. 2022;21:15330338221126814",
       "pmid": "36071652",
-      "doi": "10.3390/diagnostics12092167",
-      "type": "SART vs FBP Comparison"
+      "doi": "10.1177/15330338221126814",
+      "type": "SART vs FBP Comparison",
+      "CORRECTION_NOTE": "이전 ID 'polat2022', 저자 'Abreu E', 저널 'Diagnostics'는 완전히 잘못됨. 실제 저자: Polat A, Kumrular RK. 실제 저널: Technol Cancer Res Treat"
     }
   ],
   "content": {
@@ -66,7 +72,7 @@
       ]
     },
     "algorithm_types": {
-      "source_ref": "sechopoulos2013b, erhard2017",
+      "source_ref": "sechopoulos2013b, rodriguez2018",
       "shift_and_add": {
         "description": "가장 단순한 역투영. 투영 영상을 슬라이스 깊이에 맞게 shift하여 합산",
         "advantages": "계산 간단, 빠름",
@@ -87,19 +93,19 @@
       }
     },
     "fbp_vs_iterative": {
-      "source_ref": "erhard2017, zheng2019, abreu2021",
+      "source_ref": "rodriguez2018, krammer2019, polat2022",
       "image_quality_comparison": {
         "cnr_improvement": "반복 재구성이 FBP 대비 CNR 2-6배 향상 (SART CNR=2.87 vs FBP CNR=0.50)",
         "noise": "반복 재구성이 노이즈 현저히 감소",
         "lesion_visibility": "유방암 가시성 향상, 특히 저대조도 종괴"
       },
       "clinical_findings": {
-        "source_ref": "zheng2019",
+        "source_ref": "krammer2019",
         "finding": "Heuristic Bayesian Inference(HBI) 재구성이 FBP 대비 유방암 가시성 향상 및 perceived breast density 감소",
         "density_impact": "평균 밀도 카테고리 0.5-1 등급 감소"
       },
       "phantom_study": {
-        "source_ref": "abreu2021",
+        "source_ref": "polat2022",
         "finding": "SART(2-4 iterations)가 FBP보다 미세석회화 검출 우수",
         "quantitative": "23 projections에서 SART(2 iter) CNR=2.871 vs FBP CNR=0.497"
       }
@@ -107,15 +113,18 @@
     "depth_resolution": {
       "source_ref": "sechopoulos2013b",
       "formula": "Δz_FWHM ≈ K / sin(α/2)",
-      "K_values": {
-        "iterative": "0.42 mm (최적화된 반복 재구성)",
-        "default": "0.50 mm (중간)",
-        "fbp": "1.0 mm (필터 역투영)"
+      "CAUTION_NOTE": "K값(0.42, 0.50, 1.0)의 출처 불명확. Sechopoulos 2013b, Dobbins 2003에서 해당 수치 직접 확인 불가. 일반적 원리만 사용하고 구체적 K값은 신뢰하지 말 것.",
+      "K_values_UNVERIFIED": {
+        "iterative": "0.42 mm (출처 미확인)",
+        "default": "0.50 mm (출처 미확인)",
+        "fbp": "1.0 mm (출처 미확인)"
       },
-      "examples": {
-        "50deg_iterative": "Δz = 0.42/sin(25°) = 0.99 mm",
-        "25deg_default": "Δz = 0.50/sin(12.5°) = 2.31 mm",
-        "15deg_fbp": "Δz = 1.0/sin(7.5°) = 7.66 mm"
+      "verified_principle": "넓은 각도(α↑) → sin(α/2)↑ → Δz↓ → 깊이 분해능 향상. 반복 재구성이 FBP보다 depth resolution 우수.",
+      "measured_values": {
+        "source_ref": "rodriguez2016 (web search)",
+        "siemens_50deg": "FWHM = 2.3 mm",
+        "ge_25deg": "FWHM = 2.8 mm",
+        "fujifilm_hr_40deg": "FWHM = 4.1 mm (reconstruction algorithm 영향)"
       },
       "clinical_implication": "넓은 각도 + 반복 재구성 = 최적 깊이 분해능"
     },
@@ -138,7 +147,7 @@
       }
     },
     "vendor_algorithms": {
-      "source_ref": "erhard2017, sechopoulos2013b",
+      "source_ref": "rodriguez2018, sechopoulos2013b",
       "hologic": "Proprietary FBP variant",
       "siemens": "FBP + iterative optimizations (EMPIRE)",
       "ge": "Adaptive Statistical Iterative Reconstruction (ASiR) 기반",
@@ -149,6 +158,6 @@
     "algorithm_selection": "반복 재구성이 대조도와 노이즈 면에서 우수하나 계산 시간 고려 필요",
     "density_perception": "재구성 알고리즘이 perceived breast density에 영향 → BI-RADS 분류 일관성 주의",
     "microcalcification": "미세석회화 검출은 반복 재구성(CNR 향상)과 넓은 각도(아티팩트 감소) 조합 시 최적",
-    "source_ref": "sechopoulos2013b, zheng2019, abreu2021"
+    "source_ref": "sechopoulos2013b, krammer2019, polat2022"
   }
 }

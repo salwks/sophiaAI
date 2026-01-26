@@ -22,7 +22,8 @@
     {
       "id": "dromain2011",
       "citation": "Dromain C, Thibault F, Muller S, et al. Dual-energy contrast-enhanced digital mammography: initial clinical results. Eur Radiol. 2011;21(3):565-574",
-      "pmid": "20857116",
+      "pmid": "20839001",
+      "CORRECTION_NOTE": "이전 PMID 20857116은 완전히 다른 논문(Suramab antiangiogenic agent). 올바른 PMID: 20839001",
       "doi": "10.1007/s00330-010-1944-y",
       "type": "Initial Clinical Results"
     },
@@ -54,6 +55,22 @@
       "pmid": "37820689",
       "doi": "10.1002/mp.16750",
       "type": "QC Methods Study"
+    },
+    {
+      "id": "yang2023",
+      "citation": "Yang ML, Bhimani C, Roth R, Germaine P. Contrast enhanced mammography: focus on frequently encountered benign and malignant diagnoses. Cancer Imaging. 2023;23:10",
+      "pmid": "36691077",
+      "pmc": "PMC9872331",
+      "doi": "10.1186/s40644-023-00526-1",
+      "type": "Clinical Focus Review"
+    },
+    {
+      "id": "gennaro2022",
+      "citation": "Gennaro G, Baldan E, Bezzon E, Caumo F. Artifact reduction in contrast-enhanced mammography. Eur Radiol. 2022;32(10):6810-6819",
+      "pmid": "35554734",
+      "pmc": "PMC9098782",
+      "doi": "10.1007/s00330-022-08806-9",
+      "type": "Artifact Reduction Study"
     }
   ],
   "content": {
@@ -67,12 +84,14 @@
       "source_ref": "jochelson2021, dromain2011",
       "iodine_k_edge_keV": 33.2,
       "low_energy_image": {
-        "energy_range_keV": "26-32",
-        "description": "K-edge 아래에서 획득, 기존 맘모그램과 유사"
+        "tube_voltage_kVp": "26-32",
+        "description": "K-edge 아래에서 획득, 기존 맘모그램과 유사",
+        "UNIT_NOTE": "kVp = 관전압. 평균 광자 에너지(keV)와 다름"
       },
       "high_energy_image": {
-        "energy_range_keV": "45-49",
-        "description": "K-edge 위에서 획득, 요오드 감쇠 증가"
+        "tube_voltage_kVp": "44-49",
+        "description": "K-edge 위에서 획득, 요오드 감쇠 증가",
+        "UNIT_NOTE": "kVp = 관전압. 평균 광자 에너지(keV)와 다름"
       },
       "recombined_image": {
         "description": "두 영상을 가중 로그 감산하여 유방 조직 신호 제거, 요오드 신호만 남김",
@@ -143,6 +162,40 @@
         "요오드 농도 정확도",
         "시스템 간 표준화"
       ]
+    },
+    "magnification_guidance": {
+      "source_ref": "yang2023",
+      "timing_recommendation": "확대 촬영이 필요한 경우, CEM 모드 외부에서 10분 시간창 이후에 획득 가능",
+      "rationale": "10분 조영 시간창 내에서는 표준 4-view (CC, MLO 양측) 완료 우선",
+      "dcis_evaluation": {
+        "description": "미세석회화만 나타나는 DCIS는 LE 영상에서 확인 가능, 필요시 확대 촬영으로 추가 평가",
+        "note": "LE 영상은 기존 맘모그래피와 동등하므로 석회화 특성화에 적합"
+      },
+      "clinical_implication": "CEM 프로토콜 중 확대 촬영 시도 시 조영 시간창 초과 위험 → 별도 획득 권장"
+    },
+    "artifacts": {
+      "source_ref": "gennaro2022",
+      "types": {
+        "breast_in_breast": {
+          "description": "유방 가장자리에 C자형 'halo' 형태의 가성 증강",
+          "cause": "유방 두께 불균일과 산란선 차이",
+          "occurrence_rate_percent": 78.3
+        },
+        "ripple_artifact": {
+          "description": "희미한 교대로 나타나는 흑백 줄무늬 패턴",
+          "cause": "LE와 HE 영상 간 미세한 환자 움직임으로 인한 misregistration",
+          "occurrence_rate_percent": 54.2
+        },
+        "skinfold_enhancement": {
+          "description": "이중에너지 감산 처리에서 피부 주름의 증가된 가시성",
+          "cause": "피부 주름 부위의 조직 중첩",
+          "occurrence_rate_percent": 54.8
+        }
+      },
+      "artifact_reduction": {
+        "finding": "새로운 알고리즘이 breast-in-breast 84.5%, ripple 84.2%, skinfold 56.9% 아티팩트 제거",
+        "lesion_preservation": "병변 조영 증강은 보존됨"
+      }
     }
   },
   "clinical_relevance": {

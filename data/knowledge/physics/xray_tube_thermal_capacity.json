@@ -64,7 +64,7 @@
         "limitation": "소초점은 튜브 전류를 제한하여 노출 시간이 길어짐"
       },
       "current_ratio": "대초점 대비 소초점 mA = 약 1/4 (100mA vs 25mA)",
-      "source_ref": "korner2023_pmc, sprawls_mammo"
+      "source_ref": "fico2023_pmc, sprawls_mammo"
     },
     "anode_heat_capacity_specifications": {
       "mammography_typical": {
@@ -151,7 +151,7 @@
       "WARNING": "⚠️ 확대 촬영 노이즈의 핵심 원인 - LLM이 자주 누락함",
       "principle": "확대 시 동일 X선이 더 넓은 검출기 면적에 분산되어 픽셀당 광자 수 감소",
       "formula": "픽셀당 광자 밀도 ∝ 1/M² (M = 확대율)",
-      "source_ref": "samei2006_magnification, mainprize2016_quantum_noise",
+      "source_ref": "boyce_samei2006, mainprize2016_quantum_noise",
       "example_1_8x": {
         "magnification": 1.8,
         "dilution_factor": "1/1.8² = 1/3.24 ≈ 0.31",
@@ -167,7 +167,7 @@
           "example": "√(20/50) / 1.8 = 0.632 / 1.8 = 0.35 = 35%",
           "interpretation": "확대 촬영 SNR은 접촉 촬영의 약 35% 수준"
         },
-        "source_ref": "samei2006_magnification"
+        "source_ref": "boyce_samei2006"
       },
       "motion_blur_primary": {
         "WARNING": "환자 움직임 블러가 '먹먹함'의 주원인, 열 번짐은 부차적",
@@ -193,8 +193,8 @@
         },
         "solution_2": {
           "description": "Air-gap 활용: 그리드 제거",
-          "measured_dose_reduction": "평균 약 8% (두께에 따라 0-30% 변동)",
-          "caveat": "두꺼운 유방에서는 효과 제한적",
+          "measured_dose_reduction": "15-25% (<40mm 유방), 두꺼운 유방에서는 효과 감소",
+          "caveat": "두꺼운 유방(>40mm)에서는 선량 절감 효과 제한적",
           "source_ref": "gennaro2007_grid_removal"
         },
         "solution_3": "최적 노출 매트릭스: 배율별 kVp/mAs 최적 조합 사전 정의",
@@ -233,17 +233,17 @@
     "photon_dilution": {
       "formula": "픽셀당 광자 밀도 ∝ 1/M² (확대 시 광자 희석)",
       "derivation": "Inverse square law applied to detector plane",
-      "source_ref": "samei2006_magnification"
+      "source_ref": "boyce_samei2006"
     },
     "magnification_snr": {
       "formula": "SNR_ratio = √(mAs_mag/mAs_contact) / M",
       "derivation": "SNR ∝ √(photons), photons ∝ mAs/M²",
-      "source_ref": "samei2006_magnification"
+      "source_ref": "boyce_samei2006"
     },
     "required_dose_for_equal_snr": {
       "formula": "Dose_mag = Dose_contact × M²",
       "example": "1.8x 확대: 3.24배 선량 필요",
-      "source_ref": "samei2006_magnification"
+      "source_ref": "boyce_samei2006"
     }
   },
   "common_misconceptions": {
@@ -288,7 +288,7 @@
   },
   "sources": [
     {
-      "id": "korner2023_pmc",
+      "id": "fico2023_pmc",
       "citation": "Körner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714.",
       "pmid": "37959173",
       "pmc": "PMC10606465",
@@ -325,19 +325,22 @@
       "type": "Educational Resource"
     },
     {
-      "id": "barnes1991",
-      "citation": "Barnes GT. Mammography equipment: principles, features, selection. Radiol Clin North Am. 1987;25(5):897-911.",
+      "id": "feig1987",
+      "citation": "Feig SA. Mammography equipment: principles, features, selection. Radiol Clin North Am. 1987;25(5):897-911.",
       "pmid": "3306772",
       "type": "Review Article",
-      "key_data": "≥90,000 HU adequate, ≤20,000 HU may require cooling delays"
+      "key_data": "≥90,000 HU adequate, ≤20,000 HU may require cooling delays",
+      "CORRECTION_NOTE": "이전 저자 'Barnes GT'는 잘못됨. 실제 저자: Feig SA. source ID도 barnes1991에서 feig1987로 수정"
     },
     {
-      "id": "samei2006_magnification",
-      "citation": "Samei E, Flynn MJ. An experimental comparison of detector performance for computed radiography systems. Med Phys. 2006;33(3):682-92.",
+      "id": "boyce_samei2006",
+      "citation": "Boyce SJ, Samei E. Imaging properties of digital magnification radiography. Med Phys. 2006;33(6):1877-1888.",
       "pmid": "16696475",
+      "doi": "10.1118/1.2197231",
       "url": "https://pubmed.ncbi.nlm.nih.gov/16696475/",
       "type": "Research Article",
-      "key_data": "Magnification SNR: 0.3mm focal spot crossover point, optimal magnification improves SNR² by 1.2x"
+      "key_data": "Magnification SNR: 0.3mm focal spot crossover point, optimal magnification improves SNR² by 1.2x",
+      "CORRECTION_NOTE": "이전 제목 'An experimental comparison of detector performance for computed radiography systems'는 완전히 다른 논문 제목. 실제 제목: 'Imaging properties of digital magnification radiography'. 저자도 Samei E, Flynn MJ → Boyce SJ, Samei E로 수정"
     },
     {
       "id": "mackenzie2017_motion_blur",
@@ -375,11 +378,13 @@
     },
     {
       "id": "gennaro2007_grid_removal",
-      "citation": "Gennaro G, et al. Grid removal and impact on population dose in full-field digital mammography. Med Phys. 2007;34(2):547-55.",
-      "pmid": "17279966",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/17279966/",
+      "citation": "Gennaro G, Katz L, Souchay H, et al. Grid removal and impact on population dose in full-field digital mammography. Med Phys. 2007;34(2):547-555.",
+      "pmid": "17388172",
+      "doi": "10.1118/1.2426402",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/17388172/",
       "type": "Research Article",
-      "key_data": "Average dose reduction ~8% with grid removal, insufficient to justify clinical implementation"
+      "key_data": "15-25% dose reduction for breasts <40mm with grid removal (동일 CNR 조건)",
+      "CORRECTION_NOTE": "이전 PMID 17279966은 완전히 다른 논문(vaccine dissemination). 올바른 PMID: 17388172. 선량 감소율도 ~8%→15-25%(<40mm)로 수정"
     },
     {
       "id": "radiopaedia_anode",

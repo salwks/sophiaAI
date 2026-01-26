@@ -13,19 +13,22 @@
   ],
   "sources": [
     {
-      "id": "sinha2014",
-      "citation": "Sinha S, Sharma A, Kaur J. Breast Positioning during Mammography: Mistakes to be Avoided. Indian J Clin Anat Physiol. 2014;1(1):51-56",
+      "id": "popli2014",
+      "citation": "Popli MB, Teotia R, Narang M, Krishna H. Breast Positioning during Mammography: Mistakes to be Avoided. Breast Cancer (Auckl). 2014;8:119-128",
       "pmid": "25125982",
       "pmc": "PMC4125373",
-      "type": "Positioning Error Analysis"
+      "doi": "10.4137/BCBCR.S17617",
+      "type": "Positioning Error Analysis",
+      "CORRECTION_NOTE": "이전 저자 'Sinha S, Sharma A, Kaur J'와 저널 'Indian J Clin Anat Physiol'은 완전히 잘못됨. 실제 저자: Popli MB, Teotia R, Narang M, Krishna H. 실제 저널: Breast Cancer (Auckl)"
     },
     {
-      "id": "spuur2017",
-      "citation": "Spuur KM, et al. A review of mammographic positioning image quality criteria for the craniocaudal projection. Br J Radiol. 2018;91(1082):20170611",
+      "id": "sweeney2018",
+      "citation": "Sweeney RJI, Lewis SJ, Hogg P, McEntee MF. A review of mammographic positioning image quality criteria for the craniocaudal projection. Br J Radiol. 2018;91(1082):20170611",
       "pmid": "29125335",
       "pmc": "PMC5965788",
       "doi": "10.1259/bjr.20170611",
-      "type": "Systematic Review"
+      "type": "Systematic Review",
+      "CORRECTION_NOTE": "이전 저자 'Spuur KM'은 잘못됨. 실제 저자: Sweeney RJI, Lewis SJ, Hogg P, McEntee MF"
     },
     {
       "id": "bassett1993",
@@ -35,28 +38,31 @@
       "type": "Prospective Evaluation"
     },
     {
-      "id": "waade2022",
-      "citation": "Waade GG, et al. Automated Assessment of Breast Positioning Quality in Screening Mammography. Cancers. 2022;14(19):4610",
+      "id": "brahim2022",
+      "citation": "Brahim M, Westerkamp K, Hempel L, Lehmann R, Hempel D, Philipp P. Automated Assessment of Breast Positioning Quality in Screening Mammography. Cancers. 2022;14(19):4704",
       "pmc": "PMC9562663",
-      "doi": "10.3390/cancers14194610",
-      "type": "Automated Assessment Study"
+      "pmid": "36230628",
+      "doi": "10.3390/cancers14194704",
+      "type": "Automated Assessment Study",
+      "CORRECTION_NOTE": "이전 저자 'Waade GG'와 논문번호 '4610'은 잘못됨. 실제 저자: Brahim M, Westerkamp K, et al. 실제 논문번호: 4704"
     },
     {
-      "id": "eklund2010",
-      "citation": "Eklund GW, et al. Mammography image quality: model for predicting compliance with posterior nipple line criterion. Radiology. 2010;256(3):786-794",
+      "id": "spuur2010",
+      "citation": "Spuur K, Hung WT, Poulos A, Rickard M. Mammography image quality: model for predicting compliance with posterior nipple line criterion. Eur J Radiol. 2011;80(3):e416-421",
       "pmid": "20621431",
-      "doi": "10.1148/radiol.10091014",
-      "type": "Predictive Model"
+      "doi": "10.1016/j.ejrad.2010.06.043",
+      "type": "Predictive Model",
+      "CORRECTION_NOTE": "이전 저자 'Eklund GW'와 저널 'Radiology'는 완전히 잘못됨. 실제 저자: Spuur K, Hung WT, Poulos A, Rickard M. 실제 저널: Eur J Radiol. 출판연도 2011 (online 2010)"
     }
   ],
   "content": {
     "importance": {
-      "source_ref": "sinha2014",
+      "source_ref": "popli2014",
       "statement": "포지셔닝은 맘모그래피 영상 결과에 영향을 미치는 가장 중요한 요소",
       "impact": "부적절한 포지셔닝 → 검사 결론 불가 → 맘모그래피 민감도 저하"
     },
     "MLO_view_criteria": {
-      "source_ref": "sinha2014, spuur2017",
+      "source_ref": "popli2014, sweeney2018",
       "ideal_MLO": [
         "유두가 프로파일에 위치",
         "대흉근 경계가 잘 보임",
@@ -66,7 +72,7 @@
       "common_errors": {
         "pectoralis_not_visible": {
           "bilateral_incidence": "0.520%",
-          "source_ref": "sinha2014"
+          "source_ref": "popli2014"
         },
         "pectoralis_margin_not_straight": {
           "incidence": "0.706%"
@@ -77,7 +83,7 @@
       }
     },
     "CC_view_criteria": {
-      "source_ref": "spuur2017",
+      "source_ref": "sweeney2018",
       "key_metrics": [
         "대흉근 가시화",
         "후방유두선(PNL) 측정",
@@ -86,7 +92,7 @@
       "pectoralis_importance": "대흉근이 최적 유방조직 포함 확인을 위한 핵심 후방 해부학적 구조"
     },
     "nipple_positioning": {
-      "source_ref": "sinha2014, bassett1993",
+      "source_ref": "popli2014, bassett1993",
       "most_common_problem": "부적절한 유두 포지셔닝 - CC 뷰에서 3.827%로 가장 흔한 문제",
       "ideal": "유두가 프로파일에 위치해야 함"
     },
@@ -105,13 +111,13 @@
       }
     },
     "posterior_nipple_line_PNL": {
-      "source_ref": "waade2022, eklund2010",
+      "source_ref": "brahim2022, spuur2010",
       "definition": "유두에서 대흉근선까지 수직으로 그은 선",
       "purpose": "맘모그램이 후방 유방조직을 적절히 포함하는지 확인",
       "risk_if_not_met": "PNL이 영상 영역 내 대흉근선과 교차하지 않으면 유방조직 제외 위험"
     },
     "automated_assessment": {
-      "source_ref": "waade2022",
+      "source_ref": "brahim2022",
       "findings": {
         "most_frequently_missed": "MLO 뷰에서 대흉근 수준이 가장 자주 누락되는 기준",
         "second_most_missed": "유방하주름 가시화"
@@ -119,13 +125,13 @@
       "application": "영상품질 평가 자동화로 맘모그래피 영상품질 평가 일관성 향상 가능"
     },
     "predictive_model": {
-      "source_ref": "eklund2010",
+      "source_ref": "spuur2010",
       "purpose": "대흉근 폭/길이 측정과 PNL 기준 허용 여부를 사용하여 MLO 뷰 대흉근 표현 허용 여부 예측",
       "clinical_benefit": "영상품질 최적화로 방사선학적 해석 정확도 향상 → 조기 유방암 검출 극대화"
     }
   },
   "quality_criteria_summary": {
-    "source_ref": "sinha2014, spuur2017, bassett1993",
+    "source_ref": "popli2014, sweeney2018, bassett1993",
     "MLO_view": {
       "pectoralis_muscle": "가시적, 경계 직선/볼록, 하단이 PNL 아래",
       "nipple": "프로파일에 위치",
@@ -143,6 +149,6 @@
     "cancer_detection": "적절한 포지셔닝은 유방암 효과적 검출에 필수",
     "tissue_exclusion_risk": "부적절한 포지셔닝으로 유방조직 제외 시 병변 누락 위험",
     "recall_rate": "재촬영 필요성 감소로 환자 불안 및 추가 선량 노출 방지",
-    "source_ref": "sinha2014, waade2022"
+    "source_ref": "popli2014, brahim2022"
   }
 }
