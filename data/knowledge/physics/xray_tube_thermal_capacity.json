@@ -1,0 +1,228 @@
+{
+  "id": "xray_tube_thermal_capacity",
+  "title": "X-ray Tube Thermal Capacity and Focal Spot Heat Limitations",
+  "domain": "tube_physics",
+  "keywords": [
+    "열용량", "thermal capacity", "heat capacity",
+    "heat unit", "HU", "열단위",
+    "초점 열부하", "focal spot heat loading",
+    "양극 열용량", "anode heat capacity",
+    "냉각률", "cooling rate",
+    "소초점 제한", "small focal spot limitation",
+    "mA 제한", "tube current limitation",
+    "확대촬영 한계", "magnification limitation",
+    "노출 시간", "exposure time"
+  ],
+  "content": {
+    "heat_unit_fundamentals": {
+      "definition": "Heat Unit(HU)는 X선관에서 발생하는 열량의 단위",
+      "formulas": {
+        "single_phase": {
+          "formula": "HU = kVp × mA × s",
+          "waveform_factor": 0.71,
+          "note": "단상 발생기 기준"
+        },
+        "three_phase": {
+          "formula": "HU = 1.35 × kVp × mA × s",
+          "waveform_factor": 0.96,
+          "note": "3상 발생기는 1.35배 더 많은 열 발생"
+        },
+        "joules_conversion": {
+          "formula": "Heat (J) = w × kVp × mAs",
+          "note": "w = waveform factor (단상 0.71, 3상 0.96, 정전압 1.0)"
+        }
+      },
+      "power_formula": "Power (W) = w × kVp × mA",
+      "source_ref": "radiopaedia_tube_rating"
+    },
+    "focal_spot_heat_capacity": {
+      "critical_area": "초점 영역(focal track)은 X선관에서 가장 작은 열용량을 가진 영역",
+      "heat_flow": [
+        "1. 초점에서 열 발생",
+        "2. 양극 본체로 전도 (conduction)",
+        "3. 튜브 하우징으로 복사 (radiation)",
+        "4. 하우징에서 주변 대기로 방출"
+      ],
+      "size_relationship": {
+        "principle": "초점 크기가 클수록 열용량이 높아 더 높은 튜브 정격(tube rating) 가능",
+        "doubling_effect": "초점 크기 2배 증가 → 튜브 정격 약 3배 증가",
+        "source_ref": "radiopaedia_tube_rating"
+      }
+    },
+    "mammography_focal_spot_specifications": {
+      "large_focal_spot": {
+        "nominal_size_mm": 0.3,
+        "tube_current_mA": "100 ± 25",
+        "use": "일반 접촉 촬영 (contact mammography)",
+        "heat_capacity": "높음 - 고출력 가능"
+      },
+      "small_focal_spot": {
+        "nominal_size_mm": 0.1,
+        "tube_current_mA": "25 ± 10",
+        "use": "확대 촬영 (magnification mammography)",
+        "heat_capacity": "낮음 - 전류 제한으로 인해 노출 시간 증가",
+        "limitation": "소초점은 튜브 전류를 제한하여 노출 시간이 길어짐"
+      },
+      "current_ratio": "대초점 대비 소초점 mA = 약 1/4 (100mA vs 25mA)",
+      "source_ref": "korner2023_pmc, sprawls_mammo"
+    },
+    "anode_heat_capacity_specifications": {
+      "mammography_typical": {
+        "adequate_capacity_HU": "≥ 90,000 HU",
+        "note": "대부분의 진료에 적합",
+        "source_ref": "aapm_report29"
+      },
+      "low_capacity_warning": {
+        "threshold_HU": "≤ 20,000 HU",
+        "consequence": "고용량 촬영 시 노출 사이에 대기 시간 필요",
+        "source_ref": "aapm_report29"
+      },
+      "general_comparison": {
+        "mammography_kJ": "~200 kJ",
+        "general_radiography_kJ": "~250 kJ",
+        "angiography_kJ": "~750 kJ",
+        "source_ref": "radiopaedia_tube_rating"
+      }
+    },
+    "clinical_implications": {
+      "magnification_dilemma": {
+        "problem": "확대 촬영 시 소초점 필수 → mA 제한 → 선량 증가 어려움",
+        "consequence_1": "노출 시간 증가 → 움직임 블러 위험",
+        "consequence_2": "mAs 증가 제한 → 양자 노이즈 감소 한계",
+        "consequence_3": "과열 시 초점 손상 → 영상 품질 저하"
+      },
+      "grainy_image_cause": {
+        "mechanism": [
+          "1. 소초점(0.1mm) 사용으로 mA가 25±10mA로 제한",
+          "2. 동일 mAs 달성을 위해 노출 시간 증가 필요",
+          "3. 열적 한계로 mAs 자체 증가도 제한",
+          "4. 낮은 광자 수 → 양자 노이즈 증가 → '자글자글(grainy)' 영상"
+        ],
+        "key_insight": "선량을 높여도 소초점 열용량 한계로 mA 증가 불가 → 노이즈 개선 한계"
+      },
+      "blurry_edge_cause": {
+        "mechanism": [
+          "1. 노출 시간 증가 → 환자 움직임 블러",
+          "2. 열적 스트레스 → 초점 크기 확대(focal spot blooming)",
+          "3. 기하학적 언샤프니스 증가 → 경계 불명확"
+        ]
+      }
+    },
+    "heat_management_strategies": {
+      "rotating_anode": {
+        "benefit": "열 분산으로 정격 약 60% 증가",
+        "mechanism": "초점 트랙이 넓어져 열이 분산됨"
+      },
+      "steep_anode_angle": {
+        "mammography_angle_deg": "0-16 (effective)",
+        "benefit": "동일 유효 초점 크기에서 더 높은 열 정격",
+        "trade_off": "X선 빔 커버리지 감소"
+      },
+      "cooling_time": {
+        "principle": "연속 촬영 사이에 충분한 냉각 시간 확보",
+        "practical_tip": "고용량 촬영 후 양극 냉각 차트 참조"
+      }
+    },
+    "quantitative_example": {
+      "scenario": "1.8배 확대 촬영, 두꺼운 유방 (6cm)",
+      "contact_mode": {
+        "focal_spot_mm": 0.3,
+        "typical_mA": 100,
+        "typical_ms": 500,
+        "mAs": 50,
+        "HU_at_28kVp": "28 × 50 = 1,400 HU"
+      },
+      "magnification_mode": {
+        "focal_spot_mm": 0.1,
+        "max_mA": 25,
+        "required_ms_for_same_mAs": 2000,
+        "problem": "2초 노출 → 움직임 블러 위험",
+        "realistic_mAs": "25mA × 800ms = 20mAs (접촉 촬영의 40%)",
+        "HU_at_28kVp": "28 × 20 = 560 HU",
+        "consequence": "낮은 mAs → 높은 양자 노이즈"
+      },
+      "comparison": {
+        "mAs_ratio": "20/50 = 40%",
+        "noise_increase": "√(50/20) = 1.58배 (58% 노이즈 증가)",
+        "dose_for_equal_noise": "2.5배 선량 필요하나 열적 한계로 불가능"
+      }
+    }
+  },
+  "formulas": {
+    "heat_unit_single_phase": "HU = kVp × mA × s",
+    "heat_unit_three_phase": "HU = 1.35 × kVp × mA × s",
+    "power": "P (W) = w × kVp × mA",
+    "noise_vs_dose": "Noise ∝ 1/√(mAs)",
+    "focal_spot_doubling": "2× focal spot size → ~3× tube rating"
+  },
+  "common_misconceptions": {
+    "WARNING": "다음은 LLM이 자주 잘못 설명하는 열용량 관련 오류입니다.",
+    "misconception_1_dose_always_helps": {
+      "WRONG": "확대 촬영에서 선량을 높이면 노이즈가 줄어든다",
+      "CORRECT": "소초점의 열적 한계(25±10mA)로 인해 mAs 증가에 물리적 한계가 있음",
+      "physics_proof": "mAs를 2배 높이려면 노출 시간 2배 필요 → 움직임 블러 + 초점 과열 위험"
+    },
+    "misconception_2_small_focal_better": {
+      "WRONG": "소초점은 항상 더 좋은 영상을 만든다",
+      "CORRECT": "소초점은 기하학적 선명도는 높지만, 열적 제한으로 양자 노이즈가 증가할 수 있음",
+      "trade_off": "해상도 ↑ vs 노이즈 ↑ 트레이드오프"
+    },
+    "misconception_3_target_material": {
+      "WRONG": "X선관 타겟은 알루미늄, 티타늄 등으로 만들어진다",
+      "CORRECT": "맘모그래피 X선관 타겟은 Mo(몰리브덴), Rh(로듐), W(텅스텐)으로 제작",
+      "reason": "고융점 + 적절한 특성 X선 에너지 필요"
+    }
+  },
+  "clinical_relevance": {
+    "magnification_quality": "확대 촬영의 '자글자글' 영상은 소초점 열적 한계로 인한 mAs 부족이 원인",
+    "exposure_time": "소초점 사용 시 노출 시간 4배 증가 가능 → 움직임 블러 위험",
+    "dose_optimization": "mAs 증가 대신 검출기 효율(DQE) 개선이 더 효과적인 해결책",
+    "equipment_selection": "고용량 시설은 ≥90,000 HU 양극 열용량 필요"
+  },
+  "sources": [
+    {
+      "id": "korner2023_pmc",
+      "citation": "Körner M, Weber CH, Wirth S, et al. Breast Imaging Physics in Mammography (Part I). J Clin Med. 2023;12(21):6714.",
+      "pmid": "37959173",
+      "pmc": "PMC10606465",
+      "doi": "10.3390/jcm12216714",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10606465/",
+      "type": "Review Article",
+      "key_data": "0.3mm focal spot: 100±25mA, 0.1mm focal spot: 25±10mA"
+    },
+    {
+      "id": "radiopaedia_tube_rating",
+      "citation": "Radiopaedia.org. Tube rating. Radiology Reference Article.",
+      "url": "https://radiopaedia.org/articles/tube-rating",
+      "type": "Educational Reference",
+      "key_data": "HU formula, focal spot size doubling → 3× tube rating"
+    },
+    {
+      "id": "aapm_report29",
+      "citation": "AAPM Report No. 29: Equipment Requirements and Quality Control for Mammography. American Association of Physicists in Medicine. 1990.",
+      "url": "https://www.aapm.org/pubs/reports/rpt_29.pdf",
+      "type": "Technical Report",
+      "key_data": "Mammography anode heat capacity ≥90,000 HU recommended"
+    },
+    {
+      "id": "sprawls_xray_heat",
+      "citation": "Sprawls P. X-Ray Tube Heating and Cooling. The Physical Principles of Medical Imaging.",
+      "url": "http://www.sprawls.org/ppmi2/XRAYHEAT/",
+      "type": "Educational Resource",
+      "key_data": "Focal spot area has smallest heat capacity in X-ray tube"
+    },
+    {
+      "id": "sprawls_mammo",
+      "citation": "Sprawls P. The Physics and Technology of Mammography.",
+      "url": "http://www.sprawls.org/resources/MAMMO/module.htm",
+      "type": "Educational Resource"
+    },
+    {
+      "id": "barnes1991",
+      "citation": "Barnes GT. Mammography equipment: principles, features, selection. Radiol Clin North Am. 1987;25(5):897-911.",
+      "pmid": "3306772",
+      "type": "Review Article",
+      "key_data": "≥90,000 HU adequate, ≤20,000 HU may require cooling delays"
+    }
+  ]
+}

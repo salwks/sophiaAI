@@ -246,6 +246,18 @@ class KnowledgeManager:
         ]
         is_airgap_query = any(kw in query_lower for kw in airgap_keywords)
 
+        # Phase 1-Thermal: X-ray Tube Thermal Capacity 키워드 감지
+        thermal_capacity_keywords = [
+            '열용량', 'thermal capacity', 'heat capacity', 'heat unit', 'hu',
+            '열적 한계', 'thermal limit', '열부하', 'heat loading', 'heat load',
+            '초점 열', 'focal spot heat', '냉각', 'cooling',
+            'ma 제한', 'tube current limit', 'ma limitation',
+            '양극 열', 'anode heat', '노출 시간 증가', 'exposure time increase',
+            '소초점 제한', 'small focal spot limitation',
+            '자글자글', 'grainy', '확대촬영 노이즈', 'magnification noise'
+        ]
+        is_thermal_capacity_query = any(kw in query_lower for kw in thermal_capacity_keywords)
+
         # ================================================================
         # Regulatory Standards 키워드 감지 (IEC, FDA, 식약처)
         # ================================================================
@@ -534,6 +546,18 @@ class KnowledgeManager:
                     matched_list.remove(mod)
                     matched_list.insert(0, mod)
             logger.info("Complex morphology/MTF/scatter query - multi-module priority applied")
+
+        # ================================================================
+        # Phase 1-Thermal: 열용량 질문 최우선 (모든 priority 체크 후 마지막에 적용)
+        # ================================================================
+        if is_thermal_capacity_query:
+            if 'xray_tube_thermal_capacity' in matched_list:
+                matched_list.remove('xray_tube_thermal_capacity')
+                matched_list.insert(0, 'xray_tube_thermal_capacity')
+            elif 'xray_tube_thermal_capacity' in self._cache:
+                # 매칭 안 됐어도 열용량 질문이면 강제 추가
+                matched_list.insert(0, 'xray_tube_thermal_capacity')
+            logger.info("Thermal capacity query detected - prioritizing xray_tube_thermal_capacity (FINAL PRIORITY)")
 
         # 매칭된 모듈 반환
         results = []
