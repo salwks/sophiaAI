@@ -27,6 +27,11 @@ from src.evaluation.agent_judge import AgentJudge, JudgeResult, JudgeVerdict, ge
 from src.knowledge.manager import KnowledgeManager, get_knowledge_manager
 # Phase 7.6: Agentic Orchestrator
 from src.reasoning.orchestrator import AgenticOrchestrator, get_agentic_orchestrator, OrchestrationResult
+# Phase 1+: PhysicsCoT-RAG (MedCoT-RAG 기반 인과 추론)
+from src.reasoning.physics_cot_rag import (
+    PhysicsCoTRAG, get_physics_cot_rag,
+    PhysicsCausalChainDetector, PhysicsCoTResult
+)
 
 logger = logging.getLogger(__name__)
 
@@ -202,7 +207,7 @@ class DynamicEvidencePipeline:
         max_pmc_fetch: int = 2
     ) -> DynamicEvidenceResult:
         """
-        단순화된 파이프라인 (Phase 7.17)
+        단순화된 파이프라인 (Phase 7.17 + Phase 1+)
 
         복잡한 레이어들을 모두 제거하고 기본 RAG + LLM만 사용:
         - QueryPlanner 분해 ❌
@@ -211,7 +216,11 @@ class DynamicEvidencePipeline:
         - ReflectiveEngine 힌트 ❌
         - ResponseSynthesizer 합성 ❌
 
-        단순 흐름: Question → Knowledge → LLM → Answer
+        Phase 1+: PhysicsCoT-RAG 통합
+        - 복합 질문 감지 시 인과 체인 기반 프롬프트
+        - MedCoT-RAG 4단계 추론 구조 적용
+
+        단순 흐름: Question → [CoT Detection] → Knowledge → LLM → Answer
         """
         logger.info(f"[SIMPLE] Processing: {question[:50]}...")
 
@@ -220,18 +229,46 @@ class DynamicEvidencePipeline:
             question, papers, max_pmc_fetch
         )
 
-        # 2. CQO/QOCO 프롬프트 구성 (Phase 1: Lost in the Prompt Order)
-        prompt_strategy = self._select_prompt_strategy(question)
-        if prompt_strategy == "qoco":
-            simple_prompt = self._build_qoco_prompt(
-                question, physics_knowledge, enriched_context
+        # 2. PhysicsCoT-RAG: 복합 질문 감지 (Phase 1+)
+        cot_rag = get_physics_cot_rag()
+        detected_type = cot_rag.chain_detector.detect_question_type(question)
+
+        causal_chain_hint = None
+        prompt_strategy = "cqo"  # 기본값
+
+        if detected_type:
+            # 복합 질문 감지됨 → PhysicsCoT 프롬프트 사용
+            causal_chain_hint = detected_type["causal_chain"]
+            required_modules = detected_type["required_modules"]
+            prompt_strategy = "physics_cot"
+
+            logger.info(f"[SIMPLE] Composite question detected: {detected_type['type']}")
+            logger.info(f"[SIMPLE] Causal chain: {causal_chain_hint}")
+            logger.info(f"[SIMPLE] Required modules: {required_modules}")
+
+            # 필수 모듈 기반 지식 강화
+            physics_knowledge = self._enhance_knowledge_for_composite(
+                physics_knowledge, required_modules
             )
-            logger.info(f"[SIMPLE] Using QOCO prompt strategy (calculation/comparison)")
+
+            # PhysicsCoT 프롬프트 생성
+            simple_prompt = self._build_physics_cot_prompt(
+                question, physics_knowledge, enriched_context, causal_chain_hint
+            )
+            logger.info(f"[SIMPLE] Using PhysicsCoT prompt (causal reasoning)")
         else:
-            simple_prompt = self._build_simple_prompt(
-                question, physics_knowledge, enriched_context
-            )
-            logger.info(f"[SIMPLE] Using CQO prompt strategy (concept/principle)")
+            # 단일 도메인 질문 → 기존 CQO/QOCO
+            prompt_strategy = self._select_prompt_strategy(question)
+            if prompt_strategy == "qoco":
+                simple_prompt = self._build_qoco_prompt(
+                    question, physics_knowledge, enriched_context
+                )
+                logger.info(f"[SIMPLE] Using QOCO prompt strategy (calculation/comparison)")
+            else:
+                simple_prompt = self._build_simple_prompt(
+                    question, physics_knowledge, enriched_context
+                )
+                logger.info(f"[SIMPLE] Using CQO prompt strategy (concept/principle)")
 
         # 3. 직접 LLM 호출 (단일 단계)
         import requests
@@ -310,13 +347,24 @@ class DynamicEvidencePipeline:
         )
 
         # 포맷팅 (프롬프트 전략 표시)
-        strategy_label = "CQO" if prompt_strategy == "cqo" else "QOCO"
+        strategy_labels = {
+            "cqo": "CQO",
+            "qoco": "QOCO",
+            "physics_cot": "PhysicsCoT-RAG"
+        }
+        strategy_label = strategy_labels.get(prompt_strategy, "CQO")
+
+        # PhysicsCoT인 경우 인과 체인 힌트 추가
+        causal_info = ""
+        if prompt_strategy == "physics_cot" and causal_chain_hint:
+            causal_info = f"\n*인과 체인: {causal_chain_hint}*\n"
+
         formatted = f"""## 답변
 
 {answer_content}
-
+{causal_info}
 ---
-*[Phase 1: {strategy_label} 프롬프트] 신뢰도: {confidence:.0%}*
+*[Phase 1+: {strategy_label} 프롬프트] 신뢰도: {confidence:.0%}*
 """
 
         return DynamicEvidenceResult(
@@ -474,6 +522,153 @@ class DynamicEvidencePipeline:
         if calc_score > concept_score and calc_score >= 2:
             return "qoco"
         return "cqo"
+
+    def _build_physics_cot_prompt(
+        self,
+        question: str,
+        physics_knowledge: str,
+        enriched_context: EnrichedContext,
+        causal_chain_hint: str
+    ) -> str:
+        """
+        PhysicsCoT 프롬프트 구성 (Phase 1+: MedCoT-RAG 기반)
+
+        MedCoT-RAG의 4단계 인과 추론을 맘모그래피 물리학에 적용:
+        1. 현상 분석 (Phenomenon Analysis)
+        2. 물리적 메커니즘 (Causal Mechanism)
+        3. 파라미터 제약 (Parameter Constraints)
+        4. 근거 통합 (Evidence Synthesis)
+
+        인과 체인 힌트를 통해 LLM이 올바른 추론 경로를 따르도록 유도
+        """
+        prompt_parts = []
+
+        # ═══════════════════════════════════════════════════════════════
+        # [C] CONTEXT: 역할 + 지식 + 인과 체인 힌트
+        # ═══════════════════════════════════════════════════════════════
+        prompt_parts.append(
+            "═══ PhysicsCoT-RAG: 인과 추론 기반 물리학 분석 ═══\n\n"
+            "역할: 맘모그래피 물리학 전문가 (인과 추론 전문)\n"
+            "다음 4단계 인과 추론 프레임워크를 따라 답변하십시오."
+        )
+
+        # 인과 체인 힌트 (핵심!)
+        prompt_parts.append(
+            f"\n\n⚠️ [인과 체인 힌트]\n"
+            f"이 질문의 핵심 인과 관계: {causal_chain_hint}\n"
+            f"이 체인을 따라 논리적으로 설명하십시오."
+        )
+
+        # 물리학 지식
+        if physics_knowledge:
+            knowledge_excerpt = physics_knowledge[:5000]  # CoT는 더 많은 컨텍스트 허용
+            prompt_parts.append(f"\n\n[물리학 참조]\n{knowledge_excerpt}")
+
+        # 논문/문헌
+        if enriched_context.enriched_context and len(enriched_context.enriched_context) > 100:
+            context_excerpt = enriched_context.enriched_context[:2000]
+            prompt_parts.append(f"\n\n[관련 문헌]\n{context_excerpt}")
+
+        # ═══════════════════════════════════════════════════════════════
+        # [Q] QUESTION
+        # ═══════════════════════════════════════════════════════════════
+        prompt_parts.append(f"\n\n═══ 질문 ═══\n{question}")
+
+        # ═══════════════════════════════════════════════════════════════
+        # [O] OPTIONS: 4단계 추론 요구
+        # ═══════════════════════════════════════════════════════════════
+        prompt_parts.append("""
+
+═══ 4단계 인과 추론 형식 ═══
+
+1️⃣ **현상 분석**: 관찰된 문제가 무엇인가?
+   - 무엇이 기대와 다른가?
+
+2️⃣ **물리적 메커니즘**: 어떤 물리 법칙이 원인인가?
+   - 관련 공식과 원리 명시
+   - 인과 체인 힌트를 따라 설명
+
+3️⃣ **파라미터 제약**: 어떤 시스템 제한이 있는가?
+   - 수치적 제약 조건 (예: mA ≤ 25±10)
+   - 이 제한이 현상에 미치는 영향
+
+4️⃣ **결론**: 인과 체인 요약 (A → B → C 형식)
+   - 핵심 메커니즘 한 문장 요약
+   - 실무적 함의
+
+한국어로 자연스럽게 작성하되, 인과 체인은 화살표(→)로 명확히 표시하십시오.
+""")
+
+        return "\n".join(prompt_parts)
+
+    def _enhance_knowledge_for_composite(
+        self,
+        physics_knowledge: str,
+        required_modules: List[str]
+    ) -> str:
+        """
+        복합 질문에 필요한 추가 지식 모듈 로드 (Phase 1+)
+
+        PhysicsCoT-RAG가 감지한 required_modules를 기반으로
+        KnowledgeManager에서 추가 모듈을 로드하여 지식 컨텍스트 강화
+        """
+        if not required_modules:
+            return physics_knowledge
+
+        try:
+            knowledge_manager = get_knowledge_manager()
+            additional_parts = []
+
+            for module_id in required_modules:
+                # 모듈이 이미 physics_knowledge에 포함되어 있으면 스킵
+                if module_id in physics_knowledge:
+                    continue
+
+                # 모듈 로드 시도 (get_knowledge_by_id 사용)
+                module_data = knowledge_manager.get_knowledge_by_id(module_id)
+                if module_data:
+                    # 핵심 내용만 추출
+                    module_summary = self._extract_module_summary(module_data, module_id)
+                    if module_summary:
+                        additional_parts.append(module_summary)
+                        logger.info(f"[CoT] Added module: {module_id}")
+
+            if additional_parts:
+                return physics_knowledge + "\n\n" + "\n\n".join(additional_parts)
+
+        except Exception as e:
+            logger.warning(f"Failed to enhance knowledge: {e}")
+
+        return physics_knowledge
+
+    def _extract_module_summary(self, module_data: Dict, module_id: str) -> str:
+        """모듈에서 핵심 내용 추출"""
+        parts = []
+
+        title = module_data.get("title", module_id)
+        parts.append(f"### [{module_id}] {title}")
+
+        # 공식 (가장 중요)
+        formulas = module_data.get("formulas", {})
+        if formulas:
+            formula_lines = [f"  - {k}: {v}" for k, v in list(formulas.items())[:5]]
+            parts.append("**핵심 공식**:\n" + "\n".join(formula_lines))
+
+        # 임상 관련성
+        clinical = module_data.get("clinical_relevance", {})
+        if clinical:
+            if isinstance(clinical, dict):
+                clinical_lines = [f"  - {k}: {v}" for k, v in list(clinical.items())[:3]]
+                parts.append("**임상 관련**:\n" + "\n".join(clinical_lines))
+            else:
+                parts.append(f"**임상 관련**: {clinical}")
+
+        # 오개념 경고
+        misconceptions = module_data.get("common_misconceptions", {})
+        if misconceptions and "WARNING" in misconceptions:
+            parts.append(f"⚠️ **경고**: {misconceptions.get('WARNING', '')}")
+
+        return "\n".join(parts) if len(parts) > 1 else ""
 
     def _simple_postprocess(self, text: str) -> str:
         """최소 후처리"""
