@@ -371,9 +371,12 @@ class PhysicsCausalChainDetector:
     QUESTION_TEMPLATES = {
         "magnification_thermal": {
             "triggers": [
-                ("확대", "열용량"), ("확대", "mA"), ("소초점", "노이즈"),
+                ("확대", "열용량"), ("확대", "열적"), ("소초점", "열"),
+                ("확대", "mA"), ("소초점", "노이즈"), ("소초점", "mAs"),
                 ("확대", "자글자글"), ("magnification", "thermal"),
-                ("small focal", "noise"), ("확대", "선량", "노이즈")
+                ("small focal", "noise"), ("확대", "선량", "노이즈"),
+                ("thermal capacity",), ("thermal", "focal"),
+                ("확대", "mas"), ("소초점", "선량")
             ],
             "causal_chain": "소초점 사용 → mA 제한(25±10mA) → mAs 부족 → 양자 노이즈 증가",
             "required_modules": [
