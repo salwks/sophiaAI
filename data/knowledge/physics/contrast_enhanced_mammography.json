@@ -71,6 +71,38 @@
       "pmc": "PMC9098782",
       "doi": "10.1007/s00330-022-08806-9",
       "type": "Artifact Reduction Study"
+    },
+    {
+      "id": "lalji2015_calcification",
+      "citation": "Lalji UC, Jeukens CR, Houben I, et al. Evaluation of low-energy contrast-enhanced spectral mammography images by comparing them to full-field digital mammography using EUREF image quality criteria. Eur Radiol. 2015;25(10):2813-2820",
+      "pmid": "25813015",
+      "pmc": "PMC4562003",
+      "doi": "10.1007/s00330-015-3695-2",
+      "type": "LE vs FFDM Calcification Visibility - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "calcification_visibility": "LE scored significantly better on two criteria on the visualization of micro-calcifications (p = 0.02 and p = 0.034)",
+        "main_finding": "micro-calcifications are significantly more visible on LE CESM than on FFDM"
+      },
+      "sample_size": "147 women, 588 images"
+    },
+    {
+      "id": "dromain2012_protocol",
+      "citation": "Dromain C, et al. Dual-energy contrast-enhanced digital mammography: initial clinical results of a multireader, multicase study. Breast Cancer Res. 2012;14(3):R94",
+      "pmid": "22697607",
+      "pmc": "PMC3446357",
+      "doi": "10.1186/bcr3210",
+      "type": "CEM Protocol and CNR Optimization - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "timing_protocol": "Two minutes after the initiation of contrast administration, the breast was compressed in the mediolateral oblique (MLO) view...4 minutes after the initiation of contrast administration [CC view]",
+        "noise_cancellation": "Iodine-enhanced images...display the regions of iodine contrast uptake while canceling non-enhancing anatomic noise in the images",
+        "cnr_optimization": "Techniques for high-energy exposures were optimized to deliver the highest contrast-to-noise ratio for the lowest x-ray dose"
+      },
+      "contrast_protocol": {
+        "dose_ml_per_kg": 1.5,
+        "injection_rate_ml_per_s": 3,
+        "timing_MLO_min": 2,
+        "timing_CC_min": 4
+      }
     }
   ],
   "content": {
@@ -164,14 +196,70 @@
       ]
     },
     "magnification_guidance": {
-      "source_ref": "yang2023",
+      "source_ref": "yang2023, lalji2015_calcification, dromain2012_protocol",
       "timing_recommendation": "확대 촬영이 필요한 경우, CEM 모드 외부에서 10분 시간창 이후에 획득 가능",
       "rationale": "10분 조영 시간창 내에서는 표준 4-view (CC, MLO 양측) 완료 우선",
       "dcis_evaluation": {
         "description": "미세석회화만 나타나는 DCIS는 LE 영상에서 확인 가능, 필요시 확대 촬영으로 추가 평가",
         "note": "LE 영상은 기존 맘모그래피와 동등하므로 석회화 특성화에 적합"
       },
-      "clinical_implication": "CEM 프로토콜 중 확대 촬영 시도 시 조영 시간창 초과 위험 → 별도 획득 권장"
+      "clinical_implication": "CEM 프로토콜 중 확대 촬영 시도 시 조영 시간창 초과 위험 → 별도 획득 권장",
+      "le_calcification_superiority": {
+        "source": "PMC4562003 - Lalji 2015 FULL TEXT VERIFIED",
+        "finding": "LE scored significantly better on visualization of micro-calcifications (p=0.02, p=0.034)",
+        "clinical_implication": "BI-RADS 석회화 분류는 Subtraction이 아닌 LE 영상에서 수행해야 함",
+        "rationale": "Subtraction 영상에서는 조직 신호 억제 시 석회화 신호도 일부 상쇄되거나 노이즈에 묻힐 수 있음"
+      }
+    },
+    "magnification_snr_physics": {
+      "source_ref": "standard_physics_textbook, dromain2012_protocol",
+      "WARNING": "⚠️ 확대 촬영 + Wash-out 시점 = SNR 급감 → 생검 타겟팅 위험",
+      "inverse_square_law": {
+        "principle": "확대 시 픽셀당 광자 수가 1/M² 비율로 감소",
+        "formula": "N_pixel = N_0 × M^(-2)",
+        "example_1_8x": {
+          "magnification": 1.8,
+          "photon_fraction": 0.308,
+          "description": "1.8배 확대 시 광자 밀도 31%로 감소"
+        }
+      },
+      "quantum_noise_amplification": {
+        "principle": "Poisson 분포에서 σ = √N → N 감소 시 상대 노이즈 증가",
+        "snr_formula": "SNR = √N_detected",
+        "snr_reduction_1_8x": {
+          "factor": 1.8,
+          "description": "1.8배 확대 시 SNR 약 1.8배(√3.24) 감소"
+        }
+      },
+      "combined_degradation_at_washout": {
+        "scenario": "57분 시점 + 1.8배 확대 + HE QDE 56%",
+        "factors": [
+          "조영제 농도 50% 감소 (wash-out)",
+          "광자 수 31%로 감소 (1/M²)",
+          "QDE 56% (HE 대역)",
+          "Ghosting 15% 민감도 감소"
+        ],
+        "combined_snr_reduction": "원래 대비 약 2.4배 이상 SNR 감소",
+        "calculation": "N_eff = N_0 × 0.308 × 0.56 × 0.85 × 0.5 = 0.073 × N_0"
+      },
+      "rose_criterion": {
+        "definition": "병변 식별을 위한 최소 CNR 조건",
+        "threshold": "CNR > 5 (95% 검출 확률)",
+        "formula": "CNR = (S_lesion - S_background) / σ_background",
+        "violation_risk": "확대 + wash-out 시점에서 Rose Criterion 위반 → 병변 식별 불가능"
+      },
+      "pk_gain_noise_amplification": {
+        "problem": "약동학 보정(PK-Gain) 시 노이즈도 동일 비율로 증폭",
+        "formula": "S_boosted = G_PK × S_raw, σ_boosted = G_PK × σ_raw",
+        "edge_destruction_mechanism": "노이즈 주파수 대역이 병변 에지(고주파) 대역과 겹침 → 경계 구분 불가",
+        "clinical_result": "노이즈와 에지가 구분 안 되는 먹먹한 덩어리로 보임"
+      },
+      "engineering_recommendations": {
+        "avoid_magnification_at_washout": "5-7분 이후 wash-out 시점에서 확대 촬영 자제",
+        "use_le_for_calcification": "석회화 형태 평가는 LE 영상 사용 (PMC4562003 검증)",
+        "snr_aware_processing": "SNR < 임계값 영역에서 gain 증폭 제한 고려",
+        "timing_optimization": "MLO 2분, CC 4분 프로토콜 준수 (PMC3446357 검증)"
+      }
     },
     "artifacts": {
       "source_ref": "gennaro2022",

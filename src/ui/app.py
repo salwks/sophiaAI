@@ -20,7 +20,10 @@ sys.path.insert(0, str(project_root))
 from src.search.engine import SearchEngine
 from src.search.query_translator import get_translator
 from src.search.relay_router import RelayRouter, get_relay_router, QueryIntent
-from src.evaluation.agent_judge import TextExcellencePipeline, get_text_excellence_pipeline, JudgeVerdict
+from src.evaluation.agent_judge import (
+    TextExcellencePipeline, get_text_excellence_pipeline, JudgeVerdict,
+    AgentJudge, get_agent_judge  # Phase 7.6: Agent-as-a-Judge 통합
+)
 from src.retrieval.dynamic_evidence import DynamicEvidencePipeline, get_dynamic_evidence_pipeline
 
 
@@ -435,6 +438,8 @@ def call_llm_with_context(
     url = "http://localhost:11434/api/chat"
 
     # Phase 7.19: UnifiedPromptBuilder 사용 (통합 지식 전달)
+    # Phase 7.20: Query Decomposition + Grounded Values
+    grounded_values_context = ""
     try:
         from src.prompts.unified_builder import UnifiedPromptBuilder, PromptLimits
         from src.knowledge.manager import get_knowledge_manager
@@ -448,6 +453,9 @@ def call_llm_with_context(
 
         # 통합 시스템 프롬프트에서 core_physics 추출
         core_physics = builder.get_axioms()
+
+        # Phase 7.20: Grounded Values (검증된 값 테이블)
+        grounded_values_context = builder._get_grounded_values(question)
     except ImportError:
         # Fallback: 기존 방식 사용
         try:
@@ -534,15 +542,21 @@ def call_llm_with_context(
 5. **페이지/섹션 참조**: 가능하면 논문의 구체적 페이지나 섹션을 명시하라.
    - 예: "Dance et al. 2011, 8-9페이지 참조\""""
 
-        user_message = f"""다음 참고 자료를 분석하여 질문에 답변해주세요.
+        # Phase 7.20: Grounded Values를 user_message 최상단에 배치
+        grounded_section = ""
+        if grounded_values_context:
+            grounded_section = f"""
+{grounded_values_context}
 
+"""
+
+        user_message = f"""다음 참고 자료를 분석하여 질문에 답변해주세요.
+{grounded_section}
 **⚠️ 데이터 우선순위 규칙 (CRITICAL):**
-1. **[표준 물리학 참조]** (시스템 프롬프트 내) → **최우선 사용**
+0. **[검증된 데이터 테이블]** (위에 표시) → **절대 최우선 - 이 값만 사용**
+1. **[표준 물리학 참조]** (시스템 프롬프트 내) → **우선 사용**
    - 검증된 물리 상수와 수치 (W값, QDE, Ghosting 등)
    - **이 섹션에 명시된 수치가 있으면 반드시 해당 값을 사용할 것**
-   - 예: "QDE = 97% (LE)" → 이 값을 인용
-   - 예: "Ghosting 최대 15%" → 이 값을 인용
-   - 예: "W = 50-64 eV" → 이 값을 인용 (3.6 eV는 실리콘 값이므로 사용 금지)
 2. **[검색된 논문]**: 아래 RAG 검색 결과
 
 **⚠️ Hallucination 금지**: 위 두 출처에 없는 논문(저자명, 연도)은 절대 인용하지 마세요.
@@ -553,7 +567,8 @@ def call_llm_with_context(
 **질문:** {question}
 
 **요구사항:**
-- **[표준 물리학 참조]에 명시된 검증 수치를 우선 사용** (W값, QDE, Ghosting 등)
+- **[검증된 데이터 테이블]의 수치를 반드시 사용** (Ghosting=15%, Lag=0.15% 등)
+- **[표준 물리학 참조]에 명시된 검증 수치를 우선 사용** (W값, QDE 등)
 - **수식을 포함**하여 물리적 관계를 명확히 설명
 - **유도 과정**을 단계별로 보여줄 것
 - **구체적 수치**를 [표준 물리학 참조]에서 정확히 인용
@@ -590,20 +605,30 @@ def call_llm_with_context(
 3. [제한 사항]: 필요시 "ℹ️ 초록(Abstract) 기반 분석입니다" 고지
 """
 
-        user_message = f"""**사용자 질문:** {question}
+        # Phase 7.20: Grounded Values (가이드라인 없는 경우도 적용)
+        grounded_section_no_guide = ""
+        if grounded_values_context:
+            grounded_section_no_guide = f"""
+{grounded_values_context}
 
+"""
+
+        user_message = f"""**사용자 질문:** {question}
+{grounded_section_no_guide}
 **⚠️ 인용 가능한 자료:**
+0. **[검증된 데이터 테이블]** (위에 표시) → **절대 최우선 - 이 값만 사용**
 1. **[표준 참조 자료]**: 시스템 프롬프트의 Dance et al. 2011 t-factor/T-factor 테이블 및 MGD 공식
 2. **[검색된 논문]**: 아래 RAG 검색 결과
 
 **검색된 연구 논문 (초록):**
 {context}
 
-위 두 출처를 활용하여 질문에 답변해주세요.
+위 세 출처를 활용하여 질문에 답변해주세요.
+- **[검증된 데이터 테이블]의 수치를 반드시 사용**
 - 가이드라인 부재를 먼저 언급
 - **Dance et al. 2011 Table 6 수치** 직접 인용 가능 (예: "5cm 두께에서 t(20°)=0.919")
 - 논문 번호를 인용하여 물리적 원리 설명
-- 위 두 출처에 없는 논문은 인용 금지
+- 위 세 출처에 없는 논문은 인용 금지
 """
 
     messages = [
@@ -1425,7 +1450,95 @@ def main():
                             st.error("⚠️ 응답 생성에 실패했습니다. 다시 시도해 주세요.")
                             st.info("💡 팁: 질문을 더 간단하게 다시 작성하거나, 잠시 후 다시 시도하세요.")
                         else:
-                            st.markdown(convert_latex_for_streamlit(full_response))
+                            # Placeholder로 답변 표시 (재생성 시 교체 가능)
+                            response_placeholder = st.empty()
+                            response_placeholder.markdown(convert_latex_for_streamlit(full_response))
+
+                        # =====================================================
+                        # Phase 7.6: Agent-as-a-Judge 평가 + 자동 재생성
+                        # =====================================================
+                        judge_result = None
+                        regenerated = False
+                        original_response = full_response  # 원본 보관 (로그용)
+
+                        if options.get("enable_judge", True):
+                            with st.spinner("🔍 Agent-as-a-Judge 품질 검증 중..."):
+                                judge = get_agent_judge()
+                                judge_result = judge.evaluate(
+                                    question=prompt,
+                                    answer=full_response,
+                                    reference_knowledge=relevant_knowledge,
+                                    context=""
+                                )
+
+                            # 자동 재생성: corrections가 있고 심각한 오류가 있으면
+                            critical_errors = [c for c in (judge_result.corrections or [])
+                                              if "Ghosting" in c or "혼동" in c or "오류" in c
+                                              or "누락" in c or "QDE" in c or "트랩" in c]
+
+                            if critical_errors:
+                                # 로그에 수정 내역 기록
+                                import logging
+                                regen_logger = logging.getLogger("regeneration")
+                                regen_logger.info(f"[Auto-Regeneration] Question: {prompt[:100]}...")
+                                regen_logger.info(f"[Auto-Regeneration] Critical errors: {critical_errors}")
+                                regen_logger.info(f"[Auto-Regeneration] Original response (first 500 chars): {original_response[:500]}...")
+
+                                # 수정 가이드를 프롬프트 맨 앞에 강제 주입
+                                correction_prefix = "\n".join([
+                                    "🚨🚨🚨 최우선 준수 사항 (이 지침을 무시하면 답변이 거부됩니다) 🚨🚨🚨",
+                                    "",
+                                    "## 반드시 지켜야 할 물리 법칙:",
+                                    "1. **Ghosting ≠ Lag** (서로 다른 현상입니다!)",
+                                    "   - Ghosting = 15% (민감도 저하, 트랩 전자와 홀 재결합)",
+                                    "   - Lag = 0.15% (신호 잔류, 프레임 간 전하 이월)",
+                                    "   - 두 값은 100배 차이! 절대 혼동하지 마세요.",
+                                    "",
+                                    "2. **QDE 에너지 의존성:**",
+                                    "   - QDE(LE, 28kVp) = 97%",
+                                    "   - QDE(HE, 49kVp) = 56%",
+                                    "   - 41%p 차이가 Gain Map 불일치의 핵심 원인",
+                                    "",
+                                    "## 이전 답변의 오류:",
+                                    *[f"• {c}" for c in critical_errors],
+                                    "",
+                                    "위 오류를 반드시 수정하여 답변하세요.",
+                                    "═══════════════════════════════════════════════════",
+                                    ""
+                                ])
+
+                                # 수정 가이드를 질문 앞에 배치
+                                corrected_prompt = correction_prefix + "\n\n질문: " + prompt
+
+                                with st.spinner("🔄 답변 품질 개선 중..."):
+                                    result_v2 = asyncio.run(dynamic_pipeline.process_simple_async(
+                                        question=corrected_prompt,
+                                        papers=papers_for_pipeline,
+                                        physics_knowledge=relevant_knowledge,
+                                        max_pmc_fetch=2
+                                    ))
+
+                                # 재생성 성공 시: 이전 답변 교체 (삭제 후 새로 표시)
+                                if result_v2.answer and result_v2.answer.strip():
+                                    full_response = result_v2.answer
+                                    regenerated = True
+
+                                    # 이전 답변 삭제하고 새 답변으로 교체
+                                    response_placeholder.empty()
+                                    response_placeholder.markdown(convert_latex_for_streamlit(full_response))
+
+                                    # 로그에 수정 완료 기록
+                                    regen_logger.info(f"[Auto-Regeneration] Corrected response (first 500 chars): {full_response[:500]}...")
+                                    regen_logger.info(f"[Auto-Regeneration] Regeneration successful")
+
+                                    # 재생성된 답변 재평가
+                                    with st.spinner("🔍 재평가 중..."):
+                                        judge_result = judge.evaluate(
+                                            question=prompt,
+                                            answer=full_response,
+                                            reference_knowledge=relevant_knowledge,
+                                            context=""
+                                        )
 
                         # Phase 7.1 상태 정보 표시
                         col1, col2, col3, col4 = st.columns(4)
@@ -1435,21 +1548,50 @@ def main():
                             else:
                                 st.info(f"📄 초록 기반 ({result.enriched_context.total_chars:,}자)")
                         with col2:
-                            if result.used_summarizer:
+                            if regenerated:
+                                st.success("🔄 자동 수정됨")
+                            elif result.used_summarizer:
                                 st.success("🔬 SLM 요약 완료")
                             else:
                                 st.info("📝 원본 사용")
                         with col3:
-                            verdict_badges = {
-                                JudgeVerdict.APPROVED: "🏆",
-                                JudgeVerdict.REVISION_REQUIRED: "⚠️",
-                                JudgeVerdict.REJECTED: "❌",
-                            }
-                            st.metric("품질", f"{result.judge_result.total_score:.0f}",
-                                     delta=f"{verdict_badges.get(result.judge_result.verdict, '')}")
+                            # Agent-as-a-Judge 결과 사용 (있으면)
+                            if judge_result:
+                                verdict_badges = {
+                                    JudgeVerdict.APPROVED: "🏆",
+                                    JudgeVerdict.REVISION_REQUIRED: "⚠️",
+                                    JudgeVerdict.REJECTED: "❌",
+                                }
+                                st.metric("품질", f"{judge_result.total_score:.0f}",
+                                         delta=f"{verdict_badges.get(judge_result.verdict, '')}")
+                            else:
+                                st.metric("품질", f"{result.judge_result.total_score:.0f}",
+                                         delta="🏆" if result.judge_result.total_score >= 70 else "⚠️")
                         with col4:
-                            st.metric("검증",
-                                     f"{result.evidence_report.verified_claims}/{result.evidence_report.total_claims}")
+                            if judge_result:
+                                issues_count = len(judge_result.issues_found) if judge_result.issues_found else 0
+                                st.metric("발견 이슈", f"{issues_count}개")
+                            else:
+                                st.metric("검증",
+                                         f"{result.evidence_report.verified_claims}/{result.evidence_report.total_claims}")
+
+                        # 수정 가이드 표시 (재생성 후에도 이슈가 남아있으면)
+                        # Phase 7.22: issues_found 또는 corrections 중 하나라도 있으면 표시
+                        has_issues = judge_result and (judge_result.corrections or judge_result.issues_found)
+                        if has_issues and not regenerated:
+                            with st.expander("🔧 수정 가이드 (클릭하여 확인)", expanded=True):
+                                # corrections가 있으면 corrections 표시
+                                if judge_result.corrections:
+                                    for corr in judge_result.corrections[:5]:
+                                        st.warning(f"⚠️ {corr}")
+                                # corrections가 없고 issues_found만 있으면 issues 표시
+                                elif judge_result.issues_found:
+                                    for issue in judge_result.issues_found[:5]:
+                                        st.warning(f"⚠️ {issue}")
+
+                        # 심각한 문제 경고
+                        if judge_result and judge_result.verdict == JudgeVerdict.REJECTED:
+                            st.error("⚠️ 답변에 심각한 문제가 발견되었습니다. 수정 가이드를 참고하세요.")
 
                     else:
                         # 🧠 일반 LLM 심층 추론
@@ -1479,6 +1621,45 @@ def main():
                             response_placeholder.markdown(full_response + "▌")
 
                         response_placeholder.markdown(convert_latex_for_streamlit(full_response))
+
+                        # =====================================================
+                        # Phase 7.6: Agent-as-a-Judge 평가
+                        # =====================================================
+                        if options.get("enable_judge", True):  # 기본 활성화
+                            with st.spinner("🔍 Agent-as-a-Judge 품질 검증 중..."):
+                                judge = get_agent_judge()
+                                judge_result = judge.evaluate(
+                                    question=prompt,
+                                    answer=full_response,
+                                    reference_knowledge=relevant_knowledge,
+                                    context=context
+                                )
+
+                            # 품질 지표 표시
+                            col1, col2, col3 = st.columns(3)
+                            with col1:
+                                verdict_badges = {
+                                    JudgeVerdict.APPROVED: ("✅", "success"),
+                                    JudgeVerdict.REVISION_REQUIRED: ("⚠️", "warning"),
+                                    JudgeVerdict.REJECTED: ("❌", "error"),
+                                }
+                                badge, status = verdict_badges.get(judge_result.verdict, ("❓", "info"))
+                                st.metric("품질 점수", f"{judge_result.total_score:.0f}/100", delta=badge)
+                            with col2:
+                                st.metric("도구 검증", f"{judge_result.tool_score:.0f}" if hasattr(judge_result, 'tool_score') else "N/A")
+                            with col3:
+                                issues_count = len(judge_result.issues_found) if judge_result.issues_found else 0
+                                st.metric("발견 이슈", f"{issues_count}개")
+
+                            # 수정 가이드 표시 (있는 경우)
+                            if hasattr(judge_result, 'corrections') and judge_result.corrections:
+                                with st.expander("🔧 수정 가이드 (클릭하여 확인)", expanded=False):
+                                    for corr in judge_result.corrections[:5]:
+                                        st.markdown(f"- ✓ {corr}")
+
+                            # 심각한 문제 경고
+                            if judge_result.verdict == JudgeVerdict.REJECTED:
+                                st.error("⚠️ 답변에 심각한 문제가 발견되었습니다. 수정 가이드를 참고하여 재질문을 권장합니다.")
 
             else:
                 # BI-RADS 없음 - 근거 자료 안내만 표시

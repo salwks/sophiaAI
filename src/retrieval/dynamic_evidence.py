@@ -341,7 +341,8 @@ class DynamicEvidencePipeline:
             criteria=default_criteria,
             issues_found=[],
             suggestions=[],
-            reasoning="[SIMPLE MODE] 평가 생략"
+            reasoning="[SIMPLE MODE] 평가 생략",
+            corrections=[]  # Phase 7.6: 수정 가이드 (SIMPLE MODE에서는 비어있음)
         )
 
         evidence_report = EvidenceReport(
@@ -481,9 +482,12 @@ class DynamicEvidencePipeline:
             "역할: 유방영상의학 물리학 전문가"
         )
 
-        # 물리학 지식 (핵심 컨텍스트) - Phase 7.19: PromptLimits 사용
+        # 물리학 지식 (핵심 컨텍스트) - Phase 7.21: UnifiedPromptBuilder._smart_truncate 사용
+        # 중요 경고 섹션(Ghosting/Lag 등)이 truncation에서 보존됨
         if physics_knowledge:
-            knowledge_excerpt = physics_knowledge[:PromptLimits.SIMPLE_KNOWLEDGE]
+            knowledge_excerpt = self.prompt_builder._smart_truncate(
+                physics_knowledge, PromptLimits.SIMPLE_KNOWLEDGE
+            )
             prompt_parts.append(f"\n\n[표준 물리학 참조]\n{knowledge_excerpt}")
 
         # 논문/문헌 컨텍스트
@@ -552,10 +556,12 @@ class DynamicEvidencePipeline:
         )
 
         # ═══════════════════════════════════════════════════════════════
-        # [C] CONTEXT: 참조 정보 - Phase 7.19: PromptLimits 사용
+        # [C] CONTEXT: 참조 정보 - Phase 7.21: UnifiedPromptBuilder._smart_truncate 사용
         # ═══════════════════════════════════════════════════════════════
         if physics_knowledge:
-            knowledge_excerpt = physics_knowledge[:PromptLimits.SIMPLE_KNOWLEDGE]
+            knowledge_excerpt = self.prompt_builder._smart_truncate(
+                physics_knowledge, PromptLimits.SIMPLE_KNOWLEDGE
+            )
             prompt_parts.append(f"\n\n═══ 참조 지식 ═══\n{knowledge_excerpt}")
 
         if enriched_context.enriched_context and len(enriched_context.enriched_context) > 100:
@@ -563,15 +569,28 @@ class DynamicEvidencePipeline:
             prompt_parts.append(f"\n\n═══ 관련 문헌 ═══\n{context_excerpt}")
 
         # ═══════════════════════════════════════════════════════════════
+        # [O] OPTIONS REPEATED: 옵션 반복 (Lost in Prompt Order 핵심!)
+        # ═══════════════════════════════════════════════════════════════
+        # 논문 근거: QOCO에서 옵션을 반복하면 +8.2% 향상
+        # Causal attention이 context 이후에 options를 다시 볼 수 있음
+        prompt_parts.append(
+            "\n\n═══ 요구사항 (반복) ═══\n"
+            "위 참조 정보를 활용하여 다음 요구사항을 충족하시오:\n"
+            "- 물리 공식과 원리 기반으로 설명\n"
+            "- 수치 계산 시 단계별 과정 제시\n"
+            "- 참조 지식과 일관성 유지\n"
+            "- [참조 지식]에 명시된 검증된 수치를 **반드시** 사용\n\n"
+            "⚠️ **데이터 우선순위 규칙**:\n"
+            "- 검증된 수치가 있으면 추정치 대신 정확한 값을 인용하세요.\n"
+            "- 질문과 직접 관련 없는 참조 자료는 무시하세요."
+        )
+
+        # ═══════════════════════════════════════════════════════════════
         # [O] OUTPUT: 출력 형식
         # ═══════════════════════════════════════════════════════════════
         prompt_parts.append(
             "\n\n═══ 답변 ═══\n"
-            "한국어로 명확하게 답변. 수식은 $기호$ 형식 사용.\n\n"
-            "⚠️ **데이터 우선순위 규칙**:\n"
-            "- [참조 지식]에 명시된 검증된 수치를 **반드시** 사용하세요.\n"
-            "- 검증된 수치가 있으면 추정치 대신 정확한 값을 인용하세요.\n"
-            "- 질문과 직접 관련 없는 참조 자료는 무시하세요."
+            "한국어로 명확하게 답변. 수식은 $기호$ 형식 사용."
         )
 
         return "\n".join(prompt_parts)
@@ -644,9 +663,11 @@ class DynamicEvidencePipeline:
             f"이 체인을 따라 논리적으로 설명하십시오."
         )
 
-        # 물리학 지식 - Phase 7.19: PromptLimits.COT_KNOWLEDGE 사용
+        # 물리학 지식 - Phase 7.21: UnifiedPromptBuilder._smart_truncate 사용
         if physics_knowledge:
-            knowledge_excerpt = physics_knowledge[:PromptLimits.COT_KNOWLEDGE]  # CoT는 더 많은 컨텍스트 허용
+            knowledge_excerpt = self.prompt_builder._smart_truncate(
+                physics_knowledge, PromptLimits.COT_KNOWLEDGE
+            )  # CoT는 더 많은 컨텍스트 허용
             prompt_parts.append(f"\n\n[물리학 참조]\n{knowledge_excerpt}")
 
         # 논문/문헌

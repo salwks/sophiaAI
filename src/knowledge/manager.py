@@ -214,6 +214,27 @@ class KnowledgeManager:
         ]
         is_pcd_contrast_query = any(kw in query_lower for kw in pcd_contrast_keywords)
 
+        # Phase 7.21: CEM Detector Physics 키워드 감지 (Ghosting/Lag/QDE in CEM context)
+        # 중요: DBT의 ghosting (재구성 아티팩트)과 CEM의 ghosting (검출기 민감도)을 구분
+        cem_detector_keywords = [
+            'cem', '조영증강유방촬영', 'contrast enhanced mammography',
+            'cem ghosting', 'cem 잔상', 'cem lag', 'cem qde',
+            'dual-energy', 'dual energy', 'le he', 'le/he', '저에너지 고에너지',
+            'qde 에너지', 'qde energy', 'qde(le)', 'qde(he)', 'qe(le)', 'qe(he)',
+            '28kvp', '49kvp', '28 kvp', '49 kvp', 'w/rh', 'w/ti',
+            'gain map', '이득 맵', '게인 맵', 'gain mismatch',
+            '민감도 감소', 'sensitivity change', 'sensitivity reduction',
+            '트랩 전자', 'trapped electron', '홀 재결합', 'hole recombination'
+        ]
+        is_cem_detector_query = any(kw in query_lower for kw in cem_detector_keywords)
+
+        # CEM + ghosting/lag 조합 감지 (DBT ghosting과 구분)
+        is_cem_ghosting_context = (
+            is_cem_detector_query or
+            (any(kw in query_lower for kw in ['cem', '조영증강', 'dual', 'qde', 'qe ']) and
+             any(kw in query_lower for kw in ['ghosting', '잔상', 'ghost', 'lag', '지연']))
+        )
+
         # Phase 1-New: X-ray Tube Physics 키워드 감지
         xray_tube_keywords = [
             'x-ray tube', 'x선관', '엑스선관', 'target', '타겟', '양극',
@@ -403,7 +424,8 @@ class KnowledgeManager:
             logger.info("Phase 4-B: Biopsy query detected - prioritizing biopsy_geometry_calibration")
 
         # Phase 5: Tomo IQ 질문 시 dbt_image_quality 최우선
-        if is_tomo_iq_query and 'dbt_image_quality' in matched_list:
+        # 단, CEM 맥락에서는 detector_physics가 더 우선 (Phase 7.21에서 override)
+        if is_tomo_iq_query and 'dbt_image_quality' in matched_list and not is_cem_ghosting_context:
             matched_list.remove('dbt_image_quality')
             matched_list.insert(0, 'dbt_image_quality')
             logger.info("Phase 5: Tomo IQ query detected - prioritizing dbt_image_quality")
@@ -581,6 +603,20 @@ class KnowledgeManager:
                 # 매칭 안 됐어도 열용량 질문이면 강제 추가
                 matched_list.insert(0, 'xray_tube_thermal_capacity')
             logger.info("Thermal capacity query detected - prioritizing xray_tube_thermal_capacity (FINAL PRIORITY)")
+
+        # ================================================================
+        # Phase 7.21: CEM Detector Physics 최종 우선순위
+        # CEM 맥락에서 Ghosting/Lag/QDE 질문 시 detector_physics 최우선 배치
+        # DBT ghosting(재구성 아티팩트)과 CEM ghosting(검출기 민감도)을 구분
+        # ================================================================
+        if is_cem_ghosting_context:
+            if 'detector_physics' in matched_list:
+                matched_list.remove('detector_physics')
+                matched_list.insert(0, 'detector_physics')
+            elif 'detector_physics' in self._cache:
+                # CEM 맥락에서는 detector_physics 강제 추가
+                matched_list.insert(0, 'detector_physics')
+            logger.info("Phase 7.21: CEM Ghosting/QDE query detected - prioritizing detector_physics (ABSOLUTE PRIORITY)")
 
         # 매칭된 모듈 반환
         results = []
@@ -1110,6 +1146,103 @@ class KnowledgeManager:
                     recovery = factors.get("recovery", {})
                     if recovery:
                         section_parts.append(f"- 회복 메커니즘: {recovery.get('mechanism', '')}")
+
+                # Phase 7.22: 누적 노출 노후화 섹션
+                aging = ghosting.get("cumulative_exposure_aging", {})
+                if aging:
+                    section_parts.append("\n### ⚠️ 누적 노출 노후화 (1년+ 사용 장비)")
+                    phenomenon = aging.get("phenomenon", {})
+                    if phenomenon:
+                        section_parts.append(f"- **현상**: {phenomenon.get('description', '')}")
+                        section_parts.append(f"- **메커니즘**: {phenomenon.get('mechanism', '')}")
+
+                    time_variant = aging.get("time_variant_gain_map", {})
+                    if time_variant:
+                        section_parts.append(f"\n**Time-Variant Gain Map 문제:**")
+                        section_parts.append(f"- 문제: {time_variant.get('problem', '')}")
+                        reason = time_variant.get("reason", {})
+                        if reason:
+                            section_parts.append(f"- QDE 불일치: {reason.get('qde_mismatch', '')}")
+                            section_parts.append(f"- 트랩 활성화: {reason.get('aging_trap_activation', '')}")
+                            section_parts.append(f"- **핵심**: {reason.get('dynamic_behavior', '')}")
+
+                # Phase 7.22: 적응적 CEM 보정 섹션 (correction_algorithms 내)
+                corr = ghosting.get("correction_algorithms", {})
+                adaptive = corr.get("practical_realtime_correction", {}).get("adaptive_cem_correction", {}) if corr else {}
+                if adaptive:
+                    section_parts.append("\n### 💡 소프트웨어 적응적 보정 (권장)")
+
+                    virtual_gain = adaptive.get("virtual_de_gain_with_aging_coefficient", {})
+                    if virtual_gain:
+                        section_parts.append(f"\n**1. Virtual DE-Gain (노후화 계수 적용)**")
+                        section_parts.append(f"- 공식: `{virtual_gain.get('equation', '')}`")
+                        params = virtual_gain.get("parameters", {})
+                        if params:
+                            section_parts.append(f"  - QDE_ratio = {params.get('QDE_ratio', '56/97 = 0.577')}")
+                            section_parts.append(f"  - β = 노후화 계수 (장비별 캘리브레이션)")
+
+                    exposure_hist = adaptive.get("exposure_history_ghosting_decay", {})
+                    if exposure_hist:
+                        section_parts.append(f"\n**2. 노출 이력 기반 Ghosting 보정**")
+                        section_parts.append(f"- 보정 공식: `{exposure_hist.get('equation', '')}`")
+                        g_eff = exposure_hist.get("ghosting_effectiveness", {})
+                        if g_eff:
+                            fast = g_eff.get("fast_component", {})
+                            slow = g_eff.get("slow_component", {})
+                            if fast and slow:
+                                section_parts.append(f"  - Fast (홀 트랩): α₁={fast.get('alpha_1', 0.10)}, τ₁={fast.get('tau_1_minutes', 2)}분")
+                                section_parts.append(f"  - Slow (전자 트랩): α₂={slow.get('alpha_2', 0.05)}, τ₂={slow.get('tau_2_minutes', 60)}분")
+
+                    restoration = adaptive.get("de_sensitivity_restoration", {})
+                    if restoration:
+                        section_parts.append(f"\n**3. 민감도 역보정 (올바른 방법)**")
+                        section_parts.append(f"- ❌ 잘못된 방법: {restoration.get('wrong_approach', '')}")
+                        section_parts.append(f"- ✅ 올바른 방법: {restoration.get('correct_approach', '')}")
+                        section_parts.append(f"- 핵심: 15% 감소 복원 → **17.6% 증폭** 필요 (비선형)")
+
+                # Phase 7.22: HE 캘리브레이션 vs 소프트웨어 보정 비교 (핵심 권장사항)
+                comparison = adaptive.get("comparison_hw_vs_sw_correction", {})
+                if comparison:
+                    warning = comparison.get("WARNING_HE_CALIBRATION", "")
+                    if warning:
+                        section_parts.append(f"\n### ⚠️⚠️⚠️ {warning} ⚠️⚠️⚠️")
+
+                    # HE 캘리브레이션 문제점
+                    hw_approaches = comparison.get("hardware_approaches", {})
+                    he_cal = hw_approaches.get("he_calibration", {})
+                    if he_cal:
+                        section_parts.append(f"\n**HE 캘리브레이션 문제점 (논문 검증):**")
+                        tube_evidence = he_cal.get("tube_erosion_evidence", {})
+                        if tube_evidence:
+                            section_parts.append(f"- ⚠️ **튜브 손상**: {tube_evidence.get('thermal_cycling_damage', '')}")
+                            section_parts.append(f"- 열전도 {tube_evidence.get('thermal_conductivity_loss_percent', 'N/A')}% 감소")
+                            section_parts.append(f"- 출처: {tube_evidence.get('source', '')}")
+                        detector_evidence = he_cal.get("detector_aging_evidence", {})
+                        if detector_evidence:
+                            section_parts.append(f"- ⚠️ **디텍터 노후화**: {detector_evidence.get('mechanism', '')}")
+                            section_parts.append(f"- 8R 누적 후 민감도 {detector_evidence.get('sensitivity_after_8R_percent', 'N/A')}%")
+
+                    # 소프트웨어 보정 장점
+                    sw_approaches = comparison.get("software_approaches", {})
+                    if sw_approaches:
+                        section_parts.append(f"\n**✅ 소프트웨어 보정 권장 (논문 검증):**")
+                        per_patient = sw_approaches.get("per_patient_offset_gain", {})
+                        if per_patient:
+                            section_parts.append(f"- 매 환자 후 offset/gain 보정: **{per_patient.get('effectiveness_percent', '>80')}% 효과**")
+                            section_parts.append(f"- 권장 근거: \"{per_patient.get('recommendation_quote', '')}\"")
+                        forward = sw_approaches.get("forward_bias_software_equivalent", {})
+                        if forward:
+                            section_parts.append(f"- Forward bias 원리: lag ghost **{forward.get('hardware_results', '70-88% 감소')}**")
+
+                    # 권장 전략
+                    recommended = comparison.get("recommended_strategy", {})
+                    if recommended:
+                        section_parts.append(f"\n**📌 권장 전략:**")
+                        section_parts.append(f"- 1순위: {recommended.get('priority_1', '')}")
+                        section_parts.append(f"- 2순위: {recommended.get('priority_2', '')}")
+                        section_parts.append(f"- ⚠️ 회피: {recommended.get('avoid', '')}")
+                        section_parts.append(f"- 근거: {recommended.get('rationale', '')}")
+
             return section_parts
 
         def format_dual_energy_response():

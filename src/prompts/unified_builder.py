@@ -2,6 +2,7 @@
 Sophia AI: Unified Prompt Builder
 =================================
 Phase 7.19: Single prompt builder for all LLM calls.
+Phase 7.20: Query Decomposition + Grounded Retrieval
 
 This module consolidates the 4 separate knowledge delivery paths into one:
 - app.py: core_physics.py + KnowledgeManager
@@ -9,21 +10,42 @@ This module consolidates the 4 separate knowledge delivery paths into one:
 - relay_router.py: _build_llm_user_prompt()
 - orchestrator.py: explain_prompt + physics_knowledge
 
+Phase 7.20 Improvements:
+- Query decomposition: 질문을 구성 요소로 분해
+- Targeted retrieval: 필요한 값만 정확히 검색
+- Grounded context: 검증된 값을 테이블 형식으로 제시
+
 All LLM calls now use UnifiedPromptBuilder for consistent:
 - Knowledge source (KnowledgeManager only)
 - Truncation limits (standardized)
-- Priority ordering (verified knowledge > searched papers)
+- Priority ordering (grounded values > verified knowledge > searched papers)
 - Format consistency
 """
 
 import logging
 from dataclasses import dataclass
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, List, Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..knowledge.manager import KnowledgeManager
 
 logger = logging.getLogger(__name__)
+
+
+# Phase 7.20: Lazy import for QueryDecompositionPipeline
+_query_decomposer = None
+
+def _get_query_decomposer():
+    """Lazy load QueryDecompositionPipeline to avoid circular imports."""
+    global _query_decomposer
+    if _query_decomposer is None:
+        try:
+            from ..retrieval.query_decomposer import QueryDecompositionPipeline
+            _query_decomposer = QueryDecompositionPipeline()
+        except ImportError as e:
+            logger.warning(f"QueryDecompositionPipeline not available: {e}")
+            _query_decomposer = False  # Mark as unavailable
+    return _query_decomposer if _query_decomposer else None
 
 
 @dataclass
@@ -169,12 +191,15 @@ class UnifiedPromptBuilder:
         query: str,
         knowledge_context: str = "",
         search_context: str = "",
-        include_priority_note: bool = True
+        include_priority_note: bool = True,
+        use_grounded_values: bool = True
     ) -> str:
         """
         Build unified user prompt with proper section ordering.
 
+        Phase 7.20: Query Decomposition + Grounded Values
         Priority ordering:
+        0. Grounded values (critical - 검증된 정확한 값) ← NEW
         1. Verified physics knowledge (highest priority)
         2. Searched papers (supplementary)
         3. User question
@@ -184,18 +209,31 @@ class UnifiedPromptBuilder:
             knowledge_context: Formatted knowledge from KnowledgeManager
             search_context: Searched papers/documents
             include_priority_note: Whether to include data priority reminder
+            use_grounded_values: Whether to use Query Decomposition for grounded values
 
         Returns:
             Complete user prompt string
         """
         parts = []
 
+        # Phase 7.20: Grounded values from Query Decomposition (최우선)
+        grounded_context = ""
+        if use_grounded_values:
+            grounded_context = self._get_grounded_values(query)
+
         # Priority note
-        if include_priority_note and knowledge_context:
+        if include_priority_note and (knowledge_context or grounded_context):
             parts.append("## Data Priority (반드시 준수)")
+            if grounded_context:
+                parts.append("0순위: 아래 '⚠️ 검증된 데이터' 테이블의 수치 (절대 변경 금지)")
             parts.append("1순위: 아래 '검증된 물리학 참조'의 수치")
             parts.append("2순위: 검색된 논문의 수치")
             parts.append("3순위: 일반 지식 (출처 명시 필수)")
+            parts.append("")
+
+        # Phase 7.20: Grounded values (최우선 - 테이블 형식)
+        if grounded_context:
+            parts.append(grounded_context)
             parts.append("")
 
         # Verified knowledge (highest priority)
@@ -217,6 +255,32 @@ class UnifiedPromptBuilder:
         parts.append(query)
 
         return "\n".join(parts)
+
+    def _get_grounded_values(self, query: str) -> str:
+        """
+        Phase 7.20: Query Decomposition으로 검증된 값 추출
+
+        질문에서 필요한 핵심 값을 식별하고,
+        검증된 값 테이블을 생성하여 반환합니다.
+
+        Args:
+            query: User question
+
+        Returns:
+            Formatted grounded values context or empty string
+        """
+        decomposer = _get_query_decomposer()
+        if not decomposer:
+            return ""
+
+        try:
+            grounded_text = decomposer.get_grounded_prompt_addition(query)
+            if grounded_text:
+                logger.info(f"Grounded values added for query: {query[:50]}...")
+            return grounded_text
+        except Exception as e:
+            logger.warning(f"Query decomposition failed: {e}")
+            return ""
 
     def get_axioms(self) -> str:
         """
@@ -353,7 +417,7 @@ class UnifiedPromptBuilder:
         Smart truncation preserving important sections.
 
         Priority:
-        1. Warning/misconception sections
+        1. Warning/misconception sections (Ghosting/Lag, QDE 등)
         2. Formulas sections
         3. Beginning of text
 
@@ -367,8 +431,11 @@ class UnifiedPromptBuilder:
         if len(text) <= max_chars:
             return text
 
-        # Find priority sections
-        priority_markers = ["Warning", "warning", "오류", "주의", "WRONG", "공식", "formula"]
+        # Find priority sections - Phase 7.21: Ghosting/Lag/QDE 추가
+        priority_markers = [
+            "Warning", "warning", "오류", "주의", "WRONG", "공식", "formula",
+            "⚠️", "Ghosting", "Lag", "QDE", "혼동 금지", "100배 차이"
+        ]
 
         # Collect priority sections
         priority_sections = []
