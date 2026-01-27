@@ -6,8 +6,34 @@ DeepSeek이 반드시 이해해야 하는 필수 물리 개념들
 이 모듈의 내용은 모든 LLM 호출 시 시스템 프롬프트에 포함됩니다.
 
 Phase 2: GOLDEN_FORMULAS - 수식 할루시네이션 방지를 위한 표준 수식 사전
+
+===========================================================================
+DEPRECATION NOTICE (Phase 7.19)
+===========================================================================
+이 모듈은 더 이상 사용되지 않습니다.
+대신 다음을 사용하세요:
+- data/knowledge/physics/core_physics.json (지식 소스)
+- src/prompts/unified_builder.py (프롬프트 빌더)
+- src/knowledge/manager.py:KnowledgeManager (지식 관리)
+
+마이그레이션:
+    # 기존 방식 (deprecated)
+    from src.knowledge.core_physics import get_core_physics_prompt
+    prompt = get_core_physics_prompt()
+
+    # 새 방식 (recommended)
+    from src.prompts.unified_builder import UnifiedPromptBuilder
+    from src.knowledge.manager import get_knowledge_manager
+    km = get_knowledge_manager()
+    builder = UnifiedPromptBuilder(km)
+    axioms = builder.get_axioms()
+    system_prompt = builder.build_system_prompt()
+
+이 파일은 하위 호환성을 위해 유지됩니다.
+===========================================================================
 """
 
+import warnings
 from typing import Dict, List, Any
 
 
@@ -304,12 +330,22 @@ def get_formula(formula_id: str) -> Dict[str, Any]:
     """
     특정 수식 정보 조회
 
+    DEPRECATED (Phase 7.19):
+        이 함수는 더 이상 사용되지 않습니다.
+        대신 KnowledgeManager를 통해 core_physics.json에서 조회하세요.
+
     Args:
         formula_id: 수식 ID (예: "MGD_2D", "SNR_QUANTUM")
 
     Returns:
         수식 정보 딕셔너리
     """
+    warnings.warn(
+        "get_formula() is deprecated. "
+        "Use KnowledgeManager.get_knowledge_by_id('core_physics') instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     # 직접 ID 매칭
     if formula_id.upper() in GOLDEN_FORMULAS:
         return GOLDEN_FORMULAS[formula_id.upper()]
@@ -915,7 +951,25 @@ PHASE5_TOMO_AXIOMS = """
 
 
 def get_core_physics_prompt() -> str:
-    """모든 LLM 호출에 포함될 핵심 물리 지식 반환"""
+    """
+    모든 LLM 호출에 포함될 핵심 물리 지식 반환
+
+    DEPRECATED (Phase 7.19):
+        이 함수는 더 이상 사용되지 않습니다.
+        대신 UnifiedPromptBuilder.get_axioms()를 사용하세요.
+
+        from src.prompts.unified_builder import UnifiedPromptBuilder
+        from src.knowledge.manager import get_knowledge_manager
+        builder = UnifiedPromptBuilder(get_knowledge_manager())
+        axioms = builder.get_axioms()
+    """
+    warnings.warn(
+        "get_core_physics_prompt() is deprecated. "
+        "Use UnifiedPromptBuilder.get_axioms() instead. "
+        "See src/prompts/unified_builder.py",
+        DeprecationWarning,
+        stacklevel=2
+    )
     return f"""
 {CONSTITUTIONAL_AXIOMS}
 

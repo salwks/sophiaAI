@@ -597,6 +597,7 @@ class KnowledgeManager:
         include_tables: bool = True,
         include_formulas: bool = True,
         include_common_qa: bool = False,  # Phase 7.5: 기본값 False (Context Contamination 방지)
+        query: str = "",  # Phase 7.18: 질문 기반 동적 섹션 배치
     ) -> str:
         """
         지식 모듈을 LLM 컨텍스트용 문자열로 포맷팅
@@ -606,6 +607,7 @@ class KnowledgeManager:
             include_tables: 테이블 포함 여부
             include_formulas: 수식 포함 여부
             include_common_qa: 자주 묻는 질문 포함 여부 (기본 False - LLM 혼란 방지)
+            query: 사용자 질문 (질문 기반 동적 섹션 배치용)
 
         Returns:
             포맷팅된 문자열
@@ -618,9 +620,14 @@ class KnowledgeManager:
         for module in knowledge_modules:
             module_id = module.get("id", "unknown")
 
+            # Phase 7.19: core_physics 모듈 전용 포맷팅
+            if module_id == "core_physics":
+                parts.append(self._format_core_physics(module, query=query))
+                continue
+
             # Phase 7.3: detector_physics 모듈 전용 포맷팅
             if module_id == "detector_physics":
-                parts.append(self._format_detector_physics(module))
+                parts.append(self._format_detector_physics(module, query=query))
                 continue
 
             # Phase 7.8: pcd_low_dose_snr 모듈 전용 포맷팅
@@ -879,142 +886,353 @@ class KnowledgeManager:
         else:
             parts.append(f"{indent}{obj}")
 
-    def _format_detector_physics(self, module: Dict[str, Any]) -> str:
+    def _format_detector_physics(self, module: Dict[str, Any], query: str = "") -> str:
         """
         Phase 7.3: detector_physics 모듈 전용 포맷팅
+        Phase 7.18: query 기반 동적 섹션 배치
 
         검출기 물리학 지식을 LLM이 이해하기 쉬운 형태로 변환
+        질문 키워드에 따라 관련 섹션을 앞에 배치하여 truncation 방지
         """
         parts = []
         parts.append("=" * 50)
         parts.append("[검출기 물리학 표준 참조 자료 - Phase 7.3]")
         parts.append("=" * 50)
 
-        # 1. 검출기 유형 비교
-        detector_types = module.get("detector_types", {})
-        if detector_types:
-            parts.append("\n## 검출기 유형 비교")
+        # Phase 7.18: 질문 키워드 기반 섹션 우선순위 결정
+        query_lower = query.lower()
 
-            # Direct conversion (a-Se)
-            direct = detector_types.get("direct_conversion", {})
-            a_se = direct.get("a_Se", {})
-            if a_se:
-                parts.append("\n### 직접변환 방식 (a-Se)")
-                parts.append(f"- 원자번호: {a_se.get('atomic_number', 'N/A')}")
-                parts.append(f"- K-edge: {a_se.get('k_edge_keV', 'N/A')} keV")
-                dqe = a_se.get("typical_DQE", {})
-                mtf = a_se.get("typical_MTF", {})
-                parts.append(f"- DQE(0): {dqe.get('at_0_lp_mm', 'N/A')}")
-                parts.append(f"- DQE(5 lp/mm): {dqe.get('at_5_lp_mm', 'N/A')}")
-                parts.append(f"- MTF(5 lp/mm): {mtf.get('at_5_lp_mm', 'N/A')}")
-                parts.append(f"- 장점: {', '.join(a_se.get('advantages', [])[:3])}")
-                parts.append(f"- 단점: {', '.join(a_se.get('disadvantages', [])[:2])}")
+        # 섹션 포맷팅 함수들을 정의
+        def format_detector_types():
+            section_parts = []
+            detector_types = module.get("detector_types", {})
+            if detector_types:
+                section_parts.append("\n## 검출기 유형 비교")
 
-            # Indirect conversion (CsI)
-            indirect = detector_types.get("indirect_conversion", {})
-            csi = indirect.get("CsI_aSi", {})
-            if csi:
-                parts.append("\n### 간접변환 방식 (CsI/a-Si)")
-                parts.append(f"- 섬광체: {csi.get('scintillator', 'N/A')}")
-                parts.append(f"- 구조: {csi.get('structure', 'N/A')}")
-                dqe = csi.get("typical_DQE", {})
-                mtf = csi.get("typical_MTF", {})
-                parts.append(f"- DQE(0): {dqe.get('at_0_lp_mm', 'N/A')}")
-                parts.append(f"- DQE(5 lp/mm): {dqe.get('at_5_lp_mm', 'N/A')}")
-                parts.append(f"- MTF(5 lp/mm): {mtf.get('at_5_lp_mm', 'N/A')}")
-                parts.append(f"- 장점: {', '.join(csi.get('advantages', [])[:3])}")
-                parts.append(f"- 단점: {', '.join(csi.get('disadvantages', [])[:2])}")
+                # Direct conversion (a-Se)
+                direct = detector_types.get("direct_conversion", {})
+                a_se = direct.get("a_Se", {})
+                if a_se:
+                    section_parts.append("\n### 직접변환 방식 (a-Se)")
+                    section_parts.append(f"- 원자번호: {a_se.get('atomic_number', 'N/A')}")
+                    section_parts.append(f"- K-edge: {a_se.get('k_edge_keV', 'N/A')} keV")
+                    ehp = a_se.get("electron_hole_pair_energy_eV", {})
+                    if ehp:
+                        section_parts.append(f"- 전자-홀 쌍 생성 에너지 (W): {ehp.get('commonly_cited', 50)} eV (일반), {ehp.get('at_mammographic_energy_17keV_10Vum', 64)} eV (맘모그래피 에너지)")
+                        if ehp.get('note'):
+                            section_parts.append(f"  ⚠️ {ehp.get('note')}")
+                    dqe = a_se.get("typical_DQE", {})
+                    mtf = a_se.get("typical_MTF", {})
+                    section_parts.append(f"- DQE(0): {dqe.get('at_0_lp_mm', 'N/A')}")
+                    section_parts.append(f"- DQE(5 lp/mm): {dqe.get('at_5_lp_mm', 'N/A')}")
+                    section_parts.append(f"- MTF(5 lp/mm): {mtf.get('at_5_lp_mm', 'N/A')}")
+                    section_parts.append(f"- 장점: {', '.join(a_se.get('advantages', [])[:3])}")
+                    section_parts.append(f"- 단점: {', '.join(a_se.get('disadvantages', [])[:2])}")
 
-            # Comparison table
-            comp = detector_types.get("comparison_table", {})
-            if comp:
-                parts.append("\n### 비교 요약")
-                params = comp.get("parameter", [])
-                a_se_vals = comp.get("a_Se_direct", [])
-                csi_vals = comp.get("CsI_indirect", [])
-                implications = comp.get("clinical_implication", [])
-                parts.append("| 항목 | a-Se (직접) | CsI (간접) | 임상적 의미 |")
-                parts.append("|------|-------------|------------|-------------|")
-                for i, param in enumerate(params):
-                    a_val = a_se_vals[i] if i < len(a_se_vals) else ""
-                    c_val = csi_vals[i] if i < len(csi_vals) else ""
-                    impl = implications[i] if i < len(implications) else ""
-                    parts.append(f"| {param} | {a_val} | {c_val} | {impl} |")
+                # Indirect conversion (CsI)
+                indirect = detector_types.get("indirect_conversion", {})
+                csi = indirect.get("CsI_aSi", {})
+                if csi:
+                    section_parts.append("\n### 간접변환 방식 (CsI/a-Si)")
+                    section_parts.append(f"- 섬광체: {csi.get('scintillator', 'N/A')}")
+                    section_parts.append(f"- 구조: {csi.get('structure', 'N/A')}")
+                    dqe = csi.get("typical_DQE", {})
+                    mtf = csi.get("typical_MTF", {})
+                    section_parts.append(f"- DQE(0): {dqe.get('at_0_lp_mm', 'N/A')}")
+                    section_parts.append(f"- DQE(5 lp/mm): {dqe.get('at_5_lp_mm', 'N/A')}")
+                    section_parts.append(f"- MTF(5 lp/mm): {mtf.get('at_5_lp_mm', 'N/A')}")
+                    section_parts.append(f"- 장점: {', '.join(csi.get('advantages', [])[:3])}")
+                    section_parts.append(f"- 단점: {', '.join(csi.get('disadvantages', [])[:2])}")
 
-        # 2. DQE 물리학
-        dqe_physics = module.get("DQE_physics", {})
-        if dqe_physics:
-            parts.append("\n## DQE 물리학")
-            parts.append(f"- 정의: {dqe_physics.get('definition', '')}")
-            parts.append(f"- 공식: {dqe_physics.get('formula', '')}")
-            parts.append(f"- 확장 공식: {dqe_physics.get('expanded_formula', '')}")
+                # Comparison table
+                comp = detector_types.get("comparison_table", {})
+                if comp:
+                    section_parts.append("\n### 비교 요약")
+                    params = comp.get("parameter", [])
+                    a_se_vals = comp.get("a_Se_direct", [])
+                    csi_vals = comp.get("CsI_indirect", [])
+                    implications = comp.get("clinical_implication", [])
+                    section_parts.append("| 항목 | a-Se (직접) | CsI (간접) | 임상적 의미 |")
+                    section_parts.append("|------|-------------|------------|-------------|")
+                    for i, param in enumerate(params):
+                        a_val = a_se_vals[i] if i < len(a_se_vals) else ""
+                        c_val = csi_vals[i] if i < len(csi_vals) else ""
+                        impl = implications[i] if i < len(implications) else ""
+                        section_parts.append(f"| {param} | {a_val} | {c_val} | {impl} |")
+            return section_parts
 
-        # 3. 선량 최적화
-        dose_opt = module.get("dose_optimization", {})
-        if dose_opt:
-            parts.append("\n## 선량 최적화 파라미터")
-            params = dose_opt.get("parameters", {})
+        def format_dqe_physics():
+            section_parts = []
+            dqe_physics = module.get("DQE_physics", {})
+            if dqe_physics:
+                section_parts.append("\n## DQE 물리학")
+                section_parts.append(f"- 정의: {dqe_physics.get('definition', '')}")
+                section_parts.append(f"- 공식: {dqe_physics.get('formula', '')}")
+                section_parts.append(f"- 확장 공식: {dqe_physics.get('expanded_formula', '')}")
+            return section_parts
 
-            kvp = params.get("kVp", {})
-            if kvp:
-                parts.append(f"\n### kVp (관전압)")
-                parts.append(f"- 범위: {kvp.get('typical_range_mammography', 'N/A')}")
-                parts.append(f"- 선량 관계: {kvp.get('dose_relationship', 'N/A')}")
-                parts.append(f"- 최적화 규칙: {kvp.get('optimization_rule', 'N/A')}")
+        def format_dose_optimization():
+            section_parts = []
+            dose_opt = module.get("dose_optimization", {})
+            if dose_opt:
+                section_parts.append("\n## 선량 최적화 파라미터")
+                params = dose_opt.get("parameters", {})
 
-            mas = params.get("mAs", {})
-            if mas:
-                parts.append(f"\n### mAs (관전류-시간적)")
-                parts.append(f"- 선량 관계: {mas.get('dose_relationship', 'N/A')}")
-                parts.append(f"- 노이즈 효과: {mas.get('effect_on_noise', 'N/A')}")
-                parts.append(f"- 최적화 규칙: {mas.get('optimization_rule', 'N/A')}")
+                kvp = params.get("kVp", {})
+                if kvp:
+                    section_parts.append(f"\n### kVp (관전압)")
+                    section_parts.append(f"- 범위: {kvp.get('typical_range_mammography', 'N/A')}")
+                    section_parts.append(f"- 선량 관계: {kvp.get('dose_relationship', 'N/A')}")
+                    section_parts.append(f"- 최적화 규칙: {kvp.get('optimization_rule', 'N/A')}")
 
-            tf = params.get("target_filter", {})
-            if tf:
-                parts.append("\n### Target/Filter 조합")
-                combos = tf.get("combinations", {})
-                for name, data in combos.items():
-                    parts.append(f"- {name}: {data.get('use', '')} (HVL: {data.get('HVL_mmAl', '')})")
-                reduction = tf.get("dose_reduction_by_filter_change", {})
-                if reduction:
-                    parts.append("\n선량 감소 효과:")
-                    for change, effect in reduction.items():
-                        parts.append(f"  - {change}: {effect}")
+                mas = params.get("mAs", {})
+                if mas:
+                    section_parts.append(f"\n### mAs (관전류-시간적)")
+                    section_parts.append(f"- 선량 관계: {mas.get('dose_relationship', 'N/A')}")
+                    section_parts.append(f"- 노이즈 효과: {mas.get('effect_on_noise', 'N/A')}")
+                    section_parts.append(f"- 최적화 규칙: {mas.get('optimization_rule', 'N/A')}")
 
-            # CNR maintenance formulas
-            cnr = dose_opt.get("CNR_maintenance_formulas", {})
-            if cnr:
-                parts.append("\n### CNR 유지 공식")
-                parts.append(f"- Rose Criterion: {cnr.get('Rose_Criterion', 'CNR >= 5')}")
-                parts.append(f"- CNR vs Dose: {cnr.get('CNR_vs_dose', '')}")
-                maintain = cnr.get("dose_reduction_with_CNR_maintenance", {})
-                if maintain:
-                    parts.append(f"- DQE 증가 공식: {maintain.get('required_DQE_increase', '')}")
-                    parts.append(f"- 예시 (10%): {maintain.get('example_10_percent', '')}")
-                    parts.append(f"- 예시 (20%): {maintain.get('example_20_percent', '')}")
+                tf = params.get("target_filter", {})
+                if tf:
+                    section_parts.append("\n### Target/Filter 조합")
+                    combos = tf.get("combinations", {})
+                    for name, data in combos.items():
+                        section_parts.append(f"- {name}: {data.get('use', '')} (HVL: {data.get('HVL_mmAl', '')})")
+                    reduction = tf.get("dose_reduction_by_filter_change", {})
+                    if reduction:
+                        section_parts.append("\n선량 감소 효과:")
+                        for change, effect in reduction.items():
+                            section_parts.append(f"  - {change}: {effect}")
 
-        # 4. 고급 메트릭
-        advanced = module.get("advanced_metrics", {})
-        if advanced:
-            parts.append("\n## 고급 검출 메트릭")
-            for metric_name, metric_data in advanced.items():
-                parts.append(f"\n### {metric_name}")
-                parts.append(f"- 정의: {metric_data.get('definition', '')}")
-                if metric_data.get('formula'):
-                    parts.append(f"- 공식: {metric_data.get('formula', '')}")
-                if metric_data.get('clinical_threshold'):
-                    parts.append(f"- 임상 기준: {metric_data.get('clinical_threshold', '')}")
+                cnr = dose_opt.get("CNR_maintenance_formulas", {})
+                if cnr:
+                    section_parts.append("\n### CNR 유지 공식")
+                    section_parts.append(f"- Rose Criterion: {cnr.get('Rose_Criterion', 'CNR >= 5')}")
+                    section_parts.append(f"- CNR vs Dose: {cnr.get('CNR_vs_dose', '')}")
+                    maintain = cnr.get("dose_reduction_with_CNR_maintenance", {})
+                    if maintain:
+                        section_parts.append(f"- DQE 증가 공식: {maintain.get('required_DQE_increase', '')}")
+                        section_parts.append(f"- 예시 (10%): {maintain.get('example_10_percent', '')}")
+                        section_parts.append(f"- 예시 (20%): {maintain.get('example_20_percent', '')}")
+            return section_parts
 
-        # 5. 응용 예시
-        examples = module.get("clinical_application_examples", {})
-        if examples:
-            parts.append("\n## 계산 예시")
-            for ex_name, ex_data in examples.items():
-                parts.append(f"\n### {ex_data.get('question', ex_name)}")
-                calc = ex_data.get("calculation", {})
-                for step, value in calc.items():
-                    parts.append(f"  - {step}: {value}")
-                parts.append(f"  → 결론: {ex_data.get('conclusion', '')}")
+        def format_advanced_metrics():
+            section_parts = []
+            advanced = module.get("advanced_metrics", {})
+            if advanced:
+                section_parts.append("\n## 고급 검출 메트릭")
+                for metric_name, metric_data in advanced.items():
+                    section_parts.append(f"\n### {metric_name}")
+                    section_parts.append(f"- 정의: {metric_data.get('definition', '')}")
+                    if metric_data.get('formula'):
+                        section_parts.append(f"- 공식: {metric_data.get('formula', '')}")
+                    if metric_data.get('clinical_threshold'):
+                        section_parts.append(f"- 임상 기준: {metric_data.get('clinical_threshold', '')}")
+            return section_parts
+
+        def format_clinical_examples():
+            section_parts = []
+            examples = module.get("clinical_application_examples", {})
+            if examples:
+                section_parts.append("\n## 계산 예시")
+                for ex_name, ex_data in examples.items():
+                    section_parts.append(f"\n### {ex_data.get('question', ex_name)}")
+                    calc = ex_data.get("calculation", {})
+                    for step, value in calc.items():
+                        section_parts.append(f"  - {step}: {value}")
+                    section_parts.append(f"  → 결론: {ex_data.get('conclusion', '')}")
+            return section_parts
+
+        def format_ghosting_and_lag():
+            section_parts = []
+            ghosting = module.get("ghosting_and_lag", {})
+            if ghosting:
+                section_parts.append("\n" + "=" * 50)
+                section_parts.append("## ⚠️ Ghosting 및 Lag (검증된 수치)")
+                section_parts.append("=" * 50)
+
+                defs = ghosting.get("definitions", {})
+                lag_def = defs.get("lag", {})
+                ghost_def = defs.get("ghosting", {})
+                if lag_def:
+                    section_parts.append(f"\n### Lag 정의")
+                    section_parts.append(f"- {lag_def.get('definition', '')}")
+                    clinical = lag_def.get("clinical_values", {})
+                    if clinical:
+                        section_parts.append(f"- **검증된 수치: 최대 {clinical.get('typical_range_percent', 'N/A')}%** (출처: {clinical.get('source', '')})")
+                if ghost_def:
+                    section_parts.append(f"\n### Ghosting 정의")
+                    section_parts.append(f"- {ghost_def.get('definition', '')}")
+                    clinical = ghost_def.get("clinical_values", {})
+                    if clinical:
+                        section_parts.append(f"- **검증된 수치: 최대 {clinical.get('maximum_observed_percent', 'N/A')}%** (출처: {clinical.get('source', '')})")
+
+                # Phase 7.18: Lag vs Ghosting 혼동 방지 경고 테이블
+                section_parts.append("\n### ⚠️⚠️⚠️ 중요: Lag vs Ghosting 구분 (100배 차이!) ⚠️⚠️⚠️")
+                section_parts.append("| 현상 | 정의 | **검증 수치** | 혼동 금지 |")
+                section_parts.append("|------|------|---------------|-----------|")
+                section_parts.append("| **Lag** | 신호 잔류 (temporal) | **0.15%** | 작은 값 |")
+                section_parts.append("| **Ghosting** | 민감도 감소 (sensitivity) | **15%** | 큰 값 |")
+                section_parts.append("| - | **차이** | **100배** | **절대 혼동 금지** |")
+                section_parts.append("")
+                section_parts.append("**⚠️ Ghosting = 15%, Lag = 0.15%. 둘을 절대 혼동하지 말 것!**")
+
+                mech = ghosting.get("mechanism", {})
+                if mech:
+                    section_parts.append(f"\n### 메커니즘")
+                    section_parts.append(f"- 주요 원인: {mech.get('primary_cause', '')}")
+                    process = mech.get("process", [])
+                    for step in process:
+                        section_parts.append(f"  {step}")
+
+                quant = ghosting.get("quantitative_data", {})
+                if quant:
+                    section_parts.append(f"\n### 정량적 데이터 (검증됨)")
+                    transport = quant.get("charge_transport_degradation", {})
+                    if transport:
+                        section_parts.append(f"- Hole transport 감소: **{transport.get('hole_transport_reduction_percent', 'N/A')}%**")
+                        section_parts.append(f"- Electron transport 감소: **{transport.get('electron_transport_reduction_percent', 'N/A')}%**")
+                        section_parts.append(f"  (조건: {transport.get('condition', '')}, 출처: {transport.get('source', '')})")
+                    lag_bias = quant.get("lag_vs_bias", {})
+                    if lag_bias:
+                        section_parts.append(f"- Positive bias lag: {lag_bias.get('positive_bias_lag_percent', 'N/A')}%")
+                        section_parts.append(f"- Negative bias lag: {lag_bias.get('negative_bias_lag_percent', 'N/A')}%")
+
+                factors = ghosting.get("affecting_factors", {})
+                if factors:
+                    section_parts.append(f"\n### 영향 인자")
+                    exp_dep = factors.get("exposure_dependence", {})
+                    if exp_dep:
+                        section_parts.append(f"- 노출 의존성: {exp_dep.get('relationship', '')}")
+                    field_dep = factors.get("electric_field_dependence", {})
+                    if field_dep:
+                        section_parts.append(f"- 전기장 의존성: {field_dep.get('relationship', '')}")
+                    recovery = factors.get("recovery", {})
+                    if recovery:
+                        section_parts.append(f"- 회복 메커니즘: {recovery.get('mechanism', '')}")
+            return section_parts
+
+        def format_dual_energy_response():
+            section_parts = []
+            dual_energy = module.get("dual_energy_response", {})
+            if dual_energy:
+                section_parts.append("\n" + "=" * 50)
+                section_parts.append("## ⚠️ Dual-Energy 에너지 응답 (CEM 핵심)")
+                section_parts.append("=" * 50)
+
+                qde_data = dual_energy.get("energy_dependent_QDE", {})
+                if qde_data:
+                    # Phase 7.18: QDE/QE 용어 정의 추가 (LLM이 이해할 수 있도록)
+                    section_parts.append(f"\n### 용어 정의: QDE = QE = 양자검출효율")
+                    section_parts.append("- **QDE** (Quantum Detection Efficiency) = **QE** (Quantum Efficiency) = **양자검출효율** = **X선 흡수 효율**")
+                    section_parts.append("- 모두 같은 의미: 입사 X선 중 검출기에서 흡수되어 신호로 변환되는 비율")
+                    section_parts.append("- ⚠️ 이론 공식 QE=1-e^(-μt)는 근사치. 아래 **실측값**을 사용할 것!")
+                    section_parts.append(f"- 설명: {qde_data.get('description', '')}")
+
+                    data = qde_data.get("data", {})
+                    le_data = data.get("LE_28kVp_W_Rh", {})
+                    he_data = data.get("HE_49kVp_W_Ti", {})
+                    if le_data and he_data:
+                        le_qde = le_data.get('QDE_percent', 97)
+                        he_qde = he_data.get('QDE_percent', 56)
+                        qde_diff = le_qde - he_qde
+
+                        section_parts.append(f"\n### ⚠️⚠️⚠️ CEM 양자검출효율(QE) 실측값 (반드시 인용!) ⚠️⚠️⚠️")
+                        section_parts.append("| 에너지 | kVp | Target/Filter | **QE (양자검출효율)** | a-Se 두께 |")
+                        section_parts.append("|--------|-----|---------------|----------------------|-----------|")
+                        section_parts.append(f"| **LE** | 28 kVp | W/Rh | **{le_qde}%** | 200 μm |")
+                        section_parts.append(f"| **HE** | 49 kVp | W/Ti | **{he_qde}%** | 200 μm |")
+                        section_parts.append(f"| **차이** | - | - | **{qde_diff}% 포인트** | - |")
+                        section_parts.append("")
+                        section_parts.append(f"**⚠️ 실측 양자검출효율: QE(LE) = {le_qde}%, QE(HE) = {he_qde}%**")
+                        section_parts.append(f"**⚠️ HE에서 QE가 {qde_diff}%p 낮음 → 이것이 조영제 농도 저감의 핵심 원인!**")
+                        section_parts.append("**⚠️ 이론 공식(QE=1-e^(-μt))으로 계산하지 말고 위 실측값을 직접 인용할 것!**")
+
+                    iodine = qde_data.get("iodine_k_edge", {})
+                    if iodine:
+                        section_parts.append(f"\n요오드 K-edge ({iodine.get('energy_keV', 'N/A')} keV):")
+                        section_parts.append(f"- 200 μm a-Se: η = {iodine.get('eta_200um_percent', 'N/A')}%")
+                        section_parts.append(f"- 500 μm a-Se: η = {iodine.get('eta_500um_percent', 'N/A')}%")
+
+                dqe_imp = dual_energy.get("DQE_improvement", {})
+                if dqe_imp:
+                    section_parts.append(f"\n### DQE 개선")
+                    section_parts.append(f"- {dqe_imp.get('description', '')}")
+                    proto = dqe_imp.get("prototype_vs_conventional", {})
+                    if proto:
+                        section_parts.append(f"- 프로토타입 개선: **{proto.get('DQE_improvement_percent', 'N/A')}%** ({proto.get('condition', '')})")
+
+                calib = dual_energy.get("CEM_calibration_implications", {})
+                if calib:
+                    section_parts.append(f"\n### CEM 캘리브레이션 문제")
+                    section_parts.append(f"- 문제: {calib.get('problem', '')}")
+                    section_parts.append(f"- **QDE 차이: {calib.get('QDE_difference', '')}**")
+                    section_parts.append(f"- 결과: {calib.get('consequence', '')}")
+            return section_parts
+
+        # Phase 7.18: 질문 키워드에 따른 동적 섹션 순서 결정
+        # CEM/Ghosting/Dual-Energy 관련 키워드
+        cem_keywords = ["cem", "조영", "contrast", "ghosting", "잔상", "ghost", "lag", "dual", "이중에너지",
+                       "le", "he", "qde", "quantum detection", "iodine", "요오드"]
+        # DQE/해상도 관련 키워드
+        dqe_keywords = ["dqe", "detective quantum", "mtf", "해상도", "resolution", "snr", "노이즈"]
+        # 선량 관련 키워드
+        dose_keywords = ["dose", "선량", "kvp", "mas", "radiation", "exposure", "filter", "target"]
+
+        # 키워드 매칭으로 우선 섹션 결정
+        is_cem_related = any(kw in query_lower for kw in cem_keywords)
+        is_dqe_related = any(kw in query_lower for kw in dqe_keywords)
+        is_dose_related = any(kw in query_lower for kw in dose_keywords)
+
+        # 동적 섹션 순서 결정
+        if is_cem_related:
+            # CEM 관련: Ghosting/Dual-Energy를 맨 앞에 배치
+            section_order = [
+                format_ghosting_and_lag,
+                format_dual_energy_response,
+                format_detector_types,
+                format_dqe_physics,
+                format_dose_optimization,
+                format_advanced_metrics,
+                format_clinical_examples,
+            ]
+        elif is_dqe_related:
+            # DQE 관련: DQE 물리학을 앞에 배치
+            section_order = [
+                format_dqe_physics,
+                format_detector_types,
+                format_dual_energy_response,
+                format_advanced_metrics,
+                format_dose_optimization,
+                format_ghosting_and_lag,
+                format_clinical_examples,
+            ]
+        elif is_dose_related:
+            # 선량 관련: 선량 최적화를 앞에 배치
+            section_order = [
+                format_dose_optimization,
+                format_detector_types,
+                format_dqe_physics,
+                format_advanced_metrics,
+                format_clinical_examples,
+                format_ghosting_and_lag,
+                format_dual_energy_response,
+            ]
+        else:
+            # 기본 순서
+            section_order = [
+                format_detector_types,
+                format_dqe_physics,
+                format_dose_optimization,
+                format_advanced_metrics,
+                format_clinical_examples,
+                format_ghosting_and_lag,
+                format_dual_energy_response,
+            ]
+
+        # 결정된 순서대로 섹션 포맷팅
+        for format_func in section_order:
+            parts.extend(format_func())
 
         return "\n".join(parts)
 
@@ -1689,6 +1907,145 @@ class KnowledgeManager:
 
         return "\n".join(parts)
 
+    def _format_core_physics(self, module: Dict[str, Any], query: str = "") -> str:
+        """
+        Phase 7.19: core_physics 모듈 전용 포맷팅
+
+        Constitutional axioms와 golden formulas를 LLM이 이해하기 쉬운 형태로 변환
+        """
+        parts = []
+        parts.append("=" * 50)
+        parts.append("[Core Physics - Constitutional Axioms & Golden Formulas]")
+        parts.append("=" * 50)
+
+        query_lower = query.lower()
+
+        # Constitutional Axioms
+        axioms_data = module.get("constitutional_axioms", {})
+        if axioms_data:
+            # Phase별 공리 포맷팅
+            for phase_key in ["phase1_fundamental", "phase2_contrast", "phase3_dqe",
+                             "phase4_mtf", "phase4b_biopsy", "phase5_tomo"]:
+                phase = axioms_data.get(phase_key, {})
+                if not phase:
+                    continue
+
+                title = phase.get("title", phase_key)
+                parts.append(f"\n### {title}")
+
+                laws = phase.get("laws", [])
+                for law in laws:
+                    parts.append(f"- **{law.get('name', '')}**: {law.get('statement', law.get('formula', ''))}")
+                    if law.get("warning"):
+                        parts.append(f"  (Warning: {law['warning']})")
+
+                # Key derivations
+                derivations = phase.get("key_derivations", [])
+                if derivations:
+                    for d in derivations:
+                        parts.append(f"  - {d}")
+
+                # Warning
+                if phase.get("warning"):
+                    parts.append(f"Warning: {phase['warning']}")
+
+        # Golden Formulas - 질문 관련 공식만 필터링
+        golden = module.get("golden_formulas", {})
+        if golden:
+            parts.append("\n## Golden Formulas (검증된 공식)")
+
+            # 질문 키워드로 관련 공식 필터링
+            formula_keywords = {
+                "MGD_2D": ["mgd", "mean glandular", "선량", "dose", "dance"],
+                "MGD_DBT_T": ["mgd", "dbt", "tomosynthesis", "토모", "t-factor", "T-factor"],
+                "MGD_DBT_t": ["mgd", "dbt", "projection", "t-factor", "토모"],
+                "T_FACTOR": ["t-factor", "T-factor", "projection", "dbt"],
+                "QUANTUM_NOISE": ["noise", "quantum", "노이즈", "양자", "포아송"],
+                "SNR_QUANTUM": ["snr", "signal", "noise", "신호"],
+                "DOSE_SNR_RELATION": ["snr", "dose", "선량"],
+                "HVL": ["hvl", "half value", "반가층"],
+                "ATTENUATION": ["attenuation", "감쇠", "beer", "lambert"],
+                "CONTRAST": ["contrast", "대조도"],
+                "CNR": ["cnr", "contrast", "noise"],
+                "DQE": ["dqe", "detective", "quantum efficiency"],
+                "MAS_CALCULATION": ["mas", "exposure", "노출"],
+                "SENSITIVITY": ["sensitivity", "민감도", "tpr"],
+                "SPECIFICITY": ["specificity", "특이도"],
+                "PPV": ["ppv", "positive predictive"],
+                "NPV": ["npv", "negative predictive"],
+                "ACCURACY": ["accuracy", "정확도"],
+            }
+
+            # 쿼리와 매칭되는 공식 찾기
+            matched_formulas = []
+            for formula_id, keywords in formula_keywords.items():
+                if formula_id in golden and any(kw in query_lower for kw in keywords):
+                    matched_formulas.append(formula_id)
+
+            # 매칭된 공식이 없으면 주요 공식 5개만 표시
+            if not matched_formulas:
+                matched_formulas = ["MGD_2D", "SNR_QUANTUM", "DQE", "CNR", "HVL"]
+
+            for formula_id in matched_formulas:
+                formula = golden.get(formula_id, {})
+                if not formula:
+                    continue
+
+                parts.append(f"\n**{formula.get('name', formula_id)}**")
+                parts.append(f"  {formula.get('formula_unicode', formula.get('formula_latex', ''))}")
+
+                # 변수 설명
+                variables = formula.get("variables", {})
+                if variables and len(variables) <= 5:
+                    var_str = ", ".join([f"{v}={d.get('description', '')}"
+                                        for v, d in list(variables.items())[:3]])
+                    parts.append(f"  변수: {var_str}")
+
+                if formula.get("source"):
+                    parts.append(f"  출처: {formula['source']}")
+
+        # Knowledge Blocks - 핵심 정보만
+        blocks = module.get("knowledge_blocks", {})
+        if blocks and "tomo" in query_lower or "mgd" in query_lower:
+            mgd_tomo = blocks.get("mgd_tomosynthesis", {})
+            if mgd_tomo:
+                parts.append("\n## MGD for Tomosynthesis (Dance et al. 2011)")
+                concepts = mgd_tomo.get("concepts", {})
+
+                t_factor = concepts.get("t_factor", {})
+                if t_factor:
+                    parts.append(f"- t-factor: {t_factor.get('definition', '')}")
+                    parts.append(f"  {t_factor.get('formula', '')}")
+
+                T_factor = concepts.get("T_factor", {})
+                if T_factor:
+                    parts.append(f"- T-factor: {T_factor.get('definition', '')}")
+                    parts.append(f"  {T_factor.get('formula', '')}")
+                    typical = T_factor.get("typical_values", {})
+                    if typical:
+                        parts.append(f"  Full-field: {typical.get('full_field', '')}")
+
+                # t-factor 테이블
+                t_table = mgd_tomo.get("t_factor_table_50_glandularity_W_Al", [])
+                if t_table:
+                    parts.append("\n  t-factor by thickness (50% glandularity, W/Al):")
+                    parts.append("  | Thickness | t(0°) | t(10°) | t(20°) | t(30°) |")
+                    parts.append("  |-----------|-------|--------|--------|--------|")
+                    for row in t_table[:4]:
+                        parts.append(f"  | {row.get('thickness_cm')} cm | {row.get('t_0', 1.0):.3f} | "
+                                   f"{row.get('t_10', 0.98):.3f} | {row.get('t_20', 0.92):.3f} | "
+                                   f"{row.get('t_30', 0.85):.3f} |")
+
+        # Strict Rules
+        rules_data = module.get("strict_rules", {})
+        rules = rules_data.get("rules", [])
+        if rules:
+            parts.append("\n## Strict Rules (필수 준수)")
+            for rule in rules:
+                parts.append(f"{rule.get('id', '-')}. {rule.get('name', '')}: {rule.get('statement', '')}")
+
+        return "\n".join(parts)
+
     def get_knowledge_for_query(self, query: str) -> str:
         """
         질문에 맞는 지식을 검색하고 포맷팅하여 반환
@@ -1698,9 +2055,11 @@ class KnowledgeManager:
 
         Returns:
             LLM 컨텍스트용 포맷팅된 지식 문자열
+
+        Phase 7.18: query 기반 동적 섹션 배치 지원
         """
         modules = self.get_relevant_knowledge(query)
-        return self.format_for_context(modules)
+        return self.format_for_context(modules, query=query)
 
     def get_all_knowledge_ids(self) -> List[str]:
         """등록된 모든 지식 모듈 ID 반환"""

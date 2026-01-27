@@ -29,6 +29,9 @@ from enum import Enum
 import requests
 from concurrent.futures import ThreadPoolExecutor
 
+# Phase 7.19: UnifiedPromptBuilder for consistent truncation limits
+from src.prompts.unified_builder import PromptLimits
+
 logger = logging.getLogger(__name__)
 
 
@@ -64,7 +67,7 @@ class RelayConfig:
     ollama_url: str = "http://localhost:11434"
     slm_model: str = "glm4:9b"           # 빠른 전처리용
     llm_model: str = "gpt-oss:20b"           # Phase 7.7: GPT-OSS 20B
-    slm_timeout: int = 15                     # SLM 타임아웃 (초)
+    slm_timeout: int = 45                     # SLM 타임아웃 (초)
     llm_timeout: int = 90                     # LLM 타임아웃 (초)
     confidence_threshold: float = 0.8         # SLM 직접 응답 신뢰도 임계값
     enable_slm_direct_answer: bool = True     # SLM 직접 응답 활성화
@@ -348,15 +351,21 @@ RESPOND ONLY WITH VALID JSON. NO EXPLANATION."""
         physics_knowledge: str,
         keywords: List[str]
     ) -> str:
-        """LLM 사용자 프롬프트 구성"""
+        """
+        LLM 사용자 프롬프트 구성
 
+        Phase 7.19: PromptLimits 사용으로 truncation 표준화
+        """
         parts = []
 
+        # Phase 7.19: 표준화된 truncation 한도 적용
         if physics_knowledge:
-            parts.append(f"### 표준 참조 자료 (검증된 물리 지식)\n{physics_knowledge}")
+            knowledge_truncated = physics_knowledge[:PromptLimits.KNOWLEDGE_CONTEXT]
+            parts.append(f"### 표준 참조 자료 (검증된 물리 지식)\n{knowledge_truncated}")
 
         if context:
-            parts.append(f"### 검색된 문서\n{context}")
+            context_truncated = context[:PromptLimits.SEARCH_CONTEXT]
+            parts.append(f"### 검색된 문서\n{context_truncated}")
 
         parts.append(f"### 질문\n{query}")
 

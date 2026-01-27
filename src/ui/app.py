@@ -25,7 +25,7 @@ from src.retrieval.dynamic_evidence import DynamicEvidencePipeline, get_dynamic_
 
 
 def convert_latex_for_streamlit(text: str) -> str:
-    """
+    r"""
     LLM 응답의 수식을 Streamlit이 렌더링할 수 있는 형태로 변환
 
     패턴:
@@ -393,7 +393,7 @@ def enhance_query_with_context(current_question: str, chat_history: list, model=
     }
 
     try:
-        response = requests.post(url, json=payload, timeout=15)
+        response = requests.post(url, json=payload, timeout=45)
         response.raise_for_status()
         result = response.json()
         enhanced = result.get("message", {}).get("content", "").strip()
@@ -408,9 +408,18 @@ def enhance_query_with_context(current_question: str, chat_history: list, model=
         return current_question
 
 
-def call_llm_with_context(question: str, context: str, model="gpt-oss:20b", temperature=0.7, has_guidelines: bool = True):
+def call_llm_with_context(
+    question: str,
+    context: str,
+    model="gpt-oss:20b",
+    temperature=0.7,
+    has_guidelines: bool = True,
+    physics_knowledge: str = ""  # Phase 7.18: 동적 물리 지식 별도 전달
+):
     """
     RAG: 검색된 논문 컨텍스트를 기반으로 LLM 답변 생성
+
+    Phase 7.19: UnifiedPromptBuilder 사용으로 지식 전달 경로 통합
 
     Args:
         question: 사용자 질문
@@ -418,18 +427,38 @@ def call_llm_with_context(question: str, context: str, model="gpt-oss:20b", temp
         model: LLM 모델명
         temperature: 온도 설정
         has_guidelines: 가이드라인 문서 포함 여부
+        physics_knowledge: KnowledgeManager에서 로드한 검증된 물리 지식 (Phase 7.18)
 
     Returns:
         LLM 답변 (generator)
     """
     url = "http://localhost:11434/api/chat"
 
-    # 핵심 물리 지식 로드
+    # Phase 7.19: UnifiedPromptBuilder 사용 (통합 지식 전달)
     try:
-        from src.knowledge.core_physics import get_core_physics_prompt
-        core_physics = get_core_physics_prompt()
+        from src.prompts.unified_builder import UnifiedPromptBuilder, PromptLimits
+        from src.knowledge.manager import get_knowledge_manager
+
+        km = get_knowledge_manager()
+        builder = UnifiedPromptBuilder(km)
+
+        # 동적 지식 컨텍스트 생성 (physics_knowledge가 없으면 쿼리 기반 자동 검색)
+        if not physics_knowledge:
+            physics_knowledge = builder.build_knowledge_context(question)
+
+        # 통합 시스템 프롬프트에서 core_physics 추출
+        core_physics = builder.get_axioms()
     except ImportError:
-        core_physics = ""
+        # Fallback: 기존 방식 사용
+        try:
+            from src.knowledge.core_physics import get_core_physics_prompt
+            core_physics = get_core_physics_prompt()
+        except ImportError:
+            core_physics = ""
+
+    # Phase 7.18/7.19: 동적 물리 지식을 core_physics 앞에 배치 (우선순위)
+    if physics_knowledge:
+        core_physics = f"{physics_knowledge}\n\n{core_physics}"
 
     if has_guidelines:
         # 데이터 무결성 강화 프롬프트 (Integrity-First Prompt)
@@ -453,6 +482,14 @@ def call_llm_with_context(question: str, context: str, model="gpt-oss:20b", temp
 # ============================================================
 
 # Strict Instruction (절대 준수 사항)
+0. **검증된 수치 우선 사용 (Data Priority)**:
+   - 위 [표준 물리학 참조]에 명시된 검증 수치(W값, QE, Ghosting, Lag 등)가 있으면 **반드시** 해당 값을 사용하라.
+   - **⚠️ W = 50-64 eV** (a-Se 검출기). 3.6 eV는 실리콘 값이므로 **절대 사용 금지**.
+   - **⚠️ 양자검출효율 (QE = QDE)**: QE(LE 28kVp) = **97%**, QE(HE 49kVp) = **56%** — CEM 질문에 필수.
+   - **⚠️ 이론 공식 QE=1-e^(-μt) 사용 금지!** 위 **실측값(97%, 56%)**을 직접 인용하라.
+   - **⚠️ Ghosting = 15%, Lag = 0.15%** — 100배 차이! 둘을 혼동하지 말 것.
+   - 네 내부 지식이 위 수치와 다르면, **위 검증 수치를 우선**하라.
+
 1. **결론 도출 금지 (Evidence First)**:
    - 네가 이미 알고 있는 일반 지식으로 결론을 먼저 내리지 마라.
    - 반드시 제공된 [표준 참조 자료], [가이드라인], [연구 논문]의 텍스트에서 직접적인 근거를 먼저 나열한 후, 그 데이터가 허용하는 범위 내에서만 결론을 도출하라.
@@ -499,8 +536,13 @@ def call_llm_with_context(question: str, context: str, model="gpt-oss:20b", temp
 
         user_message = f"""다음 참고 자료를 분석하여 질문에 답변해주세요.
 
-**⚠️ 인용 가능한 자료:**
-1. **[표준 참조 자료]**: 시스템 프롬프트에 포함된 Dance et al. 2011 논문의 t-factor/T-factor 테이블 및 MGD 공식 (인용 가능)
+**⚠️ 데이터 우선순위 규칙 (CRITICAL):**
+1. **[표준 물리학 참조]** (시스템 프롬프트 내) → **최우선 사용**
+   - 검증된 물리 상수와 수치 (W값, QDE, Ghosting 등)
+   - **이 섹션에 명시된 수치가 있으면 반드시 해당 값을 사용할 것**
+   - 예: "QDE = 97% (LE)" → 이 값을 인용
+   - 예: "Ghosting 최대 15%" → 이 값을 인용
+   - 예: "W = 50-64 eV" → 이 값을 인용 (3.6 eV는 실리콘 값이므로 사용 금지)
 2. **[검색된 논문]**: 아래 RAG 검색 결과
 
 **⚠️ Hallucination 금지**: 위 두 출처에 없는 논문(저자명, 연도)은 절대 인용하지 마세요.
@@ -511,11 +553,11 @@ def call_llm_with_context(question: str, context: str, model="gpt-oss:20b", temp
 **질문:** {question}
 
 **요구사항:**
-- **[표준 참조 자료]의 Dance et al. 2011 내용**과 **[검색된 논문]**을 함께 활용하여 답변
+- **[표준 물리학 참조]에 명시된 검증 수치를 우선 사용** (W값, QDE, Ghosting 등)
 - **수식을 포함**하여 물리적 관계를 명확히 설명
-- **유도 과정**을 단계별로 보여줄 것 (예: t-factor → T-factor 연결)
-- **구체적 수치**를 테이블에서 인용 (예: "Dance et al. 2011, Table 6에 따르면 5cm 두께에서...")
-- **실무 적용** 관점에서 장비 설계/AEC 알고리즘에 어떻게 활용되는지 설명
+- **유도 과정**을 단계별로 보여줄 것
+- **구체적 수치**를 [표준 물리학 참조]에서 정확히 인용
+- **실무 적용** 관점에서 장비 설계/캘리브레이션에 어떻게 활용되는지 설명
 - 위 두 출처에 없는 논문은 절대 인용하지 말 것
 - 자료에 답이 없으면 "제공된 자료에는 해당 정보가 없습니다"라고 명시
 """
@@ -1246,7 +1288,8 @@ def main():
 
             # dispatch_result에서 지식 정보 추출 (이미 enrich_with_knowledge()에서 처리됨)
             matched_modules = km.get_relevant_knowledge(prompt)  # 컨텍스트용
-            relevant_knowledge = km.format_for_context(matched_modules) if matched_modules else ""
+            # Phase 7.18: prompt(query) 전달하여 동적 섹션 배치
+            relevant_knowledge = km.format_for_context(matched_modules, query=prompt) if matched_modules else ""
             has_physics_knowledge = dispatch_result.has_knowledge
 
             # Knowledge Status Bar 표시
@@ -1412,10 +1455,9 @@ def main():
                         # 🧠 일반 LLM 심층 추론
                         st.caption(f"🧠 **심층 분석**: {relay_router.get_model_used(dispatch_result)}")
 
-                        # context 구성: 관련 물리 지식 + 검색된 문서들의 내용
+                        # Phase 7.18: 검증된 물리 지식과 검색된 논문 분리
+                        # 검색된 논문만 context_parts에 추가 (물리 지식은 별도 전달)
                         context_parts = []
-                        if relevant_knowledge:
-                            context_parts.append(relevant_knowledge)
                         for i, source in enumerate(filtered_sources, 1):
                             context_parts.append(f"[문서 {i}] {source['title']}\n저자: {source['authors']}\n내용: {source.get('abstract', source.get('content', ''))[:2000]}")
 
@@ -1430,7 +1472,8 @@ def main():
                             context=context,
                             model=options["model"],
                             temperature=options["temperature"],
-                            has_guidelines=True
+                            has_guidelines=True,
+                            physics_knowledge=relevant_knowledge  # Phase 7.18: 별도 전달
                         ):
                             full_response += chunk
                             response_placeholder.markdown(full_response + "▌")

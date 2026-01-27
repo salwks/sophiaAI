@@ -1,0 +1,490 @@
+{
+  "id": "core_physics",
+  "category": "physics",
+  "description": "Constitutional Physics Knowledge - Mandatory axioms and golden formulas that all LLM responses must adhere to",
+  "metadata": {
+    "version": "1.0.0",
+    "phase": "7.19",
+    "last_updated": "2025-01-27",
+    "priority": "highest",
+    "note": "This module provides physics laws that cannot be violated. Deterministic Solver validates against these."
+  },
+  "keywords": [
+    "physics", "constitutional", "axioms", "golden formulas",
+    "MGD", "mean glandular dose", "dosimetry", "dose",
+    "SNR", "signal to noise", "quantum noise", "noise",
+    "DQE", "detective quantum efficiency",
+    "MTF", "modulation transfer function", "spatial resolution",
+    "HVL", "half value layer", "attenuation",
+    "CNR", "contrast", "contrast to noise",
+    "sensitivity", "specificity", "PPV", "NPV", "accuracy",
+    "AEC", "automatic exposure", "mAs",
+    "t-factor", "T-factor", "tomosynthesis", "DBT",
+    "Dance", "2011", "Dance et al",
+    "PCD", "EID", "photon counting", "electronic noise",
+    "filter", "target filter", "Mo", "Rh", "W", "Ag"
+  ],
+
+  "constitutional_axioms": {
+    "description": "Physics laws that cannot be violated - automatic answer rejection if violated",
+    "phase1_fundamental": {
+      "title": "Phase 1: Fundamental Signal-Noise Laws",
+      "laws": [
+        {
+          "id": "law1",
+          "name": "Signal ∝ Dose",
+          "statement": "Signal is linearly proportional to dose (absolute)",
+          "formula": "S_new = (D_new/D_0) × S_0"
+        },
+        {
+          "id": "law2",
+          "name": "σ_quantum² ∝ Dose",
+          "statement": "Quantum noise variance is proportional to dose (Poisson statistics)",
+          "formula": "σ_q_new² = (D_new/D_0) × σ_q0²",
+          "warning": "Common error: σ_q² ∝ 1/Dose (this is relative noise model, WRONG)"
+        },
+        {
+          "id": "law3",
+          "name": "σ_electronic² = constant",
+          "statement": "Electronic noise is dose-independent hardware characteristic",
+          "note": "Relative contribution increases as dose decreases"
+        }
+      ],
+      "key_derivations": [
+        "SNR = S / √(σ_q² + σ_e²)",
+        "SNR_new/SNR_0 = √(D × (1 - f_e × (1-D)))",
+        "PCD: σ_e = 0 (eliminated by energy threshold)",
+        "SNR_PCD_new/SNR_PCD_0 = √D"
+      ]
+    },
+    "phase2_contrast": {
+      "title": "Phase 2: PCD Spectral Contrast Laws",
+      "laws": [
+        {
+          "id": "law4",
+          "name": "μ(E) is energy-dependent",
+          "statement": "Attenuation coefficient is a function of energy",
+          "formula": "μ = μ_pe(E) + μ_compton(E)",
+          "note": "Photoelectric: μ_pe ∝ Z³/E³ (dominates at low energy)"
+        },
+        {
+          "id": "law5",
+          "name": "EID energy-proportional weighting dilutes contrast",
+          "statement": "EID signal = Σ E_i × N_i (integrates energy → overweights high energy)",
+          "source": "[Kalluri 2013, PMC3745502]"
+        },
+        {
+          "id": "law6",
+          "name": "PCD energy bins enable optimal weighting",
+          "statement": "PCD: independent measurement per energy bin",
+          "formula": "w_i ∝ Δμ_i / σ_i (matched filter)",
+          "result": "CNR_PCD ≥ CNR_EID (Cauchy-Schwarz inequality, always holds)"
+        }
+      ],
+      "warning": "CNR_PCD < CNR_EID is physically impossible (same dose, same patient, optimal weighting)"
+    },
+    "phase3_dqe": {
+      "title": "Phase 3: DQE/NPS Laws",
+      "laws": [
+        {
+          "id": "law7",
+          "name": "DQE definition",
+          "statement": "DQE = SNR²_out / SNR²_in (information transfer efficiency)",
+          "range": "0 ≤ DQE ≤ 1",
+          "ideal": "DQE=1: ideal detector (quantum noise only)"
+        },
+        {
+          "id": "law8",
+          "name": "DQE_EID dose dependence",
+          "formula": "DQE_EID(0,N) = η_abs / (1 + σ_e²/(η_abs×N))",
+          "note": "Dose N decreases → denominator increases → DQE decreases",
+          "typical": "η_abs=0.85, f_e=0.30 → DQE_EID(full)≈0.700, DQE_EID(half)≈0.595"
+        },
+        {
+          "id": "law9",
+          "name": "DQE_PCD is dose-independent",
+          "formula": "DQE_PCD(0) = η_abs (constant)",
+          "note": "PCD: energy threshold eliminates σ_e = 0",
+          "typical": "DQE_PCD = 0.850"
+        }
+      ],
+      "nps_decomposition": {
+        "EID": "NPS_EID(f) = NPS_quantum(f) + NPS_electronic",
+        "PCD": "NPS_PCD(f) = NPS_quantum(f) (no electronic component)"
+      },
+      "warning": "DQE_PCD < DQE_EID is physically impossible (same η_abs, σ_e=0 maximizes DQE)"
+    },
+    "phase4_mtf": {
+      "title": "Phase 4: MTF/Spatial Resolution Laws",
+      "laws": [
+        {
+          "id": "law10",
+          "name": "Direct conversion MTF",
+          "formula": "MTF_direct(f) = sinc(π×f×a)",
+          "note": "PCD(CdTe): determined only by pixel pitch a, no scintillator blur"
+        },
+        {
+          "id": "law11",
+          "name": "Frequency-dependent DQE",
+          "formula": "DQE(f) = MTF²(f) / [q₀ × NNPS(f)]",
+          "note": "PCD advantage at high frequency: MTF maintained + no electronic noise NPS"
+        },
+        {
+          "id": "law12",
+          "name": "Charge sharing trade-off",
+          "statement": "CdTe thickness↑ → QDE↑ but MTF↓",
+          "note": "3mm CdTe: QDE=0.97, charge sharing causes 10-25% MTF degradation",
+          "resolution": "PCD/EID resolution limit ≈ 3× (Heismann)"
+        }
+      ],
+      "warning": "MTF_PCD < MTF_EID (same pixel, f>0) is physically impossible (direct conversion has no scintillator blur)"
+    },
+    "phase4b_biopsy": {
+      "title": "Phase 4-B: Biopsy Geometry & Calibration Laws",
+      "laws": [
+        {
+          "id": "law13",
+          "name": "Stereo triangulation",
+          "formula": "Z = Δx / (2 × sin(θ))",
+          "variables": {
+            "Δx": "parallax (horizontal displacement between stereo images)",
+            "θ": "stereo angle (±15° standard)"
+          }
+        },
+        {
+          "id": "law14",
+          "name": "Geometric error amplification",
+          "formula": "σ_Z = σ_Δx / (2 × sin(θ))",
+          "note": "θ=15°: σ_Z = σ_Δx / 0.518 ≈ 1.93 × σ_Δx",
+          "implication": "Z-axis error always larger than XY error (geometric amplification unavoidable)"
+        },
+        {
+          "id": "law15",
+          "name": "DBT depth resolution",
+          "formula": "Δz_FWHM ∝ 1 / sin(α_total/2)",
+          "note": "50° system: Δz ≈ 1mm, 15° system: Δz ≈ 5mm"
+        }
+      ],
+      "warning": "σ_Z < σ_Δx is physically impossible for stereo (θ < 30° always causes amplification 1/(2sinθ) > 1)"
+    },
+    "phase5_tomo": {
+      "title": "Phase 5: Tomosynthesis Image Quality Laws",
+      "laws": [
+        {
+          "id": "law16",
+          "name": "Dose-split DQE degradation",
+          "formula_eid": "DQE(D_proj) = η_abs / (1 + α×N)",
+          "formula_pcd": "DQE(D_proj) = η_abs (dose-independent)",
+          "pcd_advantage": "R = √(1 + α×N)",
+          "typical": "α=0.2143, N=25 → R=2.52×"
+        },
+        {
+          "id": "law17",
+          "name": "Resolution asymmetry",
+          "in_plane": "Δxy = pixel_pitch / MTF",
+          "through_plane": "Δz = K / sin(α_total/2)",
+          "ratio": "Δz/Δxy >> 1 (typically 10-80×)"
+        },
+        {
+          "id": "law18",
+          "name": "Anatomical clutter rejection",
+          "formula": "G_clutter = √(Δz/t_breast)",
+          "note": "PCD dual advantage: high DQE(quantum) + same clutter rejection"
+        }
+      ],
+      "pcd_snr_advantage_by_projections": {
+        "N=1": "R=1.10 (2D)",
+        "N=15": "R=2.01",
+        "N=25": "R=2.52 (typical DBT)",
+        "N=49": "R=3.46 (Siemens-class)"
+      },
+      "warnings": [
+        "PCD advantage ratio < 1.0 is physically impossible (√(1+α×N) ≥ 1 for N≥1)",
+        "PCD advantage decreasing with N is WRONG (√(1+α×N) monotonically increases with N)"
+      ]
+    }
+  },
+
+  "golden_formulas": {
+    "description": "Standard formulas dictionary - LLM must only use these formulas. FormulaChecker validates against this.",
+    "MGD_2D": {
+      "id": "MGD_2D",
+      "name": "Mean Glandular Dose (2D Mammography)",
+      "formula_latex": "MGD = K \\cdot g \\cdot c \\cdot s",
+      "formula_unicode": "MGD = K × g × c × s",
+      "variables": {
+        "MGD": {"description": "Mean Glandular Dose", "unit": "mGy"},
+        "K": {"description": "Incident Air Kerma at breast surface", "unit": "mGy"},
+        "g": {"description": "Conversion factor (breast thickness dependent)", "unit": "dimensionless"},
+        "c": {"description": "Glandularity correction factor", "unit": "dimensionless"},
+        "s": {"description": "Spectrum correction factor (target/filter)", "unit": "dimensionless"}
+      },
+      "source": "Dance DR, et al. Phys Med Biol. 2000;45:3225-3240",
+      "doi": "10.1088/0031-9155/45/11/308",
+      "aliases": ["ESAK_to_MGD", "Dance_formula"]
+    },
+    "MGD_DBT_T": {
+      "id": "MGD_DBT_T",
+      "name": "Mean Glandular Dose (DBT with T-factor)",
+      "formula_latex": "MGD_{total} = K_{total} \\cdot g \\cdot c \\cdot s \\cdot T",
+      "formula_unicode": "MGD_total = K_total × g × c × s × T",
+      "variables": {
+        "MGD_total": {"description": "Total MGD for DBT scan", "unit": "mGy"},
+        "K_total": {"description": "Total Incident Air Kerma", "unit": "mGy"},
+        "T": {"description": "T-factor (integrated projection series factor)", "unit": "dimensionless"}
+      },
+      "source": "Dance DR, et al. Phys Med Biol. 2011;56:453-471",
+      "doi": "10.1088/0031-9155/56/2/011",
+      "aliases": ["DBT_dose", "Tomosynthesis_MGD"]
+    },
+    "MGD_DBT_t": {
+      "id": "MGD_DBT_t",
+      "name": "Single Projection MGD (DBT with t-factor)",
+      "formula_latex": "MGD_i = K_i \\cdot g \\cdot c \\cdot s \\cdot t(\\theta_i)",
+      "formula_unicode": "MGD_i = K_i × g × c × s × t(θ_i)",
+      "variables": {
+        "MGD_i": {"description": "MGD for single projection at angle θ_i", "unit": "mGy"},
+        "t(θ_i)": {"description": "t-factor at angle θ_i (ratio to 0°)", "unit": "dimensionless"}
+      },
+      "source": "Dance DR, et al. Phys Med Biol. 2011;56:453-471",
+      "note": "t(0°) = 1.0 by definition"
+    },
+    "T_FACTOR": {
+      "id": "T_FACTOR",
+      "name": "T-factor Calculation",
+      "formula_latex": "T = \\sum_{i=1}^{N} \\alpha_i \\cdot t(\\theta_i)",
+      "formula_unicode": "T = Σ αᵢ × t(θᵢ)",
+      "variables": {
+        "T": {"description": "Integrated T-factor", "unit": "dimensionless"},
+        "α_i": {"description": "mAs fraction for projection i", "unit": "dimensionless"},
+        "t(θ_i)": {"description": "t-factor at angle θ_i", "unit": "dimensionless"}
+      },
+      "note": "If uniform mAs: T = (1/N) × Σ t(θᵢ)",
+      "source": "Dance DR, et al. Phys Med Biol. 2011;56:453-471"
+    },
+    "QUANTUM_NOISE": {
+      "id": "QUANTUM_NOISE",
+      "name": "Quantum Noise (Poisson Statistics)",
+      "formula_latex": "\\sigma = \\sqrt{N}",
+      "formula_unicode": "σ = √N",
+      "variables": {
+        "σ": {"description": "Standard deviation (noise)", "unit": "photons"},
+        "N": {"description": "Number of detected photons", "unit": "photons"}
+      },
+      "source": "Basic X-ray physics (Poisson distribution)"
+    },
+    "SNR_QUANTUM": {
+      "id": "SNR_QUANTUM",
+      "name": "Signal-to-Noise Ratio (Quantum Limited)",
+      "formula_latex": "SNR = \\frac{N}{\\sigma} = \\sqrt{N}",
+      "formula_unicode": "SNR = N/σ = √N",
+      "variables": {
+        "SNR": {"description": "Signal-to-Noise Ratio", "unit": "dimensionless"},
+        "N": {"description": "Number of detected photons", "unit": "photons"}
+      },
+      "critical_relationship": "Dose ↑ → SNR ↑ → Noise ↓"
+    },
+    "DOSE_SNR_RELATION": {
+      "id": "DOSE_SNR_RELATION",
+      "name": "Dose-SNR Relationship",
+      "formula_latex": "SNR \\propto \\sqrt{Dose}",
+      "formula_unicode": "SNR ∝ √Dose",
+      "note": "To double SNR, quadruple the dose"
+    },
+    "HVL": {
+      "id": "HVL",
+      "name": "Half Value Layer",
+      "formula_latex": "HVL = \\frac{\\ln(2)}{\\mu}",
+      "formula_unicode": "HVL = ln(2)/μ = 0.693/μ",
+      "variables": {
+        "HVL": {"description": "Half Value Layer", "unit": "mm Al"},
+        "μ": {"description": "Linear attenuation coefficient", "unit": "mm⁻¹"}
+      }
+    },
+    "ATTENUATION": {
+      "id": "ATTENUATION",
+      "name": "Exponential Attenuation",
+      "formula_latex": "I = I_0 \\cdot e^{-\\mu x}",
+      "formula_unicode": "I = I₀ × e^(-μx)",
+      "source": "Beer-Lambert Law"
+    },
+    "CONTRAST": {
+      "id": "CONTRAST",
+      "name": "Subject Contrast",
+      "formula_latex": "C = \\frac{I_1 - I_2}{I_1 + I_2}",
+      "formula_unicode": "C = (I₁ - I₂)/(I₁ + I₂)",
+      "note": "Also known as Michelson contrast"
+    },
+    "CNR": {
+      "id": "CNR",
+      "name": "Contrast-to-Noise Ratio",
+      "formula_latex": "CNR = \\frac{|S_1 - S_2|}{\\sigma}",
+      "formula_unicode": "CNR = |S₁ - S₂|/σ",
+      "note": "Key metric for lesion detectability"
+    },
+    "DQE": {
+      "id": "DQE",
+      "name": "Detective Quantum Efficiency",
+      "formula_latex": "DQE = \\frac{SNR_{out}^2}{SNR_{in}^2}",
+      "formula_unicode": "DQE = SNR_out² / SNR_in²",
+      "note": "Ideal detector has DQE = 1"
+    },
+    "MAS_CALCULATION": {
+      "id": "MAS_CALCULATION",
+      "name": "mAs Calculation",
+      "formula_latex": "mAs = mA \\cdot t",
+      "formula_unicode": "mAs = mA × t"
+    },
+    "SENSITIVITY": {
+      "id": "SENSITIVITY",
+      "name": "Sensitivity (True Positive Rate)",
+      "formula_unicode": "Sensitivity = TP/(TP + FN)",
+      "aliases": ["TPR", "Recall"]
+    },
+    "SPECIFICITY": {
+      "id": "SPECIFICITY",
+      "name": "Specificity (True Negative Rate)",
+      "formula_unicode": "Specificity = TN/(TN + FP)",
+      "aliases": ["TNR"]
+    },
+    "PPV": {
+      "id": "PPV",
+      "name": "Positive Predictive Value",
+      "formula_unicode": "PPV = TP/(TP + FP)",
+      "aliases": ["Precision"]
+    },
+    "NPV": {
+      "id": "NPV",
+      "name": "Negative Predictive Value",
+      "formula_unicode": "NPV = TN/(TN + FN)"
+    },
+    "ACCURACY": {
+      "id": "ACCURACY",
+      "name": "Diagnostic Accuracy",
+      "formula_unicode": "Accuracy = (TP + TN)/(TP + TN + FP + FN)"
+    }
+  },
+
+  "knowledge_blocks": {
+    "mgd_tomosynthesis": {
+      "title": "MGD for Breast Tomosynthesis",
+      "source": {
+        "citation": "Dance DR, Young KC, van Engen RE. Phys Med Biol. 2011;56:453-471",
+        "doi": "10.1088/0031-9155/56/2/011",
+        "key_pages": "8-9 (t-factor and T-factor derivation)"
+      },
+      "concepts": {
+        "t_factor": {
+          "definition": "Dose ratio at angle θ relative to 0° (direct)",
+          "formula": "t(θ) = D(θ) / D(0)",
+          "use": "Single projection MGD calculation",
+          "note": "t(0°) = 1.0 by definition, decreases as angle increases"
+        },
+        "T_factor": {
+          "definition": "Integrated dose correction for entire projection series",
+          "formula": "T = Σ αᵢ × t(θᵢ)",
+          "use": "Total DBT scan MGD calculation",
+          "typical_values": {
+            "full_field": "0.93-1.00",
+            "sectra_narrow_beam": "0.76-0.98 (thickness dependent)"
+          }
+        }
+      },
+      "t_factor_table_50_glandularity_W_Al": [
+        {"thickness_cm": 3, "t_0": 1.000, "t_10": 0.975, "t_20": 0.906, "t_30": 0.803},
+        {"thickness_cm": 5, "t_0": 1.000, "t_10": 0.978, "t_20": 0.919, "t_30": 0.832},
+        {"thickness_cm": 6.5, "t_0": 1.000, "t_10": 0.980, "t_20": 0.929, "t_30": 0.852},
+        {"thickness_cm": 8, "t_0": 1.000, "t_10": 0.982, "t_20": 0.937, "t_30": 0.868}
+      ],
+      "clinical_importance": [
+        "Dose optimization: Quantify additional dose for DBT vs 2D",
+        "Protocol standardization: UK/European/IAEA protocol compatibility",
+        "System comparison: Compare dose across different DBT systems",
+        "AEC algorithm design: Per-angle mAs allocation strategy"
+      ]
+    },
+    "quantum_noise": {
+      "title": "Quantum Noise (Quantum Mottle)",
+      "definition": "Statistical variation due to Poisson distribution of X-ray photons",
+      "fundamental_relationship": {
+        "noise": "σ = √N",
+        "snr": "SNR = √N"
+      },
+      "dose_relationship": {
+        "higher_dose": "Dose ↑ → photons ↑ → noise ↓ → SNR ↑",
+        "lower_dose": "Dose ↓ → photons ↓ → noise ↑ → SNR ↓"
+      },
+      "vs_scatter": {
+        "quantum_noise": "Cause: photon statistical variation, Distribution: random/Poisson, Removal: increase dose/denoising",
+        "scatter": "Cause: X-ray direction change, Distribution: spatial pattern, Removal: grid/air gap"
+      }
+    },
+    "filter_mtf": {
+      "title": "Denoising Filters and MTF",
+      "gaussian_filter": {
+        "mtf_impact": "MTF loss due to edge blurring",
+        "microcalcification": "Not suitable (edge damage)",
+        "use": "AVOID in high-resolution mammography"
+      },
+      "edge_preserving_filters": [
+        {"name": "Bilateral Filter", "mechanism": "Spatial + intensity-based weighting"},
+        {"name": "Anisotropic Diffusion", "mechanism": "Diffuse only along edges"},
+        {"name": "Non-local Means (NLM)", "mechanism": "Similar patch-based"}
+      ],
+      "deep_learning_denoising": {
+        "advantage": "Can preserve MTF through learning",
+        "caveat": "Depends on training data quality, may generate microcalcification artifacts"
+      },
+      "principle": "MTF preservation = high-frequency retention = edge preservation = microcalcification detectability"
+    },
+    "target_filter": {
+      "title": "Target/Filter Combinations",
+      "k_edge_energies": {
+        "Mo": {"k_edge_keV": 20.0, "character": "Soft beam, thin breast"},
+        "Rh": {"k_edge_keV": 23.2, "character": "Medium"},
+        "Ag": {"k_edge_keV": 25.5, "character": "Hardest beam, thick breast"}
+      },
+      "recommendations_by_thickness": {
+        "thin_≤3cm": ["Mo/Mo", "Mo/Rh"],
+        "medium_3-5cm": ["Mo/Rh", "Rh/Rh"],
+        "thick_≥6cm": ["W/Rh", "W/Ag"]
+      },
+      "principle": "K-edge ↑ → mean energy ↑ → penetration ↑ → Hard beam",
+      "common_errors": [
+        "WRONG: W/Ag is softer than W/Rh (Ag K-edge 25.5 > Rh K-edge 23.2)",
+        "WRONG: Use soft beam for thick breast (insufficient penetration)"
+      ]
+    }
+  },
+
+  "strict_rules": {
+    "description": "Rules that must be included in every LLM system prompt",
+    "rules": [
+      {
+        "id": 0,
+        "name": "Data Priority",
+        "statement": "Use verified numerics from standard physics reference first (검증된 수치 우선 사용)"
+      },
+      {
+        "id": 1,
+        "name": "Evidence First",
+        "statement": "Do not draw conclusions without evidence (결론 도출 금지)"
+      },
+      {
+        "id": 2,
+        "name": "Grounding Physics",
+        "statement": "Adhere to physics definitions (물리 정의 준수)"
+      },
+      {
+        "id": 3,
+        "name": "Quoting Integrity",
+        "statement": "Maintain citation integrity (인용 무결성)"
+      },
+      {
+        "id": 4,
+        "name": "Contradiction Reporting",
+        "statement": "Report if data conflicts with physics laws (물리 법칙 충돌 시 보고)"
+      }
+    ]
+  }
+}

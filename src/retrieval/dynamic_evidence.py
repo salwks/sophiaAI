@@ -28,6 +28,8 @@ from src.reasoning.evidence_mapper import EvidenceMapper, EvidenceReport, get_ev
 from src.reasoning.text_logic import TextReasoningEngine, RefinedAnswer, get_text_reasoning_engine
 from src.evaluation.agent_judge import AgentJudge, JudgeResult, JudgeVerdict, get_agent_judge
 from src.knowledge.manager import KnowledgeManager, get_knowledge_manager
+# Phase 7.19: UnifiedPromptBuilder
+from src.prompts.unified_builder import UnifiedPromptBuilder, PromptLimits
 # Phase 7.6: Agentic Orchestrator
 from src.reasoning.orchestrator import AgenticOrchestrator, get_agentic_orchestrator, OrchestrationResult
 # Phase 1+: PhysicsCoT-RAG (MedCoT-RAG 기반 인과 추론)
@@ -91,6 +93,8 @@ class DynamicEvidencePipeline:
         # Phase 7.6: Agentic Orchestrator
         self.enable_decomposition = enable_decomposition
         self.orchestrator = get_agentic_orchestrator() if enable_decomposition else None
+        # Phase 7.19: UnifiedPromptBuilder for consistent knowledge injection
+        self.prompt_builder = UnifiedPromptBuilder(self.knowledge_manager)
 
     async def process_async(
         self,
@@ -137,7 +141,7 @@ class DynamicEvidencePipeline:
             retry_answer = self.reasoning_engine.reason(
                 question=question,
                 context="",  # 컨텍스트 제거
-                physics_knowledge=physics_knowledge[:3000] if physics_knowledge else "",
+                physics_knowledge=physics_knowledge[:PromptLimits.SIMPLE_KNOWLEDGE] if physics_knowledge else "",
                 require_derivation=False
             )
             if retry_answer.content.strip():
@@ -357,10 +361,12 @@ class DynamicEvidencePipeline:
         }
         strategy_label = strategy_labels.get(prompt_strategy, "CQO")
 
-        # PhysicsCoT인 경우 인과 체인 힌트 추가
+        # Phase 7.18: 인과 체인 힌트 비활성화 (오염 방지)
+        # 템플릿 매칭이 부정확해서 관련 없는 인과 체인이 주입되는 문제가 있음
+        # TODO: 템플릿 매칭 로직 개선 후 재활성화
         causal_info = ""
-        if prompt_strategy == "physics_cot" and causal_chain_hint:
-            causal_info = f"\n*인과 체인: {causal_chain_hint}*\n"
+        # if prompt_strategy == "physics_cot" and causal_chain_hint:
+        #     causal_info = f"\n*인과 체인: {causal_chain_hint}*\n"
 
         formatted = f"""## 답변
 
@@ -475,9 +481,9 @@ class DynamicEvidencePipeline:
             "역할: 유방영상의학 물리학 전문가"
         )
 
-        # 물리학 지식 (핵심 컨텍스트)
+        # 물리학 지식 (핵심 컨텍스트) - Phase 7.19: PromptLimits 사용
         if physics_knowledge:
-            knowledge_excerpt = physics_knowledge[:4000]
+            knowledge_excerpt = physics_knowledge[:PromptLimits.SIMPLE_KNOWLEDGE]
             prompt_parts.append(f"\n\n[표준 물리학 참조]\n{knowledge_excerpt}")
 
         # 논문/문헌 컨텍스트
@@ -499,7 +505,11 @@ class DynamicEvidencePipeline:
             "- 필요시 계산 과정 포함\n"
             "- 한국어, 자연스러운 문단\n"
             "- 수식은 $기호$ 또는 $$블록$$ 형식 사용\n\n"
-            "⚠️ 중요: 질문과 직접 관련 없는 참조 자료 내용은 답변에 포함하지 마세요."
+            "⚠️ **데이터 우선순위 규칙**:\n"
+            "- [표준 물리학 참조]에 명시된 검증된 수치(예: QDE 97% vs 56%, ghosting 최대 15%)를 **반드시** 사용하세요.\n"
+            "- 검증된 수치가 있으면 추정치 대신 정확한 값을 인용하세요.\n"
+            "- 에너지 범위(LE 28 kVp, HE 49 kVp 등)도 참조 자료의 정확한 값을 사용하세요.\n"
+            "- 질문과 직접 관련 없는 참조 자료 내용은 답변에 포함하지 마세요."
         )
 
         return "\n".join(prompt_parts)
@@ -542,10 +552,10 @@ class DynamicEvidencePipeline:
         )
 
         # ═══════════════════════════════════════════════════════════════
-        # [C] CONTEXT: 참조 정보
+        # [C] CONTEXT: 참조 정보 - Phase 7.19: PromptLimits 사용
         # ═══════════════════════════════════════════════════════════════
         if physics_knowledge:
-            knowledge_excerpt = physics_knowledge[:4000]
+            knowledge_excerpt = physics_knowledge[:PromptLimits.SIMPLE_KNOWLEDGE]
             prompt_parts.append(f"\n\n═══ 참조 지식 ═══\n{knowledge_excerpt}")
 
         if enriched_context.enriched_context and len(enriched_context.enriched_context) > 100:
@@ -557,8 +567,11 @@ class DynamicEvidencePipeline:
         # ═══════════════════════════════════════════════════════════════
         prompt_parts.append(
             "\n\n═══ 답변 ═══\n"
-            "한국어로 명확하게 답변. 수식은 $기호$ 형식 사용.\n"
-            "⚠️ 질문과 직접 관련 없는 참조 자료는 무시하세요."
+            "한국어로 명확하게 답변. 수식은 $기호$ 형식 사용.\n\n"
+            "⚠️ **데이터 우선순위 규칙**:\n"
+            "- [참조 지식]에 명시된 검증된 수치를 **반드시** 사용하세요.\n"
+            "- 검증된 수치가 있으면 추정치 대신 정확한 값을 인용하세요.\n"
+            "- 질문과 직접 관련 없는 참조 자료는 무시하세요."
         )
 
         return "\n".join(prompt_parts)
@@ -631,9 +644,9 @@ class DynamicEvidencePipeline:
             f"이 체인을 따라 논리적으로 설명하십시오."
         )
 
-        # 물리학 지식
+        # 물리학 지식 - Phase 7.19: PromptLimits.COT_KNOWLEDGE 사용
         if physics_knowledge:
-            knowledge_excerpt = physics_knowledge[:5000]  # CoT는 더 많은 컨텍스트 허용
+            knowledge_excerpt = physics_knowledge[:PromptLimits.COT_KNOWLEDGE]  # CoT는 더 많은 컨텍스트 허용
             prompt_parts.append(f"\n\n[물리학 참조]\n{knowledge_excerpt}")
 
         # 논문/문헌
@@ -658,17 +671,21 @@ class DynamicEvidencePipeline:
 
 2️⃣ **물리적 메커니즘**: 어떤 물리 법칙이 원인인가?
    - 관련 공식과 원리 명시 (수식은 $기호$ 형식)
-   - 인과 체인 힌트를 따라 설명
 
 3️⃣ **파라미터 제약**: 어떤 시스템 제한이 있는가?
-   - 수치적 제약 조건 (예: mA ≤ 25±10)
+   - 수치적 제약 조건
    - 이 제한이 현상에 미치는 영향
 
 4️⃣ **결론**: 인과 체인 요약 (A → B → C 형식)
    - 핵심 메커니즘 한 문장 요약
    - 실무적 함의
 
-⚠️ 중요: 질문과 직접 관련 없는 참조 자료(예: 조영제 타이밍, DCIS 민감도 등)는 답변에 포함하지 마세요.
+⚠️ **데이터 우선순위 규칙**:
+- [물리학 참조]에 명시된 검증된 수치(예: QDE 97%, 56%, ghosting 15%)를 **반드시** 사용하세요.
+- 검증된 수치가 있으면 추정치나 "약 ~%" 표현 대신 정확한 수치를 인용하세요.
+- 에너지 범위(LE 28 kVp, HE 49 kVp)도 참조 자료의 정확한 값을 사용하세요.
+- 질문과 직접 관련 없는 참조 자료는 답변에 포함하지 마세요.
+
 한국어로 자연스럽게 작성하되, 인과 체인은 화살표(→)로 명확히 표시하십시오.
 """)
 
