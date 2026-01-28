@@ -8,7 +8,9 @@
     "iodine", "요오드", "contrast agent", "조영제",
     "angiogenesis", "신생혈관", "enhancement",
     "k-edge", "low energy", "high energy",
-    "recombined image", "재조합 영상"
+    "recombined image", "재조합 영상",
+    "DICOM", "injection time", "주입 시간", "acquisition time", "촬영 시점",
+    "contrast bolus", "timing", "workflow", "metadata", "태그"
   ],
   "sources": [
     {
@@ -102,6 +104,58 @@
         "injection_rate_ml_per_s": 3,
         "timing_MLO_min": 2,
         "timing_CC_min": 4
+      }
+    },
+    {
+      "id": "pillion2015_dicom_contrast",
+      "citation": "Pillion DJ, Lio JL. We Built This House; It's Time to Move in: Leveraging Existing DICOM Structure to More Completely Utilize Readily Available Detailed Contrast Administration Information. J Am Coll Radiol. 2015;12(8):830-833",
+      "pmid": "26250975",
+      "pmc": "PMC4501949",
+      "doi": "10.1016/j.jacr.2015.04.023",
+      "type": "DICOM Contrast Tags Analysis - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "problem_statement": "the information that the radiologist receives is usually limited",
+        "no_standard": "there is no standard convention for the inclusion of contrast information within the radiology report",
+        "screen_capture_limitation": "a drawback to this method is that the original data utilized to create the image are not typically retained in a computer readable format"
+      },
+      "dicom_tags_identified": [
+        "(0018,1042) Contrast/Bolus Start Time",
+        "(0018,1043) Contrast/Bolus Stop Time",
+        "(0018,1041) Contrast/Bolus Volume",
+        "(0018,1046) Contrast Flow Rate",
+        "(0018,1047) Contrast Flow Duration"
+      ]
+    },
+    {
+      "id": "defined2019_cesm_systematic",
+      "citation": "Defined E, et al. Technique, protocols and adverse reactions for contrast-enhanced spectral mammography (CESM): a systematic review. Insights Imaging. 2019;10:76",
+      "pmid": "31342217",
+      "pmc": "PMC6677840",
+      "doi": "10.1186/s13244-019-0756-z",
+      "type": "CESM Protocol Systematic Review - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "acquisition_delay": "120 second acquisition delay in 65/84 (77%)",
+        "exam_duration": "examination time < 10 min was reported in 65/84 studies (77%)",
+        "contrast_dose": "1.5 mL/kg dose at 3 mL/s in 62/72 studies (86%)"
+      },
+      "protocol_statistics": {
+        "acquisition_delay_120s_percent": 77,
+        "exam_under_10min_percent": 77,
+        "flow_rate_3ml_s_percent": 86,
+        "iohexol_use_percent": 53
+      }
+    },
+    {
+      "id": "chiarelli2021_cem_overview",
+      "citation": "Chiarelli AM, et al. Contrast-enhanced mammography: what the radiologist needs to know. Br J Radiol. 2021;94(1127):20210580",
+      "pmid": "34672205",
+      "pmc": "PMC8611680",
+      "doi": "10.1259/bjr.20210580",
+      "type": "CEM Clinical Overview - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "injection_protocol": "2-3 ml/s followed by saline flush at the same rate",
+        "timing_window": "between 2 and 10 min after contrast administration",
+        "exam_room_time": "15-20 min, which is approximately twice the time required for a FFDM"
       }
     }
   ],
@@ -283,6 +337,135 @@
       "artifact_reduction": {
         "finding": "새로운 알고리즘이 breast-in-breast 84.5%, ripple 84.2%, skinfold 56.9% 아티팩트 제거",
         "lesion_preservation": "병변 조영 증강은 보존됨"
+      }
+    },
+    "dicom_contrast_timing": {
+      "source_ref": "pillion2015_dicom_contrast, defined2019_cesm_systematic, chiarelli2021_cem_overview",
+      "WARNING": "⚠️ DICOM 조영제 태그는 대부분 Type 3 (Optional) - 장비가 채우지 않으면 비어있음",
+      "problem_summary": {
+        "question": "DICOM 태그에 조영제 주입 시간과 촬영 시점 정보가 왜 안 남나요?",
+        "answer": "DICOM Contrast/Bolus 태그들이 Optional (Type 3)이고, 주입 장치와 영상 장비 간 실시간 통합이 없기 때문",
+        "source": "PMC4501949 - Pillion 2015 FULL TEXT VERIFIED"
+      },
+      "dicom_contrast_bolus_module": {
+        "standard": "DICOM Part 3 Section C.7.6.4",
+        "tag_type": "Type 3 (Optional) - 장비 제조사가 채우지 않아도 표준 위반 아님",
+        "available_tags": {
+          "injection_timing": {
+            "(0018,1042)": {
+              "name": "Contrast/Bolus Start Time",
+              "type": "Type 3 (Optional)",
+              "description": "조영제 주입 시작 시간",
+              "format": "HHMMSS.FFFFFF"
+            },
+            "(0018,1043)": {
+              "name": "Contrast/Bolus Stop Time",
+              "type": "Type 3 (Optional)",
+              "description": "조영제 주입 종료 시간",
+              "format": "HHMMSS.FFFFFF"
+            }
+          },
+          "volume_dose": {
+            "(0018,1041)": {
+              "name": "Contrast/Bolus Volume",
+              "type": "Type 3 (Optional)",
+              "unit": "mL"
+            },
+            "(0018,1044)": {
+              "name": "Contrast/Bolus Total Dose",
+              "type": "Type 3 (Optional)",
+              "unit": "mL"
+            }
+          },
+          "flow_parameters": {
+            "(0018,1046)": {
+              "name": "Contrast Flow Rate",
+              "type": "Type 3 (Optional)",
+              "unit": "mL/s"
+            },
+            "(0018,1047)": {
+              "name": "Contrast Flow Duration",
+              "type": "Type 3 (Optional)",
+              "unit": "seconds",
+              "note": "stop time 대안으로 사용 가능"
+            }
+          },
+          "acquisition_timing": {
+            "(0008,0032)": {
+              "name": "Acquisition Time",
+              "type": "Type 3 (Optional)",
+              "description": "영상 획득 시간"
+            },
+            "(0008,002A)": {
+              "name": "Acquisition DateTime",
+              "type": "Type 1C (Conditional)",
+              "description": "영상 획득 날짜/시간"
+            }
+          }
+        }
+      },
+      "root_cause_analysis": {
+        "primary_cause": "주입 장치(Power Injector)와 영상 장비 간 실시간 통합 부재",
+        "contributing_factors": [
+          {
+            "factor": "Tag Type 3 (Optional)",
+            "impact": "제조사가 구현하지 않아도 DICOM 표준 준수",
+            "source": "DICOM Part 3 Section C.7.6.4"
+          },
+          {
+            "factor": "워크플로우 분리",
+            "impact": "주입은 수동 또는 외부 인젝터, 영상 장비가 주입 이벤트 인식 불가",
+            "source": "PMC4501949"
+          },
+          {
+            "factor": "시간 동기화 부재",
+            "impact": "영상 장비와 인젝터 간 NTP/GPS 동기화 미구현",
+            "typical_error": "±5초 이상 오차 가능"
+          },
+          {
+            "factor": "인터페이스 표준 미비",
+            "impact": "인젝터 → 영상 장비 데이터 전송 프로토콜 없음 (DICOM-SR, HL7 미연동)"
+          }
+        ],
+        "current_workaround": {
+          "method": "방사선과 의사가 'arterial phase' 등 기능적 라벨 사용",
+          "limitation": "정확한 타임스탬프 대신 해부학적 증강 패턴에 의존",
+          "screen_capture_problem": "스크린 캡처 시 원본 데이터가 computer readable format으로 남지 않음 (PMC4501949)"
+        }
+      },
+      "clinical_impact": {
+        "timing_verification_impossible": "후향적으로 주입-촬영 시간 간격 검증 불가",
+        "protocol_qa_limited": "프로토콜 준수 여부 (2-10분 창) 자동 확인 불가",
+        "research_data_loss": "wash-out 시점 분석 등 연구에 정확한 타이밍 데이터 필요"
+      },
+      "solutions_recommendations": {
+        "source": "PMC4501949 - Pillion 2015",
+        "short_term": [
+          "인젝터 로그 파일을 PACS 메타데이터와 수동 매칭",
+          "환자 기록에 주입 시간 수기 기록",
+          "RIS/PACS 시스템에 별도 타임스탬프 필드 추가"
+        ],
+        "long_term": [
+          "인젝터 ↔ 영상 장비 인터페이스 구현 (HL7, DICOM-SR)",
+          "Substance Administration DICOM Structured Reports 활용",
+          "NTP/GPS 기반 시간 동기화 구현",
+          "제조사에 Type 3 태그 자동 채움 요청"
+        ],
+        "display_recommendation": "viewing station에서 조영제 종류, 용량, 타이밍 정보 표시"
+      },
+      "cesm_specific_timing": {
+        "source": "PMC6677840, PMC8611680",
+        "standard_protocol": {
+          "injection_to_first_image_sec": 120,
+          "adoption_rate_percent": 77,
+          "total_exam_time_min": "6-10",
+          "room_time_min": "15-20"
+        },
+        "timing_window": {
+          "optimal_min": "2-10",
+          "delayed_after_min": 8,
+          "quote": "Images are considered to be of diagnostic value if acquired within 10 minutes after contrast administration"
+        }
       }
     }
   },

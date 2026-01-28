@@ -651,6 +651,24 @@ class KnowledgeManager:
         if not knowledge_modules:
             return ""
 
+        # Phase 7.24: 질문 키워드 기반 모듈 순서 재조정
+        # DICOM 관련 질문 시 contrast_enhanced_mammography를 맨 앞에 배치
+        query_lower = query.lower()
+        dicom_keywords = ["dicom", "태그", "tag", "주입 시간", "injection time",
+                         "(0018,1042)", "(0018,1043)", "type 3", "metadata"]
+
+        if any(kw in query_lower for kw in dicom_keywords):
+            # DICOM 질문: contrast_enhanced_mammography 모듈을 맨 앞으로 이동
+            cem_module = None
+            other_modules = []
+            for m in knowledge_modules:
+                if m.get("id") == "contrast_enhanced_mammography":
+                    cem_module = m
+                else:
+                    other_modules.append(m)
+            if cem_module:
+                knowledge_modules = [cem_module] + other_modules
+
         parts = []
 
         for module in knowledge_modules:
@@ -694,6 +712,11 @@ class KnowledgeManager:
             # Phase 5: dbt_image_quality 모듈 전용 포맷팅
             if module_id == "dbt_image_quality":
                 parts.append(self._format_dbt_image_quality(module))
+                continue
+
+            # Phase 7.24: contrast_enhanced_mammography 모듈 전용 포맷팅
+            if module_id == "contrast_enhanced_mammography":
+                parts.append(self._format_contrast_enhanced_mammography(module, query=query))
                 continue
             source = module.get("source", {})
             parts.append(f"[표준 참조 자료] {source.get('authors', 'Unknown')} ({source.get('year', '')})")
@@ -2176,6 +2199,331 @@ class KnowledgeManager:
             parts.append("\n## Strict Rules (필수 준수)")
             for rule in rules:
                 parts.append(f"{rule.get('id', '-')}. {rule.get('name', '')}: {rule.get('statement', '')}")
+
+        return "\n".join(parts)
+
+    def _format_contrast_enhanced_mammography(self, module: Dict[str, Any], query: str = "") -> str:
+        """
+        Phase 7.24: contrast_enhanced_mammography 모듈 전용 포맷팅
+
+        DICOM 관련 질문 시 dicom_contrast_timing 섹션을 최우선 배치하여
+        Lost in the Middle 현상 방지
+        """
+        parts = []
+        parts.append("=" * 50)
+        parts.append("[조영증강 유방촬영(CEM) 참조 자료 - Phase 7.24]")
+        parts.append("=" * 50)
+
+        # Phase 7.24: 질문 키워드 기반 섹션 우선순위 결정
+        query_lower = query.lower()
+
+        content = module.get("content", {})
+
+        # 섹션 포맷팅 함수들 정의
+        def format_dicom_contrast_timing():
+            """DICOM 조영제 타이밍 섹션 - 핵심 정보"""
+            section_parts = []
+            dicom = content.get("dicom_contrast_timing", {})
+            if not dicom:
+                return section_parts
+
+            section_parts.append("\n" + "=" * 50)
+            section_parts.append("## ⚠️ DICOM 조영제 타이밍 정보 (검증됨)")
+            section_parts.append("=" * 50)
+
+            # WARNING 먼저 표시
+            warning = dicom.get("WARNING", "")
+            if warning:
+                section_parts.append(f"\n**{warning}**")
+
+            # 핵심 문제 요약
+            problem = dicom.get("problem_summary", {})
+            if problem:
+                section_parts.append("\n### 핵심 문제 요약")
+                section_parts.append(f"- **질문**: {problem.get('question', '')}")
+                section_parts.append(f"- **답변**: {problem.get('answer', '')}")
+                section_parts.append(f"- **출처**: {problem.get('source', '')}")
+
+            # DICOM 태그 정보 - 평탄화하여 출력
+            bolus_module = dicom.get("dicom_contrast_bolus_module", {})
+            if bolus_module:
+                section_parts.append("\n### DICOM Contrast/Bolus Module 태그")
+                section_parts.append(f"- 표준: {bolus_module.get('standard', '')}")
+                section_parts.append(f"- **태그 유형: {bolus_module.get('tag_type', '')}**")
+
+                tags = bolus_module.get("available_tags", {})
+
+                # Injection Timing 태그
+                injection = tags.get("injection_timing", {})
+                if injection:
+                    section_parts.append("\n**주입 시간 태그:**")
+                    section_parts.append("| 태그 | 이름 | 유형 | 설명 |")
+                    section_parts.append("|------|------|------|------|")
+                    for tag_id, tag_info in injection.items():
+                        section_parts.append(
+                            f"| {tag_id} | {tag_info.get('name', '')} | **{tag_info.get('type', '')}** | {tag_info.get('description', '')} |"
+                        )
+
+                # Volume/Dose 태그
+                volume = tags.get("volume_dose", {})
+                if volume:
+                    section_parts.append("\n**용량 태그:**")
+                    for tag_id, tag_info in volume.items():
+                        section_parts.append(
+                            f"- {tag_id}: {tag_info.get('name', '')} ({tag_info.get('type', '')})"
+                        )
+
+                # Flow 태그
+                flow = tags.get("flow_parameters", {})
+                if flow:
+                    section_parts.append("\n**유속 태그:**")
+                    for tag_id, tag_info in flow.items():
+                        section_parts.append(
+                            f"- {tag_id}: {tag_info.get('name', '')} ({tag_info.get('type', '')})"
+                        )
+
+            # 근본 원인 분석
+            root_cause = dicom.get("root_cause_analysis", {})
+            if root_cause:
+                section_parts.append("\n### 근본 원인 분석")
+                section_parts.append(f"**주요 원인**: {root_cause.get('primary_cause', '')}")
+
+                factors = root_cause.get("contributing_factors", [])
+                if factors:
+                    section_parts.append("\n**기여 요인:**")
+                    for f in factors:
+                        section_parts.append(f"- {f.get('factor', '')}: {f.get('impact', '')}")
+                        if f.get('source'):
+                            section_parts.append(f"  (출처: {f.get('source')})")
+
+                workaround = root_cause.get("current_workaround", {})
+                if workaround:
+                    section_parts.append(f"\n**현재 우회 방법**: {workaround.get('method', '')}")
+                    section_parts.append(f"- 한계: {workaround.get('limitation', '')}")
+
+            # 해결책/권장사항
+            solutions = dicom.get("solutions_recommendations", {})
+            if solutions:
+                section_parts.append("\n### 해결책 및 권장사항")
+                section_parts.append(f"(출처: {solutions.get('source', '')})")
+
+                short_term = solutions.get("short_term", [])
+                if short_term:
+                    section_parts.append("\n**단기 해결책:**")
+                    for s in short_term:
+                        section_parts.append(f"- {s}")
+
+                long_term = solutions.get("long_term", [])
+                if long_term:
+                    section_parts.append("\n**장기 해결책:**")
+                    for s in long_term:
+                        section_parts.append(f"- {s}")
+
+            return section_parts
+
+        def format_principles():
+            """CEM 기본 원리"""
+            section_parts = []
+            principles = content.get("principles", {})
+            if principles:
+                section_parts.append("\n## CEM 기본 원리")
+                section_parts.append(f"- 설명: {principles.get('description', '')}")
+                section_parts.append(f"- 메커니즘: {principles.get('mechanism', '')}")
+                section_parts.append(f"- 출처: {principles.get('source_ref', '')}")
+            return section_parts
+
+        def format_dual_energy():
+            """이중 에너지 기법"""
+            section_parts = []
+            dual = content.get("dual_energy_technique", {})
+            if dual:
+                section_parts.append("\n## 이중 에너지 기법")
+                section_parts.append(f"- 요오드 K-edge: {dual.get('iodine_k_edge_keV', '')} keV")
+
+                le = dual.get("low_energy_image", {})
+                if le:
+                    section_parts.append(f"- LE 영상: {le.get('tube_voltage_kVp', '')} kVp - {le.get('description', '')}")
+
+                he = dual.get("high_energy_image", {})
+                if he:
+                    section_parts.append(f"- HE 영상: {he.get('tube_voltage_kVp', '')} kVp - {he.get('description', '')}")
+
+                recomb = dual.get("recombined_image", {})
+                if recomb:
+                    section_parts.append(f"- 재조합: {recomb.get('description', '')}")
+                    section_parts.append(f"  공식: {recomb.get('formula', '')}")
+            return section_parts
+
+        def format_acquisition_protocol():
+            """획득 프로토콜"""
+            section_parts = []
+            protocol = content.get("acquisition_protocol", {})
+            if protocol:
+                section_parts.append("\n## 획득 프로토콜")
+
+                injection = protocol.get("contrast_injection", {})
+                if injection:
+                    section_parts.append(f"- 조영제: {injection.get('agent', '')}")
+                    section_parts.append(f"- 용량: {injection.get('dose_ml_kg', '')} mL/kg")
+                    section_parts.append(f"- 주입 속도: {injection.get('injection_rate_ml_s', '')} mL/s")
+                    section_parts.append(f"- 지연 시간: {injection.get('delay_min', '')}분")
+
+                sequence = protocol.get("imaging_sequence", {})
+                if sequence:
+                    section_parts.append(f"- 촬영 순서: {sequence.get('order', '')}")
+                    section_parts.append(f"- 총 소요 시간: {sequence.get('total_time_min', '')}분")
+            return section_parts
+
+        def format_clinical_performance():
+            """임상 성능"""
+            section_parts = []
+            perf = content.get("clinical_performance", {})
+            if perf:
+                section_parts.append("\n## 임상 성능")
+
+                sens = perf.get("sensitivity", {})
+                if sens:
+                    section_parts.append(f"- CEM 민감도: {sens.get('cem', '')}")
+                    section_parts.append(f"- 기존 맘모그래피: {sens.get('mammography_alone', '')}")
+                    section_parts.append(f"- 비교: {sens.get('comparison', '')}")
+
+                spec = perf.get("specificity", {})
+                if spec:
+                    section_parts.append(f"- CEM 특이도: {spec.get('cem', '')}")
+            return section_parts
+
+        def format_artifacts():
+            """아티팩트"""
+            section_parts = []
+            artifacts = content.get("artifacts", {})
+            if artifacts:
+                section_parts.append("\n## CEM 아티팩트")
+
+                types = artifacts.get("types", {})
+                for name, data in types.items():
+                    section_parts.append(f"\n### {name}")
+                    section_parts.append(f"- 설명: {data.get('description', '')}")
+                    section_parts.append(f"- 원인: {data.get('cause', '')}")
+                    section_parts.append(f"- 발생률: {data.get('occurrence_rate_percent', '')}%")
+
+                reduction = artifacts.get("artifact_reduction", {})
+                if reduction:
+                    section_parts.append(f"\n아티팩트 감소: {reduction.get('finding', '')}")
+            return section_parts
+
+        def format_magnification_physics():
+            """확대 촬영 SNR 물리학"""
+            section_parts = []
+            mag = content.get("magnification_snr_physics", {})
+            if mag:
+                section_parts.append("\n## 확대 촬영 SNR 물리학")
+
+                warning = mag.get("WARNING", "")
+                if warning:
+                    section_parts.append(f"**{warning}**")
+
+                inv_square = mag.get("inverse_square_law", {})
+                if inv_square:
+                    section_parts.append(f"- 역제곱 법칙: {inv_square.get('principle', '')}")
+                    section_parts.append(f"  공식: {inv_square.get('formula', '')}")
+
+                rose = mag.get("rose_criterion", {})
+                if rose:
+                    section_parts.append(f"\n- Rose Criterion: CNR > {rose.get('threshold', 5)}")
+                    section_parts.append(f"  {rose.get('violation_risk', '')}")
+            return section_parts
+
+        # DICOM 관련 키워드
+        dicom_keywords = ["dicom", "태그", "tag", "주입 시간", "injection time", "acquisition time",
+                        "촬영 시점", "시간 정보", "timing", "metadata", "메타데이터",
+                        "(0018,1042)", "(0018,1043)", "contrast bolus", "type 3", "optional"]
+
+        # 프로토콜 관련 키워드
+        protocol_keywords = ["protocol", "프로토콜", "injection", "주입", "timing window", "시간창"]
+
+        # 아티팩트 관련 키워드
+        artifact_keywords = ["artifact", "아티팩트", "ripple", "halo", "ghost", "잔상"]
+
+        # 확대 관련 키워드
+        mag_keywords = ["magnification", "확대", "snr", "rose criterion"]
+
+        # 키워드 매칭
+        is_dicom_related = any(kw in query_lower for kw in dicom_keywords)
+        is_protocol_related = any(kw in query_lower for kw in protocol_keywords)
+        is_artifact_related = any(kw in query_lower for kw in artifact_keywords)
+        is_mag_related = any(kw in query_lower for kw in mag_keywords)
+
+        # 동적 섹션 순서 결정
+        if is_dicom_related:
+            # DICOM 관련: dicom_contrast_timing을 맨 앞에 배치
+            section_order = [
+                format_dicom_contrast_timing,
+                format_acquisition_protocol,
+                format_principles,
+                format_dual_energy,
+                format_clinical_performance,
+                format_artifacts,
+                format_magnification_physics,
+            ]
+        elif is_protocol_related:
+            # 프로토콜 관련
+            section_order = [
+                format_acquisition_protocol,
+                format_dicom_contrast_timing,
+                format_principles,
+                format_dual_energy,
+                format_clinical_performance,
+                format_artifacts,
+                format_magnification_physics,
+            ]
+        elif is_artifact_related:
+            # 아티팩트 관련
+            section_order = [
+                format_artifacts,
+                format_principles,
+                format_dual_energy,
+                format_acquisition_protocol,
+                format_clinical_performance,
+                format_dicom_contrast_timing,
+                format_magnification_physics,
+            ]
+        elif is_mag_related:
+            # 확대 촬영 관련
+            section_order = [
+                format_magnification_physics,
+                format_dual_energy,
+                format_acquisition_protocol,
+                format_clinical_performance,
+                format_principles,
+                format_artifacts,
+                format_dicom_contrast_timing,
+            ]
+        else:
+            # 기본 순서
+            section_order = [
+                format_principles,
+                format_dual_energy,
+                format_acquisition_protocol,
+                format_clinical_performance,
+                format_artifacts,
+                format_dicom_contrast_timing,
+                format_magnification_physics,
+            ]
+
+        # 결정된 순서대로 섹션 포맷팅
+        for format_func in section_order:
+            parts.extend(format_func())
+
+        # 출처 정보 추가
+        sources = module.get("sources", [])
+        if sources:
+            parts.append("\n## 참조 문헌")
+            for src in sources[:5]:  # 상위 5개만
+                citation = src.get("citation", "")
+                if citation:
+                    parts.append(f"- {citation}")
+                    if src.get("verified_quotes"):
+                        parts.append("  [전문 검증 완료]")
 
         return "\n".join(parts)
 

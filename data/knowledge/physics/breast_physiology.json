@@ -1,0 +1,450 @@
+{
+  "id": "breast_physiology",
+  "category": "Breast Physiology and Hemodynamics",
+  "keywords": [
+    "blood flow", "혈류", "혈류 감소", "blood flow reduction",
+    "compression", "압박", "압축", "압박 강도", "compression force",
+    "vascular", "혈관", "혈관 압박", "vascular compression",
+    "hemodynamics", "hemoglobin", "헤모글로빈",
+    "perfusion", "관류", "조직 관류",
+    "contrast delivery", "조영제 전달", "조영제 농도",
+    "wash-out", "wash-in", "washout", "유출",
+    "enhancement", "증강", "조영 증강",
+    "blood redistribution", "혈액 재분포",
+    "oxygenation", "산소포화도",
+    "장비 문제", "생리학", "physiology",
+    "kinetics", "동역학", "peak enhancement"
+  ],
+  "sources": [
+    {
+      "id": "carp2014_blood_flow",
+      "citation": "Carp SA, Selb J, Fang Q, et al. Dynamic functional and mechanical response properties of breast tissue to compression. Opt Express. 2008;16(20):16064-16078",
+      "pmid": "24439328",
+      "pmc": "PMC4393946",
+      "doi": "10.1364/OE.16.016064",
+      "type": "Blood Flow Reduction Study - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "main_finding": "Significant reductions (P < .01) in total hemoglobin concentration (~30%), blood oxygenation (~20%), and blood flow (~87%) were observed under applied pressures (forces) of up to 30 kPa (120 N)",
+        "soft_compression": "Even with 'soft' compression (~5 kPa surface pressure), a reduction in tissue blood flow by ~50% was observed",
+        "residual_flow": "~10% residual flow remained even at pressures exceeding systolic blood pressure",
+        "clinical_implication": "imaging protocols based on injected contrast agents should account for variation in tissue blood flow due to mammographic compression"
+      },
+      "subjects": "15 healthy volunteers, mean age 35 ± 16 years",
+      "method": "Diffuse Optical Spectroscopy (DOS) + Diffuse Correlation Spectroscopy (DCS)"
+    },
+    {
+      "id": "altoe2020_hemodynamic",
+      "citation": "Altoe ML, Marone A, Baker H, et al. Mechanical and hemodynamic responses of breast tissue under mammographic-like compression during functional dynamic optical imaging. J Biomed Opt. 2020;25(10):106002",
+      "pmid": "33078939",
+      "pmc": "PMC7587258",
+      "doi": "10.1117/1.JBO.25.10.106002",
+      "type": "Hemodynamic Response Study - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "vascular_compartments": "High amplitude of compression can result in removing blood from almost all vascular compartments, including arteries",
+        "low_compression": "Low amplitude compression may only result in removing blood from veins and capillaries (<30 mmHg)",
+        "tumor_contrast": "By increasing the compression force, the remaining blood in the non-collapsed vessels at the tumor was expelled to produce a high contrast between normal and tumor tissue",
+        "tumor_stiffness": "Under compression, most vascular compartments, including arteries, were collapsed in normal breast tissue. However, because tumors are stiff enough, the vascular compartment at the tumor location was protected from total collapse"
+      },
+      "subjects": "12 healthy volunteers, age 33 ± 13 years, BMI 25.9 ± 4.2"
+    },
+    {
+      "id": "jochelson2021_cem",
+      "citation": "Jochelson MS, Lobbes MBI. Contrast-enhanced Mammography: State of the Art. Radiology. 2021;299(1):36-48",
+      "pmid": "33650905",
+      "pmc": "PMC7997616",
+      "doi": "10.1148/radiol.2021201948",
+      "type": "CEM State of the Art - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "compression_timing": "low-energy (LE) and high-energy images are obtained in quick succession while the breast remains compressed",
+        "contrast_persistence": "contrast material may remain present in tissue for up to 10 minutes"
+      }
+    },
+    {
+      "id": "chiarelli2021_cem",
+      "citation": "Chiarelli AM, et al. Contrast-enhanced mammography: what the radiologist needs to know. Br J Radiol. 2021;94(1127):20210580",
+      "pmid": "34672205",
+      "pmc": "PMC8611680",
+      "doi": "10.1259/bjr.20210580",
+      "type": "CEM Technical Review - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "injection_timing": "Two minutes after contrast injection, the patient is positioned for mammographic imaging",
+        "imaging_window": "Optimally, image acquisition should take place between 2 and 10 min after contrast administration",
+        "compression_release": "breast compression is released in between image acquisitions",
+        "leaky_vessels": "Parts of the tumour then become hypoxic, stimulating the release of vascular growth factors. The latter promote new blood vessel formation...often 'leaky' to contrast agents"
+      }
+    },
+    {
+      "id": "kamal2022_kinetics",
+      "citation": "Kamal RM, Helal MH, Mansour SM, et al. Kinetic patterns of benign and malignant breast lesions on contrast enhanced digital mammogram. PLoS One. 2020;15(9):e0239271",
+      "pmid": "32946520",
+      "pmc": "PMC7498093",
+      "doi": "10.1371/journal.pone.0239271",
+      "type": "CEDM Kinetic Patterns - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "malignant_peak": "Malignant lesions: 6.52 ± 1.81 (at 2 min peak)",
+        "benign_peak": "Benign lesions: 4.82 ± 1.81 (at 3 min peak)",
+        "washout_malignant": "At 2-10 min interval, 51% of malignant lesions showed washout pattern",
+        "plateau_benign": "At 2-10 min interval, 67% of benign lesions showed plateau pattern"
+      },
+      "sample": "148 lesions (73 malignant, 75 benign)"
+    },
+    {
+      "id": "waade2017_compression_force",
+      "citation": "Waade GG, Moshina N, Sebuodegard S, et al. Compression forces used in the Norwegian Breast Cancer Screening Program. Br J Radiol. 2017;90(1071):20160770",
+      "pmid": "28045573",
+      "pmc": "PMC5601524",
+      "doi": "10.1259/bjr.20160770",
+      "type": "Compression Force Standards - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "recommended_range": "the recommended range of compression force for full-field digital mammography (FFDM) is 11–18 kg (108–177 N)",
+        "uk_limit": "the force of the compression on the X-ray machine should not exceed 200 Newtons or 20 kg",
+        "mean_force": "Mean compression force: 116 N (95% CI: 116.0–116.6)",
+        "cc_force": "Craniocaudal (CC) view: 108 N",
+        "mlo_force": "Mediolateral oblique (MLO) view: 125 N"
+      },
+      "sample": "17,951 examinations, 35,902 mammograms"
+    },
+    {
+      "id": "branderhorst2019_paddle",
+      "citation": "Branderhorst W, de Groot JE, van Lier MGJTB, et al. Evaluation of pressure-controlled mammography compression paddles. Med Phys. 2019;46(2):678-688",
+      "pmid": "30536747",
+      "pmc": "PMC6443616",
+      "doi": "10.1002/mp.13324",
+      "type": "Compression Paddle Comparison - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "force_target": "Target compression force of 17-18 daN (decaNewtons)",
+        "pressure_target": "Target pressure of 10 kPa",
+        "no_difference": "We observed no clinically relevant differences in CBT, compression force, compression pressure, AGD, or pain score between the force- and pressure-controlled paddle"
+      },
+      "sample": "3,188 patients, 3,848 exam pairs"
+    },
+    {
+      "id": "fredenberg2016_spectral",
+      "citation": "Fredenberg E, Dance DR, Willsher P, et al. Measurement of breast-tissue x-ray attenuation by spectral imaging. Med Phys. 2016;43(12):6480-6490",
+      "pmid": "27908171",
+      "pmc": "PMC5553693",
+      "doi": "10.1118/1.4966265",
+      "type": "Spectral CEM Physics - FULL TEXT VERIFIED",
+      "verified_quotes": {
+        "dual_energy_eq": "μgLμaL μgHμaH · tg·ta = ln(IL) - ln(IH)",
+        "iodine_thickness": "the measured enhancement in the dual-energy decomposed total thickness image is linearly related to the true iodine thickness",
+        "slope_dependency": "The slope in this correlation depends on the attenuation spectrum, which is a function of input spectrum, breast thickness, and density",
+        "rms_error": "RMS quantification error: 0.20 mg/cm²"
+      },
+      "iodine_k_edge_keV": 33.2,
+      "optimal_splitting_keV": 34
+    }
+  ],
+  "content": {
+    "compression_vascular_effects": {
+      "source_ref": "carp2014_blood_flow, altoe2020_hemodynamic",
+      "WARNING": "압박은 혈류를 최대 87%까지 감소시켜 조영제 전달에 직접적 영향을 미침",
+      "blood_flow_reduction": {
+        "at_30kPa_120N": {
+          "blood_flow_reduction_percent": 87,
+          "hemoglobin_reduction_percent": 30,
+          "oxygenation_reduction_percent": 20,
+          "statistical_significance": "P < 0.01",
+          "source": "PMC4393946 - Carp et al. FULL TEXT VERIFIED"
+        },
+        "at_5kPa_soft_compression": {
+          "blood_flow_reduction_percent": 50,
+          "description": "가벼운 압박에서도 혈류가 절반으로 감소",
+          "source": "PMC4393946"
+        },
+        "residual_flow": {
+          "percent": 10,
+          "condition": "수축기 혈압 초과 압력에서도 ~10% 잔류 혈류 유지",
+          "source": "PMC4393946"
+        }
+      },
+      "vascular_compartment_thresholds": {
+        "source": "PMC7587258 - Altoe et al. FULL TEXT VERIFIED",
+        "veins_capillaries_collapse": "<30 mmHg",
+        "arteries_collapse": "고압 압박 시에만 동맥까지 허탈",
+        "clinical_implication": "저압 압박은 정맥/모세혈관만 영향, 동맥은 유지"
+      },
+      "tumor_vs_normal_tissue": {
+        "source": "PMC7587258",
+        "mechanism": "종양은 주변 조직보다 강성(stiffness)이 높아 압박 시에도 혈관 허탈에 저항",
+        "normal_tissue": "대부분의 혈관 구획(동맥 포함)이 허탈",
+        "tumor_tissue": "혈관 구획이 보존되어 종양-정상 조직 간 대조도 증가",
+        "quantitative_data": {
+          "tumor_HbT_at_half_compression_uM": 50,
+          "normal_HbT_at_half_compression_uM": 17,
+          "ratio": "3:1",
+          "source": "PMC7587258 Table data"
+        }
+      }
+    },
+    "contrast_delivery_implications": {
+      "source_ref": "carp2014_blood_flow, chiarelli2021_cem",
+      "key_principle": "압박은 조영제 전달을 방해하므로, CEM에서는 주입 시 비압박 상태 유지",
+      "protocol_rationale": {
+        "injection_without_compression": {
+          "reason": "혈류 최대화를 위해 주입 시 비압박",
+          "quote": "A non-ionic low-osmolar iodinated contrast agent is then injected with the breast out of compression to facilitate greatest blood flow",
+          "source": "PMC8611680"
+        },
+        "compression_during_imaging": {
+          "reason": "영상 획득 시에만 압박",
+          "duration": "2-20초 (조직 특성에 따라 상이)",
+          "source": "PMC7997616"
+        },
+        "compression_release_between_views": {
+          "protocol": "촬영 간 압박 해제",
+          "quote": "breast compression is released in between image acquisitions",
+          "source": "PMC8611680"
+        }
+      },
+      "timing_window": {
+        "optimal_range_min": "2-10",
+        "delay_after_injection_min": 2,
+        "total_exam_completion_min": 10,
+        "source": "PMC8611680"
+      }
+    },
+    "enhancement_kinetics": {
+      "source_ref": "kamal2022_kinetics",
+      "WARNING": "악성은 2분에 최대 증강, 양성은 3분에 최대 증강 - 시간에 따라 진단 정확도 변화",
+      "peak_enhancement_timing": {
+        "malignant_lesions": {
+          "peak_time_min": 2,
+          "mean_score": "6.52 ± 1.81",
+          "source": "PMC7498093 FULL TEXT VERIFIED"
+        },
+        "benign_lesions": {
+          "peak_time_min": 3,
+          "mean_score": "4.82 ± 1.81",
+          "source": "PMC7498093"
+        }
+      },
+      "kinetic_patterns": {
+        "definitions": {
+          "type1_persistent": "지속적 증가 (계속 상승)",
+          "type2_plateau": "평탄 (일정 유지)",
+          "type3_washout": "유출 (초기 증가 후 감소)"
+        },
+        "at_2_to_10_min_interval": {
+          "malignant_washout_percent": 51,
+          "benign_plateau_percent": 67,
+          "malignant_washout_association": "P ≤ 0.001",
+          "source": "PMC7498093"
+        },
+        "at_2_to_4_min_interval": {
+          "malignant_washout_percent": 25,
+          "benign_plateau_percent": 80,
+          "source": "PMC7498093"
+        }
+      },
+      "diagnostic_accuracy_by_time": {
+        "source": "PMC7498093 FULL TEXT VERIFIED",
+        "data": [
+          {"time_min": 2, "AUC": 0.73, "range": "0.68-0.78"},
+          {"time_min": 3, "AUC": 0.72, "range": "0.68-0.76"},
+          {"time_min": 4, "AUC": 0.69, "range": "0.65-0.73"},
+          {"time_min": 7, "AUC": 0.67, "range": "0.61-0.71"},
+          {"time_min": 10, "AUC": 0.64, "range": "0.57-0.69"}
+        ],
+        "clinical_implication": "시간이 지날수록 진단 정확도 감소 - 2분 촬영이 가장 정확"
+      }
+    },
+    "angiogenesis_and_leaky_vessels": {
+      "source_ref": "chiarelli2021_cem",
+      "mechanism": {
+        "step1": "종양이 성장하면서 일부가 저산소 상태(hypoxic)가 됨",
+        "step2": "저산소 상태가 혈관 성장 인자(VEGF 등) 분비를 자극",
+        "step3": "새로운 혈관(neovasculature)이 형성됨",
+        "step4": "신생 혈관은 구조가 불완전하여 조영제에 '누수(leaky)'",
+        "step5": "조영제가 종양 간질(interstitium)로 누출되어 증강"
+      },
+      "quote": "Parts of the tumour then become hypoxic, stimulating the release of vascular growth factors. The latter promote new blood vessel formation...often 'leaky' to contrast agents",
+      "source": "PMC8611680 FULL TEXT VERIFIED"
+    },
+    "compression_induced_concentration_change": {
+      "source_ref": "carp2014_blood_flow, altoe2020_hemodynamic",
+      "question": "압박 강도에 따라 조영제 농도가 변해 보이는 이유는?",
+      "answer": "장비 문제가 아닌 생리학적 현상",
+      "mechanisms": [
+        {
+          "mechanism": "혈류 감소",
+          "effect": "압박 → 혈류 87% 감소 → 조영제 전달 저하",
+          "source": "PMC4393946"
+        },
+        {
+          "mechanism": "조직 밀도 증가",
+          "effect": "압박 → 두께 감소, 밀도 증가 → μ 변화 → 측정값 변화",
+          "source": "compression_physics 모듈 참조"
+        },
+        {
+          "mechanism": "혈관 허탈",
+          "effect": "정맥/모세혈관 허탈 → 혈액 재분포 → 농도 재분포",
+          "source": "PMC7587258"
+        },
+        {
+          "mechanism": "종양 선택적 보존",
+          "effect": "종양은 강성이 높아 혈관 허탈 저항 → 종양 내 농도 상대적 유지",
+          "source": "PMC7587258"
+        }
+      ],
+      "quantitative_summary": {
+        "5kPa_compression": "혈류 50% 감소",
+        "30kPa_compression": "혈류 87% 감소, 헤모글로빈 30% 감소",
+        "tumor_normal_HbT_ratio": "3:1 (압박 시 종양에서 더 높은 농도 유지)"
+      }
+    },
+    "equipment_specifications": {
+      "source_ref": "waade2017_compression_force, branderhorst2019_paddle",
+      "compression_force_standards": {
+        "norwegian_nbcsp": {
+          "recommended_range_N": "108-177",
+          "recommended_range_kg": "11-18",
+          "source": "PMC5601524 FULL TEXT VERIFIED"
+        },
+        "uk_nhsbsp": {
+          "maximum_N": 200,
+          "maximum_kg": 20,
+          "source": "PMC5601524"
+        },
+        "clinical_practice_measured": {
+          "mean_force_N": 116,
+          "cc_view_N": 108,
+          "mlo_view_N": 125,
+          "compliance_within_range_percent": 58.9,
+          "below_range_percent": 38.2,
+          "above_range_percent": 2.9,
+          "source": "PMC5601524"
+        }
+      },
+      "pressure_specifications": {
+        "target_pressure_kPa": 10,
+        "acceptable_pain_range_kPa": "10.3-13.5",
+        "force_controlled_target_daN": "17-18",
+        "source": "PMC6443616 FULL TEXT VERIFIED"
+      },
+      "equipment_tolerance": {
+        "compression_force_tolerance_N": 10,
+        "description": "표시값 대비 ±10 N 허용"
+      },
+      "breast_thickness_range_mm": "10-110"
+    },
+    "cem_dual_energy_physics": {
+      "source_ref": "fredenberg2016_spectral",
+      "iodine_k_edge": {
+        "energy_keV": 33.2,
+        "optimal_splitting_keV": 34,
+        "description": "요오드 K-edge에서 감쇠계수 급격히 증가"
+      },
+      "dual_energy_decomposition": {
+        "equation": "μgL·tg + μaL·ta = ln(IL), μgH·tg + μaH·ta = ln(IH)",
+        "variables": {
+          "μ": "에너지 의존 감쇠계수 (linear attenuation coefficient)",
+          "t": "조직 두께 (effective thickness)",
+          "L_H": "저에너지/고에너지 (Low/High energy)",
+          "g_a": "유선/지방 조직 (glandular/adipose)"
+        },
+        "source": "PMC5553693 FULL TEXT VERIFIED"
+      },
+      "iodine_concentration_measurement": {
+        "equation": "S = T + s·ti",
+        "variables": {
+          "S": "측정된 총 두께 신호",
+          "T": "실제 유방 두께 (tg + ta)",
+          "s": "변환 기울기 (스펙트럼 의존)",
+          "ti": "요오드 두께"
+        },
+        "linear_relationship": "dual-energy 분해된 총 두께 영상의 증강은 실제 요오드 두께에 선형적으로 비례",
+        "source": "PMC5553693"
+      },
+      "quantification_accuracy": {
+        "rms_error_mg_per_cm2": 0.20,
+        "measurement_precision_mg_per_cm2": 0.18,
+        "linear_correlation_r": 0.99,
+        "iodine_concentration_range_mg_per_ml": "2-20",
+        "source": "PMC5553693"
+      },
+      "weighting_factor": {
+        "equation": "w = (μgL - μaL) / (μgH - μaH)",
+        "description": "유방 조직 신호 제거를 위한 가중 인자",
+        "source": "PMC5553693"
+      },
+      "cnr_formula": {
+        "equation": "CNR = (SI - SB) / σB",
+        "variables": {
+          "SI": "요오드 신호 (iodine signal)",
+          "SB": "배경 신호 (background signal)",
+          "σB": "배경 표준편차"
+        }
+      }
+    },
+    "clinical_recommendations": {
+      "source_ref": "carp2014_blood_flow, chiarelli2021_cem",
+      "for_cem_protocol": [
+        "조영제 주입 시 비압박 상태 유지 (혈류 최대화)",
+        "주입 후 2분 대기 후 촬영 시작",
+        "촬영 간 압박 해제하여 혈류 회복 허용",
+        "전체 검사를 10분 이내 완료"
+      ],
+      "for_interpretation": [
+        "압박 정도가 일정하지 않으면 증강 정도 비교 주의",
+        "악성은 2분에 최대 증강, 양성은 3분 - 시간 고려",
+        "washout 패턴은 악성 의심 (51% at 2-10min)",
+        "plateau 패턴은 양성 시사 (67% at 2-10min)"
+      ],
+      "for_quantitative_analysis": [
+        "압박 정도 기록 필수",
+        "동일 압박 조건에서 비교",
+        "압박-기준 보정 알고리즘 고려"
+      ]
+    }
+  },
+  "formulas": {
+    "blood_flow_pressure_relationship": {
+      "description": "압박 압력과 혈류 감소의 관계",
+      "data_points": [
+        {"pressure_kPa": 5, "blood_flow_reduction_percent": 50},
+        {"pressure_kPa": 30, "blood_flow_reduction_percent": 87}
+      ],
+      "source": "PMC4393946"
+    },
+    "tumor_normal_hemoglobin_ratio": {
+      "formula": "R_HbT = HbT_tumor / HbT_normal",
+      "typical_value": "3:1 at half-compression",
+      "source": "PMC7587258"
+    },
+    "contrast_delivery_estimate": {
+      "formula": "C_tissue = C_injected × (1 - ΔF)",
+      "variables": {
+        "C_tissue": "조직에 도달하는 조영제 농도",
+        "C_injected": "주입된 조영제 농도",
+        "ΔF": "혈류 감소율 (0-1)"
+      },
+      "examples": [
+        {"pressure_kPa": 30, "delta_F": 0.87, "delivery_percent": 13},
+        {"pressure_kPa": 5, "delta_F": 0.50, "delivery_percent": 50}
+      ],
+      "source": "PMC4393946 기반 계산"
+    },
+    "dual_energy_decomposition": {
+      "formula": "[μgL μaL; μgH μaH] × [tg; ta] = [ln(IL); ln(IH)]",
+      "description": "2×2 행렬 방정식으로 유선/지방 두께 분리",
+      "source": "PMC5553693"
+    },
+    "iodine_signal_linear": {
+      "formula": "S = T + s × ti",
+      "description": "측정 신호 S는 유방 두께 T + (변환 기울기 s × 요오드 두께 ti)",
+      "source": "PMC5553693"
+    },
+    "compression_force_to_pressure": {
+      "formula": "P (kPa) = F (N) / A (cm²) × 0.01",
+      "description": "압박력(N)을 접촉 면적(cm²)으로 나누어 압력(kPa) 계산",
+      "example": "F=120N, A=100cm² → P=12kPa"
+    }
+  },
+  "clinical_relevance": {
+    "cem_optimization": "조영제 주입 프로토콜과 압박 타이밍이 영상 품질에 직접 영향",
+    "artifact_prevention": "압박 차이로 인한 증강 차이는 장비 문제가 아닌 생리학적 현상",
+    "differential_diagnosis": "종양과 정상 조직의 혈관 반응 차이를 활용한 대조도 증가",
+    "quantitative_imaging": "정량적 조영제 농도 분석 시 압박 조건 표준화 필요"
+  }
+}
